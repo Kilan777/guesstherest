@@ -37,9 +37,26 @@ export function getHandle(): string {
   return generated;
 }
 
+/** The player chose this name. Locks it so sign-in won't overwrite it. */
 export function setHandle(name: string): string {
   const clean = name.replace(/\s+/g, ' ').trim().slice(0, 20);
   const final = clean || randomHandle();
-  updateSettings({ handle: final });
+  updateSettings({ handle: final, handleLocked: true });
   return final;
+}
+
+/**
+ * Adopt a name suggested by an identity provider. Signing in used to call
+ * `setHandle` directly, which clobbered a custom name on every token refresh —
+ * so changing it in Settings appeared to work and then silently reverted.
+ */
+export function adoptHandle(name: string): void {
+  if (getSettings().handleLocked) return;
+  const clean = name.replace(/\s+/g, ' ').trim().slice(0, 20);
+  if (clean) updateSettings({ handle: clean });
+}
+
+/** True when the player has never picked a name for themselves. */
+export function needsHandle(): boolean {
+  return !getSettings().handleLocked;
 }

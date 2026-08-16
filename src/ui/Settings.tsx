@@ -56,7 +56,8 @@ export function Settings(props: { onClose: () => void }) {
             </button>
           </div>
           <p className="hint-text">
-            Shown next to your scores. Signing in with Google replaces it with your Google name.
+            Shown next to your scores. Yours to choose — signing in with Google suggests your
+            Google name, but never overwrites a name you set here.
           </p>
         </section>
 

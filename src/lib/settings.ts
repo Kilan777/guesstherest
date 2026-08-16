@@ -10,6 +10,8 @@ export type Settings = {
   supabaseUrl: string;
   supabaseKey: string;
   handle: string;
+  /** True once the player has chosen a name themselves. */
+  handleLocked: boolean;
   sfx: boolean;
 };
 
@@ -19,6 +21,7 @@ const DEFAULTS: Settings = {
   supabaseUrl: (env.VITE_SUPABASE_URL as string) || '',
   supabaseKey: (env.VITE_SUPABASE_ANON_KEY as string) || '',
   handle: '',
+  handleLocked: false,
   sfx: true,
 };
 

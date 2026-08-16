@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { getSupabase } from './supabase';
-import { getHandle, setHandle } from './identity';
+import { adoptHandle, getHandle } from './identity';
 import { hasSupabase } from './settings';
 
 /**
@@ -71,8 +71,8 @@ export function useAuth(): AuthState & {
           status: player?.signedIn ? 'signed-in' : 'anonymous',
           error: null,
         });
-        // Adopt the Google display name as the leaderboard handle.
-        if (player?.signedIn) setHandle(player.name);
+        // Only if they haven't picked one themselves.
+        if (player?.signedIn) adoptHandle(player.name);
       })
       .catch(() => alive && setState({ player: null, status: 'anonymous', error: null }));
 
@@ -80,7 +80,7 @@ export function useAuth(): AuthState & {
       if (!alive) return;
       const player = toPlayer(session);
       setState({ player, status: player?.signedIn ? 'signed-in' : 'anonymous', error: null });
-      if (player?.signedIn) setHandle(player.name);
+      if (player?.signedIn) adoptHandle(player.name);
     });
 
     return () => {

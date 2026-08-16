@@ -3,11 +3,12 @@ import { GAMES, gameBySlug } from '../games';
 import type { GameDef } from '../engine/types';
 import { localBest } from '../lib/leaderboard';
 import { formatScore } from '../lib/scoring';
-import { getHandle } from '../lib/identity';
+import { getHandle, needsHandle } from '../lib/identity';
 import { useAuth } from '../lib/auth';
 import { recentGames, trendingGames, type Trending } from '../lib/history';
 import { warmDeck } from '../engine/warm';
 import { CardArt } from './CardArt';
+import { NamePrompt } from './NamePrompt';
 
 export function Home(props: { onPlay: (slug: string) => void; onOpenSettings: () => void }) {
   const auth = useAuth();
@@ -15,6 +16,9 @@ export function Home(props: { onPlay: (slug: string) => void; onOpenSettings: ()
   const [recent, setRecent] = useState<string[]>([]);
   const [trending, setTrending] = useState<Trending | null>(null);
   const [localName] = useState(getHandle);
+  // Asked once, right after a first sign-in.
+  const [askName, setAskName] = useState(false);
+  const [asked, setAsked] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -25,11 +29,15 @@ export function Home(props: { onPlay: (slug: string) => void; onOpenSettings: ()
     } else {
       setRecent([]);
     }
+    if (auth.status === 'signed-in' && auth.player && needsHandle() && !asked) {
+      setAsked(true);
+      setAskName(true);
+    }
     trendingGames(3).then((t) => alive && setTrending(t));
     return () => {
       alive = false;
     };
-  }, [auth.status, auth.player]);
+  }, [auth.status, auth.player, asked]);
 
   const matches = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -48,6 +56,9 @@ export function Home(props: { onPlay: (slug: string) => void; onOpenSettings: ()
 
   return (
     <div className="home">
+      {askName && auth.player && (
+        <NamePrompt suggested={auth.player.name} onDone={() => setAskName(false)} />
+      )}
       <nav className="topnav">
         <a className="brand" href="#/" onClick={() => setQuery('')}>
           <span className="brand-mark">🎯</span>
@@ -91,13 +102,7 @@ export function Home(props: { onPlay: (slug: string) => void; onOpenSettings: ()
       {!searching && trendingList.length > 0 && (
         <Row
           title="Trending now"
-          hint={
-            trending?.source === 'global'
-              ? 'Most played this week'
-              : trending?.source === 'local'
-                ? 'Most played on this device'
-                : 'Good places to start'
-          }
+          hint="Where most people start"
         >
           {trendingList.map((g, i) => (
             <Card key={g.slug} game={g} onPlay={props.onPlay} rank={i + 1} compact />

@@ -67,44 +67,14 @@ export type Trending = {
 };
 
 /**
- * Shown before there's any play data to rank. An empty "Trending" row on a
- * first visit is worse than an honest set of suggestions, so these stand in —
- * labelled as picks, not as a trend nobody has actually set.
+ * The featured row is curated rather than computed.
+ *
+ * It was ranked by play count, but with a handful of plays in the table that
+ * ranking is noise — it surfaced whichever three games happened to be tried
+ * first. These three are the ones worth showing a newcomer, in this order.
  */
-const STARTER_PICKS = ['song', 'scene', 'rebus'];
+const FEATURED = ['song', 'country', 'rebus'];
 
-/**
- * What everyone has been playing this week. With no backend (or no rows yet)
- * this falls back to this device's own counts, and the UI says which it is
- * rather than passing local habits off as a global trend.
- */
 export async function trendingGames(limit = 3): Promise<Trending> {
-  const sb = getSupabase();
-  if (sb) {
-    try {
-      const { data, error } = await sb
-        .from('trending')
-        .select('game_slug, plays')
-        .order('plays', { ascending: false })
-        .limit(limit);
-      if (!error && data?.length) {
-        return { slugs: data.map((r) => r.game_slug as string), source: 'global' };
-      }
-    } catch {
-      /* fall through to local */
-    }
-  }
-
-  const counts = [...localCounts().entries()].sort((a, b) => b[1] - a[1]);
-  if (counts.length >= limit) {
-    return { slugs: counts.slice(0, limit).map(([slug]) => slug), source: 'local' };
-  }
-
-  // Top up thin local history with the starter picks so the row is never short.
-  const slugs = counts.map(([slug]) => slug);
-  for (const pick of STARTER_PICKS) {
-    if (slugs.length >= limit) break;
-    if (!slugs.includes(pick)) slugs.push(pick);
-  }
-  return { slugs, source: counts.length ? 'local' : 'picks' };
+  return { slugs: FEATURED.slice(0, limit), source: 'picks' };
 }
