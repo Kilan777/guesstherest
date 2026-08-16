@@ -2,7 +2,7 @@
 
 **[guesstherest.com](https://guesstherest.com)**
 
-Nineteen guessing games behind one shared mechanic: you start with almost
+Thirty guessing games behind one shared mechanic: you start with almost
 nothing, and every extra look costs you points.
 
 ```bash
@@ -10,7 +10,7 @@ npm install
 npm run dev      # http://localhost:5173
 ```
 
-That's the whole setup. **No API keys. No account.** All nineteen games work
+That's the whole setup. **No API keys. No account.** All thirty games work
 immediately. Signing in with Google and the global leaderboard are optional
 extras that need a Supabase project; without one, scores still save per-device.
 
@@ -39,8 +39,19 @@ extras that need a Supabase project; without one, scores still save per-device.
 | 📅 **Guess the Year** | name a film's release year | description → decade → 5-year window |
 | 🌍 **Guess the Capital** | a country, four cities | region → clue → first letter |
 | ⚗️ **Guess the Element** | a chemical symbol | number → category → everyday use |
+| 🌐 **Guess the Country** | a street you can look around | continent → clue → first letter |
+| 🌆 **Guess the City** | a skyline at 10× | 10× → 6 → 3.6 → 2.2 → 1.3× |
+| 🗺️ **Guess the Outline** | 3 windows onto a map | 3 → 7 → 12 → 18 → 24 windows |
+| 🎲 **Guess the Board Game** | box art behind windows | 2 → 6 → 13 → 24 → 36 windows |
+| 🚗 **Guess the Car** | a shape behind frosted glass | five sharpening steps |
+| 🪐 **Guess the Planet** | a patch of somewhere else | 9× → 5.5 → 3.4 → 2.1 → 1.3× |
+| 🏅 **Guess the Sport** | the action at 12× | 12× → 7 → 4 → 2.4 → 1.4× |
+| 🎻 **Guess the Instrument** | an instrument at 13× | 13× → 7.5 → 4.2 → 2.4 → 1.4× |
+| 🎬 **Guess the Plot** | a film summarised badly | decade → genre → clue |
+| 📣 **Guess the Slogan** | an advertising line | sector → era → clue |
+| 🗣️ **Guess the Language** | a sentence in its own script | script → family → where |
 
-**Scoring** is shared by all nineteen. A round is worth 1000 points at the top of the
+**Scoring** is shared by all thirty. A round is worth 1000 points at the top of the
 ladder and decays ~38% per rung, plus a speed bonus that tapers over 20 seconds
 and a streak multiplier up to 2×. A wrong guess costs a rung, exactly like a
 skip — so guessing early is a real gamble, not a free roll. Guess the Year pays
@@ -51,8 +62,8 @@ partial credit: one year off is 60%, two 35%, three 15%.
 shortcuts stay out of the way while you are typing — **Esc** leaves the box and
 hands them back. Space falls back to *reveal more* in games that have no player.
 
-Five games need no network at all — **Emoji**, **Film Line**, **Opening Line**,
-**Capital** and **Element** — and **Guess the Object** falls back to zooming
+Nine games need no network at all — **Emoji**, **Film Line**, **Opening Line**,
+**Plot**, **Slogan**, **Language**, **Capital** and **Element** — and **Guess the Object** falls back to zooming
 into an emoji when Wikipedia is unreachable.
 
 ---
@@ -122,6 +133,20 @@ scoring, streaks, prefetching, the leaderboard and the three guess widgets
 ---
 
 ## Notes from building it
+
+**Street View without an API key.** Guess the Country uses Google's iframe
+embed, which needs no key but only renders when it really is inside an iframe.
+Two things needed handling: the embed prints the place name in its top-left
+corner, which is the answer, so that corner is covered — and Google's logo,
+Terms link and imagery attribution along the bottom are deliberately left
+untouched, because covering the place label is fine and hiding attribution is
+not.
+
+**Blur is the wrong way to hide a flag.** The poster game reveals sharp windows
+into a blurred image, which suits artwork. Applying the same treatment to flags
+made them trivial: blur preserves the colour layout perfectly, and the colour
+layout *is* the flag. `TileStage` grew a `conceal` mode so flags and country
+outlines hide behind solid backing instead.
 
 **The theme is light and green on purpose.** An earlier version was the usual
 dark-mode-with-neon-accents, which is the default look of anything generated

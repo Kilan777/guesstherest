@@ -5,6 +5,23 @@ import { streamDeck } from '../content/deck';
 
 type YearPayload = { poster: string | null; title: string; blurb: string; year: number };
 
+/**
+ * Wikipedia's one-line description for a film is almost always "2010 film by
+ * Christopher Nolan" — which hands over the answer on the first clue of a game
+ * whose entire question is the year. Strip any year, and any decade written as
+ * "1990s", then tidy up what's left.
+ */
+function stripYears(text: string): string {
+  const cleaned = text
+    .replace(/\b(1[89]|20)\d{2}s\b/g, '')
+    .replace(/\b(1[89]|20)\d{2}\b/g, '')
+    .replace(/\s{2,}/g, ' ')
+    .replace(/^[\s,–-]+/, '')
+    .trim();
+  if (!cleaned || cleaned.length < 8) return '';
+  return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+}
+
 export const YEAR_MIN = 1930;
 export const YEAR_MAX = new Date().getFullYear();
 
@@ -54,7 +71,7 @@ async function loadDeck(count: number, rng: () => number): Promise<Deck> {
     catalog: [],
     resolve: async (seed) => {
       const info = await pageInfo(seed.wiki);
-      return { poster: info?.imageFull ?? null, blurb: info?.description ?? '' };
+      return { poster: info?.imageFull ?? null, blurb: stripYears(info?.description ?? '') };
     },
     toRound: (seed, value) => {
       const decade = Math.floor(seed.year / 10) * 10;
@@ -66,7 +83,7 @@ async function loadDeck(count: number, rng: () => number): Promise<Deck> {
         answer: { id: `year:${seed.wiki}`, label: String(seed.year) },
         year: seed.year,
         hints: [
-          value.blurb || 'No description on file.',
+          value.blurb || 'No description on file — the poster is all you get.',
           `It came out in the ${decade}s`,
           `Somewhere between ${lo} and ${lo + 4}`,
         ],

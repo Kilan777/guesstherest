@@ -408,6 +408,177 @@ function Element() {
   );
 }
 
+
+/* ── third wave ───────────────────────────────────────────────────────────── */
+
+function Country() {
+  return (
+    <svg viewBox={VB} className="art" aria-hidden>
+      <rect x="18" y="24" width="284" height="132" rx="8" fill="currentColor" opacity="0.1" />
+      <path d="M18 128 L74 96 L128 118 L182 78 L238 104 L302 72" fill="none" stroke="currentColor" strokeWidth="3" opacity="0.4" />
+      <path d="M18 156 L302 156" stroke="currentColor" strokeWidth="2" opacity="0.3" />
+      {[60, 120, 180, 240].map((x, i) => (
+        <rect key={x} x={x} y={100 - i * 6} width="26" height={56 + i * 6} rx="2" fill="currentColor" opacity="0.22" />
+      ))}
+      <circle cx="228" cy="58" r="17" fill="currentColor" opacity="0.9" />
+      <path d="M228 41 a17 17 0 0 1 0 34 z" fill="#ffffff" opacity="0.35" />
+      <line x1="150" y1="150" x2="150" y2="166" stroke="currentColor" strokeWidth="3" />
+    </svg>
+  );
+}
+
+function Language() {
+  const glyphs = ['あ', 'Ω', 'д', 'ᜀ', 'क', '한'];
+  return (
+    <svg viewBox={VB} className="art" aria-hidden>
+      {glyphs.map((g, i) => (
+        <text key={i} x={26 + (i % 3) * 98} y={74 + Math.floor(i / 3) * 66} fontSize={44}
+          fill="currentColor" opacity={i === 0 ? 0.95 : 0.28}>{g}</text>
+      ))}
+    </svg>
+  );
+}
+
+function Slogan() {
+  return (
+    <svg viewBox={VB} className="art" aria-hidden>
+      <path d="M40 46 h198 a12 12 0 0 1 12 12 v52 a12 12 0 0 1 -12 12 h-142 l-34 28 v-28 h-22 a12 12 0 0 1 -12 -12 v-52 a12 12 0 0 1 12 -12 z"
+        fill="currentColor" opacity="0.14" />
+      <rect x="62" y="68" width="120" height="9" rx="4.5" fill="currentColor" opacity="0.85" />
+      <rect x="62" y="88" width="164" height="9" rx="4.5" fill="currentColor" opacity="0.4" />
+      <path d="M262 58 l30 -14 v58 l-30 -14 z" fill="currentColor" opacity="0.75" />
+    </svg>
+  );
+}
+
+function Plot() {
+  return (
+    <svg viewBox={VB} className="art" aria-hidden>
+      <rect x="46" y="20" width="228" height="140" rx="7" fill="currentColor" opacity="0.09" />
+      <rect x="46" y="20" width="228" height="140" rx="7" fill="none" stroke="currentColor" strokeWidth="2" opacity="0.35" />
+      {[46, 64, 82, 100, 118, 136].map((y, i) => (
+        <rect key={y} x="70" y={y} width={i === 0 ? 150 : 180 - (i % 3) * 34} height="8" rx="4"
+          fill="currentColor" opacity={i === 0 ? 0.85 : 0.2} />
+      ))}
+    </svg>
+  );
+}
+
+function Planet() {
+  return (
+    <svg viewBox={VB} className="art" aria-hidden>
+      <circle cx="150" cy="90" r="56" fill="currentColor" opacity="0.75" />
+      <circle cx="128" cy="72" r="13" fill="#ffffff" opacity="0.3" />
+      <circle cx="168" cy="106" r="20" fill="#ffffff" opacity="0.18" />
+      <circle cx="176" cy="62" r="8" fill="#ffffff" opacity="0.25" />
+      <ellipse cx="150" cy="90" rx="94" ry="24" fill="none" stroke="currentColor" strokeWidth="6" opacity="0.5"
+        transform="rotate(-18 150 90)" />
+      {([[36, 30], [274, 44], [258, 142], [58, 150]] as [number, number][]).map(([x, y], i) => (
+        <circle key={i} cx={x} cy={y} r={2.5} fill="currentColor" opacity="0.5" />
+      ))}
+    </svg>
+  );
+}
+
+function Car() {
+  return (
+    <svg viewBox={VB} className="art" aria-hidden>
+      <defs><filter id="a-car"><feGaussianBlur stdDeviation="6" /></filter></defs>
+      <g filter="url(#a-car)" opacity="0.75">
+        <path d="M40 118 q10 -30 34 -32 l30 -22 q46 -10 88 0 l32 24 q30 4 36 30 z" fill="currentColor" />
+      </g>
+      <circle cx="92" cy="122" r="20" fill="currentColor" opacity="0.85" />
+      <circle cx="222" cy="122" r="20" fill="currentColor" opacity="0.85" />
+      <circle cx="92" cy="122" r="8" fill="#ffffff" opacity="0.4" />
+      <circle cx="222" cy="122" r="8" fill="#ffffff" opacity="0.4" />
+      <line x1="20" y1="146" x2="300" y2="146" stroke="currentColor" strokeWidth="3" opacity="0.35" />
+    </svg>
+  );
+}
+
+function Sport() {
+  return (
+    <svg viewBox={VB} className="art" aria-hidden>
+      <circle cx="160" cy="88" r="52" fill="none" stroke="currentColor" strokeWidth="4" opacity="0.8" />
+      <path d="M160 36 l30 22 -11 36 h-38 l-11 -36 z" fill="currentColor" opacity="0.75" />
+      <path d="M108 74 l22 20 M212 74 l-22 20 M141 124 l-14 30 M179 124 l14 30" stroke="currentColor" strokeWidth="4" opacity="0.4" />
+      <rect x="44" y="146" width="232" height="8" rx="4" fill="currentColor" opacity="0.25" />
+    </svg>
+  );
+}
+
+function Instrument() {
+  return (
+    <svg viewBox={VB} className="art" aria-hidden>
+      <path d="M150 150 q-40 0 -40 -34 q0 -26 22 -34 q-14 -14 -2 -30 q14 -18 34 -6 q20 -14 32 4 q10 16 -4 30 q22 8 22 34 q0 34 -40 34 z"
+        fill="currentColor" opacity="0.28" />
+      <rect x="146" y="26" width="9" height="106" rx="4" fill="currentColor" opacity="0.8" />
+      {[44, 60, 76].map((y) => (
+        <rect key={y} x="126" y={y} width="49" height="4" rx="2" fill="currentColor" opacity="0.55" />
+      ))}
+      <circle cx="150" cy="112" r="15" fill="#ffffff" opacity="0.35" />
+      <path d="M40 60 q18 26 0 52 M280 60 q-18 26 0 52" stroke="currentColor" strokeWidth="4" fill="none" opacity="0.3" />
+    </svg>
+  );
+}
+
+function Skyline() {
+  const towers: [number, number, number][] = [
+    [30, 96, 30], [66, 66, 26], [98, 112, 22], [126, 44, 34], [166, 84, 26],
+    [198, 60, 30], [234, 104, 24], [264, 74, 30],
+  ];
+  return (
+    <svg viewBox={VB} className="art" aria-hidden>
+      {towers.map(([x, y, w], i) => (
+        <g key={i}>
+          <rect x={x} y={y} width={w} height={158 - y} fill="currentColor" opacity={0.2 + (i % 3) * 0.22} />
+          {[0, 1, 2].map((r) => (
+            <rect key={r} x={x + 5} y={y + 10 + r * 18} width={w - 10} height="6" fill="#ffffff" opacity="0.3" />
+          ))}
+        </g>
+      ))}
+      <rect x="14" y="158" width="292" height="6" rx="3" fill="currentColor" opacity="0.45" />
+    </svg>
+  );
+}
+
+function Outline() {
+  const open = new Set([4, 9, 16]);
+  return (
+    <svg viewBox={VB} className="art" aria-hidden>
+      <path d="M92 34 q54 -14 88 12 q40 24 26 62 q-12 34 -50 44 q-44 12 -68 -18 q-24 -30 -12 -62 q6 -26 16 -38 z"
+        fill="currentColor" opacity="0.3" />
+      {Array.from({ length: 24 }, (_, i) => {
+        const c = i % 6;
+        const r = Math.floor(i / 6);
+        return (
+          <rect key={i} x={22 + c * 46} y={26 + r * 33} width="42" height="29" rx="3"
+            fill="currentColor" opacity={open.has(i) ? 0 : 0.16} />
+        );
+      })}
+    </svg>
+  );
+}
+
+function BoardGame() {
+  return (
+    <svg viewBox={VB} className="art" aria-hidden>
+      {Array.from({ length: 32 }, (_, i) => {
+        const c = i % 8;
+        const r = Math.floor(i / 8);
+        return (
+          <rect key={i} x={40 + c * 30} y={26 + r * 30} width="30" height="30"
+            fill="currentColor" opacity={(c + r) % 2 ? 0.26 : 0.07} />
+        );
+      })}
+      <circle cx="115" cy="71" r="13" fill="currentColor" opacity="0.9" />
+      <circle cx="205" cy="101" r="13" fill="currentColor" opacity="0.55" />
+      <rect x="242" y="118" width="34" height="34" rx="6" fill="currentColor" opacity="0.85"
+        transform="rotate(14 259 135)" />
+    </svg>
+  );
+}
+
 const ART: Record<string, () => React.ReactElement> = {
   song: Song,
   scene: Scene,
@@ -428,6 +599,17 @@ const ART: Record<string, () => React.ReactElement> = {
   filmline: FilmLine,
   capital: Capital,
   element: Element,
+  country: Country,
+  language: Language,
+  slogan: Slogan,
+  plot: Plot,
+  planet: Planet,
+  car: Car,
+  sport: Sport,
+  instrument: Instrument,
+  skyline: Skyline,
+  outline: Outline,
+  boardgame: BoardGame,
 };
 
 export function CardArt({ slug }: { slug: string }) {

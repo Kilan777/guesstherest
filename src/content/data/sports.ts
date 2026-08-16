@@ -1,0 +1,111 @@
+/**
+ * Sports, keyed to their Wikipedia articles — the Olympic programme plus the
+ * games that are enormous somewhere and unknown everywhere else.
+ *
+ * The lead image on a sport article is almost always a wide shot of play, which
+ * is what a deep crop needs: kit, pitch markings and equipment all survive the
+ * zoom even when the players do not.
+ *
+ * Titles are stored decoded — `pageInfo` encodes them itself.
+ */
+export type SportSeed = { wiki: string; label: string };
+
+export const SPORTS: SportSeed[] = [
+  { wiki: 'Association_football', label: 'Association football' },
+  { wiki: 'Basketball', label: 'Basketball' },
+  { wiki: 'Baseball', label: 'Baseball' },
+  { wiki: 'Softball', label: 'Softball' },
+  { wiki: 'Cricket', label: 'Cricket' },
+  { wiki: 'American_football', label: 'American football' },
+  { wiki: 'Rugby_union', label: 'Rugby union' },
+  { wiki: 'Rugby_league', label: 'Rugby league' },
+  { wiki: 'Australian_rules_football', label: 'Australian rules football' },
+  { wiki: 'Gaelic_football', label: 'Gaelic football' },
+  { wiki: 'Hurling', label: 'Hurling' },
+  { wiki: 'Shinty', label: 'Shinty' },
+  { wiki: 'Field_hockey', label: 'Field hockey' },
+  { wiki: 'Ice_hockey', label: 'Ice hockey' },
+  { wiki: 'Bandy', label: 'Bandy' },
+  { wiki: 'Floorball', label: 'Floorball' },
+  { wiki: 'Lacrosse', label: 'Lacrosse' },
+  { wiki: 'Netball', label: 'Netball' },
+  { wiki: 'Handball', label: 'Handball' },
+  { wiki: 'Volleyball', label: 'Volleyball' },
+  { wiki: 'Beach_volleyball', label: 'Beach volleyball' },
+  { wiki: 'Sepak_takraw', label: 'Sepak takraw' },
+  { wiki: 'Kabaddi', label: 'Kabaddi' },
+  { wiki: 'Pesäpallo', label: 'Pesäpallo' },
+  { wiki: 'Ultimate_(sport)', label: 'Ultimate' },
+  { wiki: 'Water_polo', label: 'Water polo' },
+
+  { wiki: 'Tennis', label: 'Tennis' },
+  { wiki: 'Table_tennis', label: 'Table tennis' },
+  { wiki: 'Badminton', label: 'Badminton' },
+  { wiki: 'Squash_(sport)', label: 'Squash' },
+  { wiki: 'Padel', label: 'Padel' },
+  { wiki: 'Pickleball', label: 'Pickleball' },
+  { wiki: 'Basque_pelota', label: 'Basque pelota' },
+  { wiki: 'Jai_alai', label: 'Jai alai' },
+
+  { wiki: 'Golf', label: 'Golf' },
+  { wiki: 'Snooker', label: 'Snooker' },
+  { wiki: 'Bowling', label: 'Bowling' },
+  { wiki: 'Darts', label: 'Darts' },
+  { wiki: 'Archery', label: 'Archery' },
+  { wiki: 'Kyudo', label: 'Kyūdō' },
+
+  { wiki: 'Sumo', label: 'Sumo' },
+  { wiki: 'Judo', label: 'Judo' },
+  { wiki: 'Taekwondo', label: 'Taekwondo' },
+  { wiki: 'Muay_Thai', label: 'Muay Thai' },
+  { wiki: 'Kendo', label: 'Kendo' },
+  { wiki: 'Capoeira', label: 'Capoeira' },
+  { wiki: 'Boxing', label: 'Boxing' },
+  { wiki: 'Wrestling', label: 'Wrestling' },
+  { wiki: 'Fencing', label: 'Fencing' },
+
+  { wiki: 'Curling', label: 'Curling' },
+  { wiki: 'Biathlon', label: 'Biathlon' },
+  { wiki: 'Figure_skating', label: 'Figure skating' },
+  { wiki: 'Speed_skating', label: 'Speed skating' },
+  { wiki: 'Bobsleigh', label: 'Bobsleigh' },
+  { wiki: 'Skeleton_(sport)', label: 'Skeleton' },
+  { wiki: 'Luge', label: 'Luge' },
+  { wiki: 'Ski_jumping', label: 'Ski jumping' },
+  { wiki: 'Cross-country_skiing', label: 'Cross-country skiing' },
+  { wiki: 'Alpine_skiing', label: 'Alpine skiing' },
+  { wiki: 'Snowboarding', label: 'Snowboarding' },
+
+  { wiki: 'Surfing', label: 'Surfing' },
+  { wiki: 'Skateboarding', label: 'Skateboarding' },
+  { wiki: 'Rowing_(sport)', label: 'Rowing' },
+  { wiki: 'Canoe_sprint', label: 'Canoe sprint' },
+  { wiki: 'Sailing', label: 'Sailing' },
+  { wiki: 'Synchronised_swimming', label: 'Synchronised swimming' },
+  { wiki: 'Diving_(sport)', label: 'Diving' },
+
+  { wiki: 'Gymnastics', label: 'Gymnastics' },
+  { wiki: 'Rhythmic_gymnastics', label: 'Rhythmic gymnastics' },
+  { wiki: 'Trampolining', label: 'Trampolining' },
+  { wiki: 'Weightlifting', label: 'Weightlifting' },
+  { wiki: 'Pole_vault', label: 'Pole vault' },
+  { wiki: 'Shot_put', label: 'Shot put' },
+  { wiki: 'Hammer_throw', label: 'Hammer throw' },
+  { wiki: 'Javelin_throw', label: 'Javelin throw' },
+  { wiki: 'Discus_throw', label: 'Discus throw' },
+  { wiki: 'Triathlon', label: 'Triathlon' },
+  { wiki: 'Orienteering', label: 'Orienteering' },
+  { wiki: 'Fell_running', label: 'Fell running' },
+  { wiki: 'Rock_climbing', label: 'Rock climbing' },
+  { wiki: 'Bouldering', label: 'Bouldering' },
+
+  { wiki: 'Track_cycling', label: 'Track cycling' },
+  { wiki: 'BMX_racing', label: 'BMX racing' },
+  { wiki: 'Motocross', label: 'Motocross' },
+  { wiki: 'Polo', label: 'Polo' },
+  { wiki: 'Show_jumping', label: 'Show jumping' },
+  { wiki: 'Equestrian_vaulting', label: 'Equestrian vaulting' },
+  { wiki: 'Buzkashi', label: 'Buzkashi' },
+  { wiki: 'Cheerleading', label: 'Cheerleading' },
+  { wiki: 'Tug_of_war', label: 'Tug of war' },
+];

@@ -6,8 +6,8 @@ import { BlurStage } from './stages';
 
 /** Faces survive blur better than album sleeves do, so this ladder starts
  *  gentler than the album one and lands closer to sharp. */
-const BLURS = [26, 16, 9, 4, 1.5];
-const SCALES = [1.5, 1.38, 1.26, 1.14, 1.05];
+const BLURS = [9, 4, 1.5];
+const SCALES = [1.26, 1.14, 1.05];
 
 type ActorPayload = { portrait: string | null; label: string; note: string };
 
@@ -70,7 +70,7 @@ export const actorGame: GameDef = {
   emoji: '🎭',
   accent: '#92315F',
   guess: 'search',
-  levels: ['Smudge', 'Blurry', 'Soft', 'Nearly there', 'Almost sharp'],
+  levels: ['Soft', 'Nearly there', 'Almost sharp'],
   skipLabel: 'Sharpen',
   needsNetwork: true,
   rounds: 10,

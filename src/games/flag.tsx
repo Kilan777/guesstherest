@@ -23,6 +23,8 @@ function FlagStage({ round, level, revealed }: StageProps) {
       cols={COLS}
       rows={ROWS}
       seed={round.id}
+      conceal="hide"
+      aspect="landscape"
       caption={<strong>{p.label}</strong>}
     />
   );

@@ -776,6 +776,14 @@ a {
   background: var(--bg-sink);
 }
 
+/* Most national flags are 3:2. */
+.frame-flag {
+  aspect-ratio: 3 / 2;
+  max-width: 560px;
+  margin: 0 auto;
+  background: var(--bg-sink);
+}
+
 .tile-img {
   position: absolute;
   inset: 0;
@@ -785,7 +793,12 @@ a {
   user-select: none;
 }
 
+.tile-solid {
+  background: linear-gradient(150deg, #35513f, #1f3527);
+}
+
 .tile-base,
+.tile-solid,
 .tile-sharp {
   position: absolute;
   inset: 0;
@@ -1083,6 +1096,33 @@ a {
 .yt-idle {
   font-size: 3rem;
   color: var(--text-faint);
+}
+
+/* ── street view stage ────────────────────────────────────────────────────── */
+
+.sv-frame {
+  aspect-ratio: 16 / 10;
+  background: #16241c;
+}
+
+.sv-frame-inner {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* Just big enough for the place name and the maps link beneath it. */
+.sv-label-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 240px;
+  height: 78px;
+  background: var(--bg-sink);
+  border-bottom-right-radius: 10px;
+  pointer-events: none;
 }
 
 /* ── year stage ───────────────────────────────────────────────────────────── */

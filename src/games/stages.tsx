@@ -129,9 +129,24 @@ export function TileStage(props: {
   rows: number;
   /** Stable per-round cell order. */
   seed: string;
+  /**
+   * How the unrevealed area is hidden.
+   *  - 'blur'  the rest of the picture is blurred. Right for posters and box
+   *            art, where shape and composition are the clue.
+   *  - 'hide'  the rest is solid. Necessary for flags: blur leaves the colour
+   *            layout completely intact, which is the entire answer.
+   */
+  conceal?: 'blur' | 'hide';
+  /**
+   * Frame shape. Posters and box art are portrait; flags are landscape, and a
+   * landscape image in a 2:3 frame with object-fit:cover crops away the sides,
+   * which is where half a flag's identity lives.
+   */
+  aspect?: 'portrait' | 'landscape';
   caption?: React.ReactNode;
 }) {
   const { src, opened, level, revealed, cols, rows } = props;
+  const conceal = props.conceal ?? 'blur';
   const state = useImageState([src]);
   const total = cols * rows;
 
@@ -171,9 +186,15 @@ export function TileStage(props: {
     for (const i of open) {
       const c = i % cols;
       const r = Math.floor(i / cols);
-      // A touch of feather stops the windows reading as hard tiles.
-      layers.push('radial-gradient(closest-side, #000 72%, rgba(0,0,0,0) 100%)');
-      sizes.push(`${(100 / cols) * 1.35}% ${(100 / rows) * 1.35}%`);
+      // Feathered windows look better over a blur; over a solid backing a soft
+      // edge just smears the flag's colours outward, so keep those crisp.
+      layers.push(
+        conceal === 'hide'
+          ? 'radial-gradient(closest-side, #000 94%, rgba(0,0,0,0) 100%)'
+          : 'radial-gradient(closest-side, #000 72%, rgba(0,0,0,0) 100%)',
+      );
+      const spread = conceal === 'hide' ? 1.02 : 1.35;
+      sizes.push(`${(100 / cols) * spread}% ${(100 / rows) * spread}%`);
       positions.push(`${cols > 1 ? (c / (cols - 1)) * 100 : 50}% ${rows > 1 ? (r / (rows - 1)) * 100 : 50}%`);
     }
     const common = {
@@ -187,22 +208,26 @@ export function TileStage(props: {
       WebkitMaskPosition: positions.join(','),
     } as React.CSSProperties;
     return common;
-  }, [open.join(','), cols, rows]);
+  }, [open.join(','), cols, rows, conceal]);
 
   const baseBlur = revealed ? 0 : 26;
 
   return (
     <div className="stage">
-      <div className="frame frame-poster">
+      <div className={`frame ${props.aspect === 'landscape' ? 'frame-flag' : 'frame-poster'}`}>
         {state.status === 'ready' ? (
           <>
-            <img
-              className="tile-img tile-base"
-              src={state.url}
-              alt=""
-              draggable={false}
-              style={{ filter: `blur(${baseBlur}px)`, transform: 'scale(1.08)' }}
-            />
+            {conceal === 'hide' && !revealed ? (
+              <div className="tile-img tile-solid" aria-hidden />
+            ) : (
+              <img
+                className="tile-img tile-base"
+                src={state.url}
+                alt=""
+                draggable={false}
+                style={{ filter: `blur(${baseBlur}px)`, transform: 'scale(1.08)' }}
+              />
+            )}
             {(openCount > 0 || revealed) && (
               <img
                 className="tile-img tile-sharp"
@@ -290,6 +315,61 @@ export function TextStage(props: {
         </ul>
       )}
       {props.revealed && props.caption ? <div className="stage-caption">{props.caption}</div> : null}
+    </div>
+  );
+}
+
+/**
+ * Street View panorama you can look around in.
+ *
+ * Uses Google's iframe embed, which needs no API key but only renders when it
+ * is actually inside an iframe. Two things have to be handled:
+ *
+ *  - The embed prints the place name in its top-left corner, which is the
+ *    answer. That corner is covered.
+ *  - Google's logo, the Terms link and the imagery attribution along the bottom
+ *    are left completely visible. Covering the place label is fine; hiding
+ *    attribution is not, and their terms say so.
+ *
+ * Dragging to look around still works — only the top-left corner is masked.
+ */
+export function StreetViewStage(props: {
+  lat: number;
+  lng: number;
+  /** Stable per-round heading so the same round always faces the same way. */
+  seed: string;
+  revealed: boolean;
+  caption?: React.ReactNode;
+}) {
+  const { lat, lng, seed, revealed } = props;
+
+  const heading = useMemo(() => {
+    let h = 0;
+    for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+    return h % 360;
+  }, [seed]);
+
+  const src = `https://maps.google.com/maps?q&layer=c&cbll=${lat},${lng}&cbp=11,${heading},0,0,0&output=svembed`;
+
+  return (
+    <div className="stage">
+      <div className="frame frame-wide sv-frame">
+        <iframe
+          key={`${lat},${lng}`}
+          className="sv-frame-inner"
+          src={src}
+          title="Street View"
+          loading="lazy"
+          referrerPolicy="no-referrer-when-downgrade"
+          allowFullScreen={false}
+        />
+        {/* Covers the place-name label and the "View on Google Maps" link.
+            Deliberately small: everything else, including Google's attribution
+            along the bottom, stays visible and interactive. */}
+        {!revealed && <div className="sv-label-mask" aria-hidden />}
+      </div>
+      <p className="stage-note">Drag to look around. Road signs, plates and which side they drive on all help.</p>
+      {revealed && props.caption ? <div className="stage-caption">{props.caption}</div> : null}
     </div>
   );
 }
