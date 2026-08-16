@@ -2,7 +2,7 @@
 
 **[guesstherest.com](https://guesstherest.com)**
 
-Thirty-two guessing games behind one shared mechanic: you start with almost
+Twenty-seven guessing games behind one shared mechanic: you start with almost
 nothing, and every extra look costs you points.
 
 ```bash
@@ -10,7 +10,7 @@ npm install
 npm run dev      # http://localhost:5173
 ```
 
-That's the whole setup. **No API keys. No account.** All thirty-two games work
+That's the whole setup. **No API keys. No account.** All twenty-seven games work
 immediately. Signing in with Google and the global leaderboard are optional
 extras that need a Supabase project; without one, scores still save per-device.
 
@@ -22,23 +22,19 @@ extras that need a Supabase project; without one, scores still save per-device.
 |---|---|---|
 | 🎧 **Guess the Song** | 0.1s of the track | 0.1s → 0.5 → 1.5 → 3 → 5s |
 | 🎬 **Guess the Movie** | 1 second of trailer footage | 1s → 2 → 4 → 8 → 15s |
-| 🍿 **Guess the Poster** | 2 tiles of 48 | 2 → 6 → 13 → 24 → 36 tiles |
 | 🧩 **Guess by Emoji** | a rebus, in your chosen category | 2 emoji → +1 → +1 → written clue |
 | 🔍 **Guess the Object** | an everyday thing at 11× | 11× → 6.5 → 3.8 → 2.2 → 1.4× |
 | 🦋 **Guess the Animal** | one patch of coat or feather at 14× | 14× → 8 → 4.5 → 2.6 → 1.5× |
 | 🗿 **Guess the Landmark** | a patch of stone at 12× | 12× → 7 → 4 → 2.4 → 1.4× |
-| 🏳️ **Guess the Flag** | 2 tiles of 24 | 2 → 5 → 9 → 14 → 20 tiles |
-| 🖼️ **Guess the Painting** | one brushstroke at 16× | 16× → 9 → 5 → 2.8 → 1.6× |
 | 💿 **Guess the Album** | cover blurred to mush | five sharpening steps |
 | 🎭 **Guess the Celebrity** | a face out of focus | three sharpening steps |
 | 🕹️ **Guess the Video Game** | box art behind tiles | 2 → 6 → 13 → 24 → 36 tiles |
-| 🍜 **Guess the Dish** | one forkful at 13× | 13× → 7.5 → 4.2 → 2.4 → 1.4× |
+| 🍜 **Guess the Dish** | a plate at 4.2× | 4.2× → 2.4 → 1.5 → full plate |
 | 💬 **Guess Who Said It** | a real quote, four faces | field → role → initials |
 | 🎞️ **Guess the Film Line** | a line of dialogue | decade → setting → who says it |
 | 📖 **Guess the Opening Line** | a novel's first sentence | decade → about it → author |
 | 📅 **Guess the Year** | name a film's release year | description → decade → 5-year window |
 | 🌍 **Guess the Capital** | a country, four cities | region → clue → first letter |
-| ⚗️ **Guess the Element** | a chemical symbol | number → category → everyday use |
 | 🌐 **Guess the Country** | a street you can look around | continent → clue → first letter |
 | 🌆 **Guess the City** | a skyline at 10× | 10× → 6 → 3.6 → 2.2 → 1.3× |
 | 🗺️ **Guess the Outline** | 3 windows onto a map | 3 → 7 → 12 → 18 → 24 windows |
@@ -46,14 +42,13 @@ extras that need a Supabase project; without one, scores still save per-device.
 | 🚗 **Guess the Car** | a shape behind frosted glass | five sharpening steps |
 | 🪐 **Guess the Planet** | a patch of somewhere else | 9× → 5.5 → 3.4 → 2.1 → 1.3× |
 | 🏅 **Guess the Sport** | the action at 12× | 12× → 7 → 4 → 2.4 → 1.4× |
-| 🎻 **Guess the Instrument** | an instrument at 13× | 13× → 7.5 → 4.2 → 2.4 → 1.4× |
 | 🎬 **Guess the Plot** | a film summarised badly | decade → genre → clue |
 | 📣 **Guess the Slogan** | an advertising line | sector → era → clue |
 | 🗣️ **Guess the Language** | a sentence in its own script | script → family → where |
 | 📱 **Guess the App** | an icon at 7× | 7× → 4.5 → 3 → 2 → 1.3× |
 | ✳️ **Guess the Logo** | 2 windows onto a brand mark | 2 → 5 → 9 → 14 → 20 windows |
 
-**Scoring** is shared by all thirty-two. A round is worth 1000 points at the top of the
+**Scoring** is shared by all twenty-seven. A round is worth 1000 points at the top of the
 ladder and decays ~38% per rung, plus a speed bonus that tapers over 20 seconds
 and a streak multiplier up to 2×. A wrong guess costs a rung, exactly like a
 skip — so guessing early is a real gamble, not a free roll. Guess the Year pays
@@ -64,8 +59,8 @@ partial credit: one year off is 60%, two 35%, three 15%.
 shortcuts stay out of the way while you are typing — **Esc** leaves the box and
 hands them back. Space falls back to *reveal more* in games that have no player.
 
-Nine games need no network at all — **Emoji**, **Film Line**, **Opening Line**,
-**Plot**, **Slogan**, **Language**, **Capital** and **Element** — and **Guess the Object** falls back to zooming
+Seven games need no network at all — **Emoji**, **Film Line**, **Opening Line**,
+**Plot**, **Slogan**, **Language** and **Capital** — and **Guess the Object** falls back to zooming
 into an emoji when Wikipedia is unreachable.
 
 ---

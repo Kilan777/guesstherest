@@ -1,14 +1,11 @@
 import type { GameDef } from '../engine/types';
 import { songGame } from './song';
 import { sceneGame } from './scene';
-import { posterGame } from './poster';
 import { objectGame } from './object';
-import { paintingGame } from './painting';
 import { albumGame } from './album';
 import { quoteGame } from './quote';
 import { rebusGame } from './rebus';
 import { yearGame } from './year';
-import { flagGame } from './flag';
 import { landmarkGame } from './landmark';
 import { animalGame } from './animal';
 import { dishGame } from './dish';
@@ -17,7 +14,6 @@ import { celebrityGame } from './celebrity';
 import { openingLineGame } from './openingline';
 import { filmLineGame } from './filmline';
 import { capitalGame } from './capital';
-import { elementGame } from './element';
 import { countryGame } from './country';
 import { languageGame } from './language';
 import { sloganGame } from './slogan';
@@ -25,7 +21,6 @@ import { plotGame } from './plot';
 import { planetGame } from './planet';
 import { carGame } from './car';
 import { sportGame } from './sport';
-import { instrumentGame } from './instrument';
 import { skylineGame } from './skyline';
 import { outlineGame } from './outline';
 import { boardgameGame } from './boardgame';
@@ -40,15 +35,12 @@ export const GAMES: GameDef[] = [
   songGame,
   sceneGame,
   countryGame,
-  posterGame,
   rebusGame,
   objectGame,
   animalGame,
   landmarkGame,
   skylineGame,
-  flagGame,
   outlineGame,
-  paintingGame,
   albumGame,
   celebrityGame,
   videoGameGame,
@@ -59,7 +51,6 @@ export const GAMES: GameDef[] = [
   planetGame,
   dishGame,
   sportGame,
-  instrumentGame,
   quoteGame,
   filmLineGame,
   openingLineGame,
@@ -68,7 +59,6 @@ export const GAMES: GameDef[] = [
   languageGame,
   yearGame,
   capitalGame,
-  elementGame,
 ];
 
 export function gameBySlug(slug: string): GameDef | undefined {

@@ -74,30 +74,6 @@ function Scene() {
   );
 }
 
-function Poster() {
-  // Two tiles lifted out of forty-eight — the opening state of the real game.
-  const open = new Set([9, 26]);
-  return (
-    <svg viewBox={VB} className="art" aria-hidden>
-      {Array.from({ length: 48 }, (_, i) => {
-        const c = i % 8;
-        const r = Math.floor(i / 8);
-        return (
-          <rect
-            key={i}
-            x={16 + c * 36}
-            y={12 + r * 26}
-            width="32"
-            height="22"
-            rx="3"
-            fill="currentColor"
-            opacity={open.has(i) ? 0.9 : 0.13}
-          />
-        );
-      })}
-    </svg>
-  );
-}
 
 function ObjectArt() {
   return (
@@ -171,30 +147,6 @@ function Album() {
   );
 }
 
-function Painting() {
-  return (
-    <svg viewBox={VB} className="art" aria-hidden>
-      <rect x="26" y="16" width="268" height="148" rx="6" fill="currentColor" opacity="0.08" />
-      <rect x="26" y="16" width="268" height="148" rx="6" fill="none" stroke="currentColor" strokeWidth="3" opacity="0.5" />
-      {[
-        'M46 128 q34 -54 72 -26 t70 -34',
-        'M52 146 q46 -30 92 -14 t96 -40',
-        'M60 100 q30 -40 66 -18 t74 -30',
-      ].map((d, i) => (
-        <path
-          key={i}
-          d={d}
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={13 - i * 3}
-          strokeLinecap="round"
-          opacity={0.75 - i * 0.2}
-        />
-      ))}
-      <circle cx="238" cy="56" r="17" fill="currentColor" opacity="0.9" />
-    </svg>
-  );
-}
 
 function Rebus() {
   const marks = ['🦁', '👑', '🚢', '🧊', '🎈', '🏠'];
@@ -246,22 +198,6 @@ function Year() {
 
 /* ── the second wave of games ─────────────────────────────────────────────── */
 
-function Flag() {
-  const open = new Set([5, 12]);
-  return (
-    <svg viewBox={VB} className="art" aria-hidden>
-      {Array.from({ length: 24 }, (_, i) => {
-        const c = i % 6;
-        const r = Math.floor(i / 6);
-        return (
-          <rect key={i} x={22 + c * 46} y={26 + r * 33} width="42" height="29" rx="3"
-            fill="currentColor" opacity={open.has(i) ? 0.9 : 0.14} />
-        );
-      })}
-      <line x1="14" y1="18" x2="14" y2="166" stroke="currentColor" strokeWidth="5" strokeLinecap="round" opacity="0.6" />
-    </svg>
-  );
-}
 
 function Landmark() {
   return (
@@ -387,26 +323,6 @@ function Capital() {
   );
 }
 
-function Element() {
-  return (
-    <svg viewBox={VB} className="art" aria-hidden>
-      <rect x="106" y="24" width="108" height="132" rx="7" fill="currentColor" opacity="0.12" />
-      <rect x="106" y="24" width="108" height="132" rx="7" fill="none" stroke="currentColor" strokeWidth="2.5" opacity="0.6" />
-      <text x="160" y="112" fontSize="60" fontWeight="800" textAnchor="middle" fill="currentColor">
-        ?
-      </text>
-      <text x="120" y="48" fontSize="17" fill="currentColor" opacity="0.7">
-        26
-      </text>
-      {[0, 1, 2].map((i) => (
-        <rect key={i} x={30 + i * 18} y={60 + i * 20} width="14" height="14" rx="2" fill="currentColor" opacity="0.16" />
-      ))}
-      {[0, 1, 2].map((i) => (
-        <rect key={i} x={262 - i * 18} y={60 + i * 20} width="14" height="14" rx="2" fill="currentColor" opacity="0.16" />
-      ))}
-    </svg>
-  );
-}
 
 
 /* ── third wave ───────────────────────────────────────────────────────────── */
@@ -507,20 +423,6 @@ function Sport() {
   );
 }
 
-function Instrument() {
-  return (
-    <svg viewBox={VB} className="art" aria-hidden>
-      <path d="M150 150 q-40 0 -40 -34 q0 -26 22 -34 q-14 -14 -2 -30 q14 -18 34 -6 q20 -14 32 4 q10 16 -4 30 q22 8 22 34 q0 34 -40 34 z"
-        fill="currentColor" opacity="0.28" />
-      <rect x="146" y="26" width="9" height="106" rx="4" fill="currentColor" opacity="0.8" />
-      {[44, 60, 76].map((y) => (
-        <rect key={y} x="126" y={y} width="49" height="4" rx="2" fill="currentColor" opacity="0.55" />
-      ))}
-      <circle cx="150" cy="112" r="15" fill="#ffffff" opacity="0.35" />
-      <path d="M40 60 q18 26 0 52 M280 60 q-18 26 0 52" stroke="currentColor" strokeWidth="4" fill="none" opacity="0.3" />
-    </svg>
-  );
-}
 
 function Skyline() {
   const towers: [number, number, number][] = [
@@ -618,14 +520,11 @@ function Logo() {
 const ART: Record<string, () => React.ReactElement> = {
   song: Song,
   scene: Scene,
-  poster: Poster,
   object: ObjectArt,
   quote: Quote,
   album: Album,
-  painting: Painting,
   rebus: Rebus,
   year: Year,
-  flag: Flag,
   landmark: Landmark,
   animal: Animal,
   dish: Dish,
@@ -634,7 +533,6 @@ const ART: Record<string, () => React.ReactElement> = {
   openingline: OpeningLine,
   filmline: FilmLine,
   capital: Capital,
-  element: Element,
   country: Country,
   language: Language,
   slogan: Slogan,
@@ -642,7 +540,6 @@ const ART: Record<string, () => React.ReactElement> = {
   planet: Planet,
   car: Car,
   sport: Sport,
-  instrument: Instrument,
   skyline: Skyline,
   outline: Outline,
   boardgame: BoardGame,
