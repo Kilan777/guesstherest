@@ -6,7 +6,7 @@ import { ZoomStage, focalOf } from './stages';
 
 /** Shallower than the painting deck — food is texture all the way down, and a
  *  16× crop of a curry is the same brown for everybody. */
-const SCALES = [13, 7.5, 4.2, 2.4, 1.4];
+const SCALES = [4.2, 2.4, 1.5, 1];
 
 type DishPayload = {
   src: string | null;
@@ -70,13 +70,13 @@ export const dishGame: GameDef = {
   slug: 'dish',
   title: 'Guess the Dish',
   short: 'Dish',
-  tagline: 'One forkful, thirteen times over.',
+  tagline: 'Four times into the plate.',
   blurb:
     'Plates from every cuisine that travels, zoomed until they are just texture. A grain of rice, a bit of sauce, and the country it came from.',
   emoji: '🍜',
   accent: '#B0551F',
   guess: 'search',
-  levels: ['13×', '7.5×', '4.2×', '2.4×', '1.4×'],
+  levels: ['4.2×', '2.4×', '1.5×', 'Full plate'],
   skipLabel: 'Zoom out',
   needsNetwork: true,
   rounds: 10,
