@@ -1,0 +1,83 @@
+/**
+ * Screen actors with a face the world knows, keyed to their Wikipedia articles.
+ *
+ * Actor articles are the most fragile seeds in the project: a bare name is very
+ * often a disambiguation page (Chris Evans is a British broadcaster first), and
+ * a fair number of working actors have no freely licensed photograph at all.
+ * Every title below was checked against the live summary API for HTTP 200, a
+ * non-disambiguation page and a present `originalimage`. Titles are stored raw
+ * rather than percent-encoded — `pageInfo` encodes them itself, and a
+ * pre-encoded title comes back 403.
+ */
+export type ActorSeed = { wiki: string; label: string };
+
+export const ACTORS: ActorSeed[] = [
+  { wiki: 'Meryl_Streep', label: 'Meryl Streep' },
+  { wiki: 'Tom_Hanks', label: 'Tom Hanks' },
+  { wiki: 'Denzel_Washington', label: 'Denzel Washington' },
+  { wiki: 'Morgan_Freeman', label: 'Morgan Freeman' },
+  { wiki: 'Robert_De_Niro', label: 'Robert De Niro' },
+  { wiki: 'Al_Pacino', label: 'Al Pacino' },
+  { wiki: 'Leonardo_DiCaprio', label: 'Leonardo DiCaprio' },
+  { wiki: 'Brad_Pitt', label: 'Brad Pitt' },
+  { wiki: 'Johnny_Depp', label: 'Johnny Depp' },
+  { wiki: 'Tom_Cruise', label: 'Tom Cruise' },
+  { wiki: 'Keanu_Reeves', label: 'Keanu Reeves' },
+  { wiki: 'Will_Smith', label: 'Will Smith' },
+  { wiki: 'Samuel_L._Jackson', label: 'Samuel L. Jackson' },
+  { wiki: 'Harrison_Ford', label: 'Harrison Ford' },
+  { wiki: 'Jack_Nicholson', label: 'Jack Nicholson' },
+  { wiki: 'Clint_Eastwood', label: 'Clint Eastwood' },
+  { wiki: 'Anthony_Hopkins', label: 'Anthony Hopkins' },
+  { wiki: 'Ian_McKellen', label: 'Ian McKellen' },
+  { wiki: 'Judi_Dench', label: 'Judi Dench' },
+  { wiki: 'Helen_Mirren', label: 'Helen Mirren' },
+  { wiki: 'Maggie_Smith', label: 'Maggie Smith' },
+  { wiki: 'Kate_Winslet', label: 'Kate Winslet' },
+  { wiki: 'Cate_Blanchett', label: 'Cate Blanchett' },
+  { wiki: 'Nicole_Kidman', label: 'Nicole Kidman' },
+  { wiki: 'Charlize_Theron', label: 'Charlize Theron' },
+  { wiki: 'Julia_Roberts', label: 'Julia Roberts' },
+  { wiki: 'Angelina_Jolie', label: 'Angelina Jolie' },
+  { wiki: 'Scarlett_Johansson', label: 'Scarlett Johansson' },
+  { wiki: 'Natalie_Portman', label: 'Natalie Portman' },
+  { wiki: 'Jennifer_Lawrence', label: 'Jennifer Lawrence' },
+  { wiki: 'Emma_Stone', label: 'Emma Stone' },
+  { wiki: 'Margot_Robbie', label: 'Margot Robbie' },
+  { wiki: 'Viola_Davis', label: 'Viola Davis' },
+  { wiki: "Lupita_Nyong'o", label: "Lupita Nyong'o" },
+  { wiki: 'Idris_Elba', label: 'Idris Elba' },
+  { wiki: 'Chadwick_Boseman', label: 'Chadwick Boseman' },
+  { wiki: 'Ryan_Gosling', label: 'Ryan Gosling' },
+  { wiki: 'Christian_Bale', label: 'Christian Bale' },
+  { wiki: 'Robert_Downey_Jr.', label: 'Robert Downey Jr.' },
+  { wiki: 'Chris_Evans_(actor)', label: 'Chris Evans' },
+  { wiki: 'Daniel_Day-Lewis', label: 'Daniel Day-Lewis' },
+  { wiki: 'Christoph_Waltz', label: 'Christoph Waltz' },
+  { wiki: 'Javier_Bardem', label: 'Javier Bardem' },
+  { wiki: 'Penélope_Cruz', label: 'Penélope Cruz' },
+  { wiki: 'Sophia_Loren', label: 'Sophia Loren' },
+  { wiki: 'Marion_Cotillard', label: 'Marion Cotillard' },
+  { wiki: 'Toshiro_Mifune', label: 'Toshiro Mifune' },
+  { wiki: 'Jackie_Chan', label: 'Jackie Chan' },
+  { wiki: 'Bruce_Lee', label: 'Bruce Lee' },
+  { wiki: 'Michelle_Yeoh', label: 'Michelle Yeoh' },
+  { wiki: 'Tony_Leung_Chiu-wai', label: 'Tony Leung Chiu-wai' },
+  { wiki: 'Shah_Rukh_Khan', label: 'Shah Rukh Khan' },
+  { wiki: 'Amitabh_Bachchan', label: 'Amitabh Bachchan' },
+  { wiki: 'Marilyn_Monroe', label: 'Marilyn Monroe' },
+  { wiki: 'Audrey_Hepburn', label: 'Audrey Hepburn' },
+  { wiki: 'Elizabeth_Taylor', label: 'Elizabeth Taylor' },
+  { wiki: 'Katharine_Hepburn', label: 'Katharine Hepburn' },
+  { wiki: 'Bette_Davis', label: 'Bette Davis' },
+  { wiki: 'Ingrid_Bergman', label: 'Ingrid Bergman' },
+  { wiki: 'Humphrey_Bogart', label: 'Humphrey Bogart' },
+  { wiki: 'Cary_Grant', label: 'Cary Grant' },
+  { wiki: 'Marlon_Brando', label: 'Marlon Brando' },
+  { wiki: 'Charlie_Chaplin', label: 'Charlie Chaplin' },
+  { wiki: 'Sean_Connery', label: 'Sean Connery' },
+  { wiki: 'Sidney_Poitier', label: 'Sidney Poitier' },
+  { wiki: 'Robin_Williams', label: 'Robin Williams' },
+  { wiki: 'Jodie_Foster', label: 'Jodie Foster' },
+  { wiki: 'Arnold_Schwarzenegger', label: 'Arnold Schwarzenegger' },
+];
