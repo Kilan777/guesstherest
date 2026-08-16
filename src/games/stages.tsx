@@ -143,10 +143,22 @@ export function TileStage(props: {
    * which is where half a flag's identity lives.
    */
   aspect?: 'portrait' | 'landscape';
+  /**
+   * Colour of the solid backing when `conceal` is 'hide'. Flags and maps are
+   * colourful and sit well on dark; a lot of logos are black on transparent,
+   * which on a dark backing reveals nothing at all.
+   */
+  backing?: 'dark' | 'light';
+  /**
+   * 'contain' keeps the whole subject in frame. Logos range from tall roundels
+   * to very wide wordmarks, and cover crops the identifying part off both.
+   */
+  fit?: 'cover' | 'contain';
   caption?: React.ReactNode;
 }) {
   const { src, opened, level, revealed, cols, rows } = props;
   const conceal = props.conceal ?? 'blur';
+  const fit = props.fit ?? 'cover';
   const state = useImageState([src]);
   const total = cols * rows;
 
@@ -218,7 +230,10 @@ export function TileStage(props: {
         {state.status === 'ready' ? (
           <>
             {conceal === 'hide' && !revealed ? (
-              <div className="tile-img tile-solid" aria-hidden />
+              <div
+                className={`tile-img tile-solid ${props.backing === 'light' ? 'tile-solid-light' : ''}`}
+                aria-hidden
+              />
             ) : (
               <img
                 className="tile-img tile-base"
@@ -234,7 +249,7 @@ export function TileStage(props: {
                 src={state.url}
                 alt=""
                 draggable={false}
-                style={revealed ? undefined : mask}
+                style={revealed ? { objectFit: fit } : { ...mask, objectFit: fit }}
               />
             )}
           </>
