@@ -252,6 +252,17 @@ export function TileStage(props: {
 /** Album covers reveal by de-blurring instead of zooming — the shapes come back first. */
 export function BlurStage(props: {
   src: string | null;
+  /**
+   * Frame shape. Album art is square; a car photo is landscape, and squeezing
+   * one into a square frame with object-fit:cover cuts the nose and tail off —
+   * which for a car is most of what identifies it.
+   */
+  aspect?: 'square' | 'landscape';
+  /**
+   * 'contain' guarantees the whole subject is visible. Worth it when the
+   * silhouette is the clue, as with cars.
+   */
+  fit?: 'cover' | 'contain';
   blurs: number[];
   scales: number[];
   level: number;
@@ -259,6 +270,7 @@ export function BlurStage(props: {
   caption?: React.ReactNode;
 }) {
   const { src, blurs, scales, level, revealed } = props;
+  const fit = props.fit ?? 'cover';
   const state = useImageState([src]);
   const i = Math.min(level, blurs.length - 1);
   const blur = revealed ? 0 : (blurs[i] ?? 0);
@@ -266,14 +278,18 @@ export function BlurStage(props: {
 
   return (
     <div className="stage">
-      <div className="frame frame-square">
+      <div className={`frame ${props.aspect === 'landscape' ? 'frame-wide' : 'frame-square'}`}>
         {state.status === 'ready' ? (
           <img
             className="frame-img"
             src={state.url}
             alt=""
             draggable={false}
-            style={{ filter: `blur(${blur}px) saturate(1.05)`, transform: `scale(${scale})` }}
+            style={{
+              filter: `blur(${blur}px) saturate(1.05)`,
+              transform: `scale(${scale})`,
+              objectFit: fit,
+            }}
           />
         ) : state.status === 'failed' || state.status === 'idle' ? (
           <div className="frame-msg">Artwork unavailable.</div>

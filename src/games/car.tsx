@@ -8,7 +8,7 @@ import { BlurStage } from './stages';
  *  is the one treatment that takes the badge and the panel gaps away while
  *  leaving the shape. */
 const BLURS = [30, 19, 11, 5, 2];
-const SCALES = [1.45, 1.34, 1.24, 1.13, 1.05];
+const SCALES = [1, 1, 1, 1, 1];
 
 type CarPayload = { src: string | null; label: string; era: string };
 
@@ -19,6 +19,8 @@ function CarStage({ round, level, revealed }: StageProps) {
       src={p.src}
       blurs={BLURS}
       scales={SCALES}
+      aspect="landscape"
+      fit="contain"
       level={level}
       revealed={revealed}
       caption={
