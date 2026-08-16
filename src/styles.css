@@ -1,24 +1,34 @@
 /* ─────────────────────────────────────────────────────────────────────────────
-   Guess The… — one dark theme, one accent variable per game.
-   Everything colour-critical hangs off --accent, which each card and screen
-   sets from the GameDef, so a new game needs no CSS of its own.
+   Guess The Rest — light theme, forest green.
+
+   Paper-white surfaces on a warm off-white ground, with deep green as the one
+   brand colour. Each game still sets its own --accent from its GameDef, but the
+   palette is now jewel-toned rather than neon: saturated enough to hold its own
+   against white, dark enough to pass contrast on it.
    ───────────────────────────────────────────────────────────────────────── */
 
 :root {
-  --bg: #08080f;
-  --bg-raise: #11111c;
-  --bg-sink: #05050a;
-  --line: #23233a;
-  --line-soft: #1a1a2b;
-  --text: #ececf5;
-  --text-dim: #9a9ab5;
-  --text-faint: #63637d;
-  --accent: #ff4d6d;
-  --good: #4ade80;
-  --bad: #f87171;
-  --radius: 16px;
-  --radius-sm: 10px;
-  --shadow: 0 18px 50px -20px rgba(0, 0, 0, 0.9);
+  --bg: #f4f3ec;
+  --bg-raise: #ffffff;
+  --bg-sink: #eceade;
+  --line: #d3d2c2;
+  --line-soft: #e2e1d4;
+  --text: #16241c;
+  --text-dim: #4d5a51;
+  --text-faint: #7b877e;
+
+  /* Brand */
+  --forest: #1f5136;
+  --forest-deep: #143524;
+  --forest-soft: #e6efe7;
+
+  --accent: var(--forest);
+  --good: #1f7a44;
+  --bad: #a8302a;
+
+  --radius: 14px;
+  --radius-sm: 9px;
+  --shadow: 0 10px 30px -14px rgba(20, 53, 36, 0.4);
   --font: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --mono: ui-monospace, 'SF Mono', 'Cascadia Code', Menlo, monospace;
 }
@@ -40,11 +50,6 @@ body {
   -webkit-font-smoothing: antialiased;
   line-height: 1.5;
   min-height: 100vh;
-  background-image:
-    radial-gradient(900px 500px at 12% -8%, rgba(255, 77, 109, 0.12), transparent 60%),
-    radial-gradient(800px 460px at 88% 4%, rgba(76, 201, 240, 0.1), transparent 62%),
-    radial-gradient(700px 500px at 50% 100%, rgba(199, 125, 255, 0.08), transparent 60%);
-  background-attachment: fixed;
 }
 
 /* Full-bleed. A centred max-width column with a big gradient hero is the
@@ -100,7 +105,7 @@ a {
 
 .btn-primary {
   background: var(--accent);
-  color: #0a0a12;
+  color: #fff;
 }
 
 .btn-ghost {
@@ -121,8 +126,8 @@ a {
 
 .icon-btn {
   background: transparent;
-  border: 1px solid var(--line);
-  color: var(--text-dim);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.85);
   border-radius: 999px;
   width: 38px;
   height: 38px;
@@ -133,8 +138,8 @@ a {
 }
 
 .icon-btn:hover {
-  border-color: var(--accent);
-  color: var(--accent);
+  border-color: #fff;
+  color: #fff;
 }
 
 /* ── top nav ──────────────────────────────────────────────────────────────── */
@@ -148,8 +153,8 @@ a {
   gap: 14px;
   padding: 11px var(--pad);
   border-bottom: 1px solid var(--line-soft);
-  background: rgba(8, 8, 15, 0.82);
-  backdrop-filter: blur(14px);
+  background: var(--forest-deep);
+  border-bottom-color: var(--forest-deep);
 }
 
 .brand {
@@ -157,7 +162,7 @@ a {
   align-items: center;
   gap: 9px;
   text-decoration: none;
-  color: var(--text);
+  color: #fff;
   font-weight: 800;
   font-size: 1.1rem;
   letter-spacing: -0.02em;
@@ -165,13 +170,12 @@ a {
 }
 
 .brand-mark {
-  font-size: 1.4rem;
-  filter: drop-shadow(0 0 12px rgba(255, 77, 109, 0.55));
+  font-size: 1.35rem;
 }
 
 .brand-name em {
   font-style: normal;
-  color: var(--text-faint);
+  color: rgba(255, 255, 255, 0.55);
 }
 
 .nav-search {
@@ -179,17 +183,17 @@ a {
   display: flex;
   align-items: center;
   gap: 10px;
-  background: var(--bg-raise);
-  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: 999px;
   padding: 0 16px;
-  color: var(--text-faint);
-  transition: border-color 0.15s, box-shadow 0.15s;
+  color: rgba(255, 255, 255, 0.65);
+  transition: border-color 0.15s, background 0.15s;
 }
 
 .nav-search:focus-within {
-  border-color: #ff4d6d;
-  box-shadow: 0 0 0 3px rgba(255, 77, 109, 0.16);
+  border-color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.18);
 }
 
 .nav-search input {
@@ -200,9 +204,11 @@ a {
   background: transparent;
   border: 0;
   outline: none;
-  color: var(--text);
+  color: #fff;
   padding: 11px 0;
 }
+
+.nav-search input::placeholder { color: rgba(255, 255, 255, 0.55); }
 
 .nav-search input::-webkit-search-cancel-button { display: none; }
 
@@ -230,17 +236,17 @@ a {
   align-items: center;
   gap: 10px;
   font: inherit;
-  background: var(--bg-raise);
-  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: 999px;
   padding: 5px 15px 5px 5px;
-  color: var(--text);
+  color: #fff;
   cursor: pointer;
   transition: border-color 0.15s, transform 0.12s;
 }
 
-.signin:hover { border-color: var(--text-dim); transform: translateY(-1px); }
-.signin.in { border-color: #2c6b4a; }
+.signin:hover { border-color: rgba(255, 255, 255, 0.55); transform: translateY(-1px); }
+.signin.in { border-color: #8fc7a3; }
 
 .signin-avatar {
   width: 30px;
@@ -249,8 +255,8 @@ a {
   object-fit: cover;
   display: grid;
   place-items: center;
-  background: linear-gradient(135deg, #ff4d6d, #c77dff);
-  color: #0a0a12;
+  background: var(--forest);
+  color: #fff;
   font-weight: 800;
   font-size: 0.85rem;
   flex: none;
@@ -284,14 +290,14 @@ a {
   font-style: normal;
   font-weight: 500;
   font-size: 0.68rem;
-  color: var(--text-faint);
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .signin-menu {
   position: absolute;
   right: 0;
   top: calc(100% + 8px);
-  background: #12121e;
+  background: var(--bg-raise);
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow);
@@ -312,7 +318,7 @@ a {
   cursor: pointer;
 }
 
-.signin-menu button:hover { background: rgba(255, 255, 255, 0.07); }
+.signin-menu button:hover { background: var(--forest-soft); }
 
 /* ── hero ─────────────────────────────────────────────────────────────────── */
 
@@ -333,18 +339,14 @@ a {
   font-size: clamp(2.8rem, 12vw, 6.5rem);
   font-weight: 800;
   letter-spacing: -0.045em;
-  background: linear-gradient(115deg, #fff 8%, #ff4d6d 42%, #c77dff 68%, #4cc9f0 92%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--forest-deep);
 }
 
 /* The parent clips a gradient to its own glyphs; a child element gets none of
    it and would render in the parent's `transparent` fill, so it needs an
    explicit fill colour of its own. */
 .hero-dots {
-  color: #6c6c8c;
-  -webkit-text-fill-color: #6c6c8c;
+  color: var(--text-faint);
   margin-left: 0.06em;
 }
 
@@ -385,7 +387,8 @@ a {
   font-size: 0.78rem;
   text-transform: uppercase;
   letter-spacing: 0.18em;
-  color: var(--text-dim);
+  color: var(--forest);
+  font-weight: 700;
 }
 
 .section-hint {
@@ -426,8 +429,8 @@ a {
 
 .card {
   position: relative;
-  background: var(--bg-sink);
-  border: 1px solid var(--line-soft);
+  background: var(--bg-raise);
+  border: 1px solid var(--line);
   border-radius: 12px;
   display: flex;
   flex-direction: column;
@@ -467,8 +470,8 @@ a {
   aspect-ratio: 16 / 9;
   color: var(--accent);
   background:
-    radial-gradient(120% 120% at 20% 0%, color-mix(in srgb, var(--accent) 26%, transparent), transparent 62%),
-    linear-gradient(160deg, #14141f, #0a0a12);
+    radial-gradient(130% 130% at 24% 0%, rgba(255, 255, 255, 0.9), transparent 70%),
+    var(--forest-soft);
   border-bottom: 1px solid var(--line-soft);
   overflow: hidden;
 }
@@ -484,7 +487,7 @@ a {
   bottom: 9px;
   font-size: 1.5rem;
   line-height: 1;
-  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.7));
+  filter: drop-shadow(0 2px 5px rgba(20, 53, 36, 0.25));
 }
 
 .card-rank {
@@ -495,7 +498,7 @@ a {
   font-weight: 800;
   color: var(--accent);
   letter-spacing: -0.04em;
-  text-shadow: 0 3px 14px rgba(0, 0, 0, 0.8);
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.6);
 }
 
 .card-flag {
@@ -507,7 +510,7 @@ a {
   letter-spacing: 0.11em;
   padding: 4px 9px;
   border-radius: 999px;
-  background: rgba(8, 8, 15, 0.72);
+  background: rgba(255, 255, 255, 0.85);
   border: 1px solid var(--line);
   color: var(--text-dim);
   backdrop-filter: blur(4px);
@@ -687,12 +690,12 @@ a {
 
 .rung.spent {
   color: var(--text-dim);
-  background: rgba(255, 255, 255, 0.015);
+  background: rgba(20, 53, 36, 0.035);
 }
 
 .rung.current {
   color: var(--text);
-  background: rgba(255, 255, 255, 0.045);
+  background: var(--forest-soft);
   font-weight: 600;
 }
 
@@ -711,8 +714,8 @@ a {
   aspect-ratio: 16 / 10;
   overflow: hidden;
   border-radius: var(--radius);
-  background: #05050c;
-  border: 1px solid var(--line-soft);
+  background: var(--bg-sink);
+  border: 1px solid var(--line);
   display: grid;
   place-items: center;
 }
@@ -729,7 +732,7 @@ a {
   aspect-ratio: 2 / 3;
   max-width: 380px;
   margin: 0 auto;
-  background: #05050c;
+  background: var(--bg-sink);
 }
 
 .tile-img {
@@ -752,10 +755,10 @@ a {
 }
 
 .tile {
-  background: linear-gradient(150deg, #1a1a2b, #0d0d17);
+  background: linear-gradient(150deg, #35513f, #1f3527);
   box-shadow:
-    inset 0 0 0 1px rgba(6, 6, 12, 0.9),
-    inset 0 1px 0 rgba(255, 255, 255, 0.045);
+    inset 0 0 0 1px rgba(255, 255, 255, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
   /* Tiles flip away rather than fading, which reads as a deliberate reveal. */
   transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
   transform-origin: center;
@@ -774,7 +777,7 @@ a {
   aspect-ratio: auto;
   min-height: 220px;
   padding: 28px;
-  background: linear-gradient(160deg, #12121f, #08080f);
+  background: linear-gradient(160deg, #fff, var(--forest-soft));
 }
 
 .frame-img {
@@ -804,7 +807,7 @@ a {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  box-shadow: inset 0 0 90px 20px rgba(0, 0, 0, 0.55);
+  box-shadow: inset 0 0 70px 14px rgba(20, 53, 36, 0.16);
 }
 
 .stage-caption {
@@ -901,10 +904,10 @@ a {
   height: min(220px, 46vw);
   border-radius: 50%;
   background:
-    repeating-radial-gradient(circle at 50% 50%, #14141f 0 2px, #0c0c15 2px 4px);
+    repeating-radial-gradient(circle at 50% 50%, #24382c 0 2px, #16241c 2px 4px);
   display: grid;
   place-items: center;
-  border: 1px solid var(--line-soft);
+  border: 1px solid var(--line);
   box-shadow: var(--shadow);
   overflow: hidden;
 }
@@ -926,7 +929,7 @@ a {
   display: grid;
   place-items: center;
   font-size: 1.6rem;
-  color: #0a0a12;
+  color: #fff;
   font-weight: 800;
 }
 
@@ -958,8 +961,8 @@ a {
 .track-played {
   position: absolute;
   inset: 0 auto 0 0;
-  background: #fff;
-  opacity: 0.9;
+  background: var(--forest-deep);
+  opacity: 0.55;
 }
 
 .track-mark {
@@ -967,7 +970,7 @@ a {
   top: 0;
   bottom: 0;
   width: 1px;
-  background: rgba(255, 255, 255, 0.22);
+  background: rgba(20, 53, 36, 0.2);
 }
 
 .track-scale {
@@ -996,7 +999,7 @@ a {
 
 .play-btn:hover:not(:disabled) {
   transform: translateY(-1px);
-  background: #191926;
+  background: var(--forest-soft);
 }
 
 .play-btn:disabled {
@@ -1024,7 +1027,7 @@ a {
 .yt-shield {
   position: absolute;
   inset: 0;
-  background: #05050c;
+  background: #16241c;
   display: grid;
   place-items: center;
   transition: opacity 0.25s ease;
@@ -1064,7 +1067,7 @@ a {
   object-fit: cover;
   border-radius: var(--radius-sm);
   flex: none;
-  background: #0c0c15;
+  background: var(--bg-sink);
 }
 
 .year-poster-empty {
@@ -1215,7 +1218,7 @@ a {
   list-style: none;
   margin: 0;
   padding: 6px;
-  background: #12121e;
+  background: var(--bg-raise);
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow);
@@ -1233,7 +1236,7 @@ a {
 }
 
 .guess-item.active {
-  background: rgba(255, 255, 255, 0.07);
+  background: var(--forest-soft);
 }
 
 .guess-item.used {
@@ -1303,7 +1306,7 @@ a {
   border-radius: 8px;
   object-fit: cover;
   flex: none;
-  background: #0c0c15;
+  background: var(--bg-sink);
 }
 
 .choice-art-empty {
@@ -1385,16 +1388,16 @@ kbd {
   padding: 3px 6px;
   border-radius: 5px;
   border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--text-faint);
+  background: var(--bg-sink);
+  color: var(--text-dim);
   margin-left: 2px;
 }
 
 /* On a filled button the low-contrast default would disappear. */
 .kbd-on-solid {
-  border-color: rgba(10, 10, 18, 0.35);
-  background: rgba(10, 10, 18, 0.16);
-  color: rgba(10, 10, 18, 0.75);
+  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.92);
 }
 
 .shortcut-hint {
@@ -1502,7 +1505,7 @@ kbd {
 .picker-choice {
   font: inherit;
   color: var(--text);
-  background: linear-gradient(165deg, #161623, #0c0c15);
+  background: var(--bg-raise);
   border: 1px solid var(--line);
   border-radius: var(--radius);
   padding: 22px 16px 18px;
@@ -1629,8 +1632,8 @@ kbd {
 }
 
 .board-src.global {
-  border-color: #1f5d43;
-  color: #6ee7a8;
+  border-color: var(--forest);
+  color: var(--forest);
 }
 
 .board-note {
@@ -1665,11 +1668,11 @@ kbd {
 }
 
 .board-row:nth-child(odd) {
-  background: rgba(255, 255, 255, 0.022);
+  background: rgba(20, 53, 36, 0.03);
 }
 
 .board-row.you {
-  background: rgba(255, 255, 255, 0.07);
+  background: var(--forest-soft);
 }
 
 .board-rank {
@@ -1709,7 +1712,7 @@ kbd {
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(3, 3, 8, 0.78);
+  background: rgba(22, 36, 28, 0.42);
   backdrop-filter: blur(6px);
   display: grid;
   place-items: center;
@@ -1763,7 +1766,7 @@ kbd {
 .field input[type='text'],
 .field input:not([type]) {
   font: inherit;
-  background: var(--bg-sink);
+  background: #fff;
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
   color: var(--text);

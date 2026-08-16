@@ -46,10 +46,10 @@ and a streak multiplier up to 2×. A wrong guess costs a rung, exactly like a
 skip — so guessing early is a real gamble, not a free roll. Guess the Year pays
 partial credit: one year off is 60%, two 35%, three 15%.
 
-**Two ways out of a round.** *Reveal more* (**R**) buys the next rung and costs
-points; *Skip round* (**S**) abandons it for zero and shows you the answer.
-**Enter** moves to the next round. In search games the shortcuts stay out of the
-way while you are typing — press **Esc** to leave the box and they come back.
+**Keyboard.** **Space** plays or replays the clip, **R** buys the next rung,
+**S** abandons the round for zero, **Enter** moves on. In search games the
+shortcuts stay out of the way while you are typing — **Esc** leaves the box and
+hands them back. Space falls back to *reveal more* in games that have no player.
 
 Five games need no network at all — **Emoji**, **Film Line**, **Opening Line**,
 **Capital** and **Element** — and **Guess the Object** falls back to zooming
@@ -122,6 +122,12 @@ scoring, streaks, prefetching, the leaderboard and the three guess widgets
 ---
 
 ## Notes from building it
+
+**The theme is light and green on purpose.** An earlier version was the usual
+dark-mode-with-neon-accents, which is the default look of anything generated
+rather than designed. It is now paper on warm off-white with a deep forest bar,
+and the per-game accents were retuned from neon to jewel tones so they hold up
+against white.
 
 **Why Web Audio and not `<audio>`.** The song game hinges on 100ms being exactly
 100ms. `currentTime` seeking and `pause()` scheduling both jitter by tens of

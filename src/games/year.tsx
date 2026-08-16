@@ -91,7 +91,7 @@ export const yearGame: GameDef = {
   blurb:
     'Name the year a film came out. Exact is full marks; one year off still pays 60%, two years 35%, three years 15%. Four and you have burned a rung.',
   emoji: '📅',
-  accent: '#06d6a0',
+  accent: '#16665A',
   guess: 'year',
   levels: ['Cold', 'Description', 'Decade', 'Five-year window'],
   skipLabel: 'Narrow it down',

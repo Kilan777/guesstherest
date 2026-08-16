@@ -73,7 +73,7 @@ export const landmarkGame: GameDef = {
   blurb:
     'A place millions of people have photographed, cropped down to a patch of stone or steel. Pull back a step at a time until the shape gives it away.',
   emoji: '🗿',
-  accent: '#e07a5f',
+  accent: '#7A4A24',
   guess: 'search',
   levels: ['12×', '7×', '4×', '2.4×', '1.4×'],
   skipLabel: 'Zoom out',

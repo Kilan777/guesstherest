@@ -72,7 +72,7 @@ export const objectGame: GameDef = {
   blurb:
     'An everyday thing, photographed and then magnified until it is abstract. Pull back one step at a time until you recognise it — or admit defeat and pull back again.',
   emoji: '🔍',
-  accent: '#4cc9f0',
+  accent: '#14615F',
   guess: 'search',
   levels: ['11×', '6.5×', '3.8×', '2.2×', '1.4×'],
   skipLabel: 'Zoom out',

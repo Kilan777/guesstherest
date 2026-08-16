@@ -109,7 +109,7 @@ export const quoteGame: GameDef = {
   blurb:
     'A line somebody famous actually said — no internet misattributions here. Pick the face it belongs to. Stuck? Trade points for their field, their job, their initials.',
   emoji: '💬',
-  accent: '#7dd87d',
+  accent: '#1F5136',
   guess: 'choice',
   levels: ['Cold', 'Field', 'Role', 'Initials'],
   skipLabel: 'Give me a clue',

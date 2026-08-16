@@ -63,7 +63,7 @@ export const flagGame: GameDef = {
   blurb:
     'A national flag behind a grid of panels. Two are open to start, and two panels of one colour narrow it down to about forty countries. Every skip opens a few more.',
   emoji: '🏳️',
-  accent: '#4361ee',
+  accent: '#26517E',
   guess: 'search',
   levels: ['2 tiles', '5 tiles', '9 tiles', '14 tiles', '20 tiles'],
   skipLabel: 'Open more',

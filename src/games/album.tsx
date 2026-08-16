@@ -75,7 +75,7 @@ export const albumGame: GameDef = {
   blurb:
     'A famous sleeve, blurred past recognition. Every skip sharpens it a little. The shapes usually give it away before the text does.',
   emoji: '💿',
-  accent: '#c77dff',
+  accent: '#5B3E8C',
   guess: 'search',
   levels: ['Smudge', 'Blurry', 'Soft', 'Nearly there', 'Almost sharp'],
   skipLabel: 'Sharpen',

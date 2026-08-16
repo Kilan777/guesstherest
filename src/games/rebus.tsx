@@ -91,7 +91,7 @@ export const rebusGame: GameDef = {
   blurb:
     'Pick a category, then read the rebus. Two emoji to start; each skip adds another. Obvious once you see it, impossible until you do — and it works with the wifi off.',
   emoji: '🧩',
-  accent: '#ffd166',
+  accent: '#96701B',
   guess: 'search',
   levels: ['2 emoji', '+1 emoji', '+1 more', 'Written clue'],
   skipLabel: 'Add an emoji',

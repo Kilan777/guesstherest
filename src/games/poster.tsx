@@ -68,7 +68,7 @@ export const posterGame: GameDef = {
   blurb:
     'A film poster behind a wall of tiles. Two are open to start. Every skip lifts a few more — but the good ones are rarely the ones you need.',
   emoji: '🍿',
-  accent: '#ef476f',
+  accent: '#8C2F39',
   guess: 'search',
   levels: ['2 tiles', '6 tiles', '13 tiles', '24 tiles', '36 tiles'],
   skipLabel: 'Open more',

@@ -4,6 +4,7 @@ import { MOVIES } from '../content/data/movies';
 import { pageInfo } from '../content/wikipedia';
 import { streamDeck } from '../content/deck';
 import { loadYouTubeApi, type YTPlayer } from '../lib/youtube';
+import { usePlayAction } from '../engine/player';
 
 const DURATIONS = [1, 2, 4, 8, 15];
 
@@ -14,12 +15,23 @@ type ScenePayload = {
   year: number;
 };
 
-/** Deterministic per-round start, biased past the studio logos at the front. */
+/**
+ * Where in the trailer to start.
+ *
+ * Trailers are built out of real footage, but not evenly: the first fifth is
+ * studio logos and setup, and the last eighth is title cards, cast lists and a
+ * release date — all of which either give the answer away or show nothing of
+ * the film. The middle is where actual scenes live, so rounds sample 38%–72%
+ * in, and the clip is pulled back if it would run into the end card.
+ */
 function startFraction(id: string): number {
   let h = 0;
   for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
-  return 0.3 + (h % 35) / 100; // 30%–65% in
+  return 0.38 + (h % 35) / 100; // 38%–72% in
 }
+
+/** Trailers end on title cards; never let a clip run into them. */
+const TAIL_GUARD = 0.88;
 
 function SceneStage({ round, level, revealed, accent }: StageProps) {
   const p = round.payload as ScenePayload;
@@ -87,8 +99,11 @@ function SceneStage({ round, level, revealed, accent }: StageProps) {
     } catch {
       duration = 0;
     }
+    const usable = duration * TAIL_GUARD;
     const start =
-      duration > 5 ? Math.min(duration * startFraction(round.id), Math.max(0, duration - clipSec - 1)) : 0;
+      duration > 5
+        ? Math.max(0, Math.min(duration * startFraction(round.id), usable - clipSec))
+        : 0;
 
     player.seekTo(Math.max(0, start), true);
     player.playVideo();
@@ -103,6 +118,9 @@ function SceneStage({ round, level, revealed, accent }: StageProps) {
       setPlaying(false);
     }, clipSec * 1000);
   }, [clipSec, round.id]);
+
+  // Space bar plays the clip.
+  usePlayAction(ready && !error ? play : null, [ready, error, play]);
 
   return (
     <div className="stage">
@@ -135,6 +153,7 @@ function SceneStage({ round, level, revealed, accent }: StageProps) {
         style={{ borderColor: accent }}
       >
         {playing ? `Playing ${clipSec}s…` : `▶ Play ${clipSec} second${clipSec === 1 ? '' : 's'}`}
+        <kbd>space</kbd>
       </button>
 
       {revealed && (
@@ -188,7 +207,7 @@ export const sceneGame: GameDef = {
   blurb:
     'A single second from somewhere in the middle of the trailer. Skip for two, four, eight, fifteen. The trick is that one second is almost always enough — you just have to trust it.',
   emoji: '🎬',
-  accent: '#ff9f1c',
+  accent: '#A8531C',
   guess: 'search',
   levels: ['1s', '2s', '4s', '8s', '15s'],
   skipLabel: 'Roll more',

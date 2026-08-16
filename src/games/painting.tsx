@@ -73,7 +73,7 @@ export const paintingGame: GameDef = {
   blurb:
     'The most famous canvases in the world, shown at sixteen times life size. Somewhere in that patch of colour is a face everyone knows.',
   emoji: '🖼️',
-  accent: '#f4a261',
+  accent: '#8A4E23',
   guess: 'search',
   levels: ['16×', '9×', '5×', '2.8×', '1.6×'],
   skipLabel: 'Step back',

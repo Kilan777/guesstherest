@@ -68,7 +68,7 @@ export const videoGameGame: GameDef = {
   blurb:
     'Cover art from four decades of games, hidden behind forty-eight panels. The logo is usually the last thing to appear, so the art has to do the work.',
   emoji: '🕹️',
-  accent: '#8338ec',
+  accent: '#43378A',
   guess: 'search',
   levels: ['2 tiles', '6 tiles', '13 tiles', '24 tiles', '36 tiles'],
   skipLabel: 'Open more',

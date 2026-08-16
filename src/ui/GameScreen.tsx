@@ -7,6 +7,7 @@ import { YearGuess } from './YearGuess';
 import { Leaderboard } from './Leaderboard';
 import { formatScore, levelValue } from '../lib/scoring';
 import { localBest } from '../lib/leaderboard';
+import { triggerPlay } from '../engine/player';
 
 export function GameScreen(props: { game: GameDef; onExit: () => void; onOpenSettings: () => void }) {
   const { game } = props;
@@ -32,14 +33,23 @@ export function GameScreen(props: { game: GameDef; onExit: () => void; onOpenSet
       }
       const key = e.key.toLowerCase();
       if (phase === 'revealed') {
-        if (e.key === 'Enter' || e.key === ' ') {
+        if (e.key === 'Enter') {
           e.preventDefault();
           next();
+        } else if (e.key === ' ') {
+          // The answer is on screen and still playable — let space replay it.
+          e.preventDefault();
+          if (!triggerPlay()) next();
         }
         return;
       }
       if (phase !== 'playing') return;
-      if (key === 'r' || e.key === ' ') {
+      if (e.key === ' ') {
+        e.preventDefault();
+        // Space belongs to the media if this game has any; games without a
+        // player fall back to buying the next rung.
+        if (!triggerPlay()) revealMore();
+      } else if (key === 'r') {
         e.preventDefault();
         revealMore();
       } else if (key === 's') {
@@ -339,8 +349,8 @@ export function GameScreen(props: { game: GameDef; onExit: () => void; onOpenSet
             </button>
             <p className="shortcut-hint">
               {game.guess === 'search'
-                ? 'Esc leaves the search box, then R and S work'
-                : 'R reveals more · S skips the round'}
+                ? 'Esc leaves the search box, then Space plays · R reveals · S skips'
+                : 'Space plays · R reveals more · S skips the round'}
             </p>
             {game.guess === 'search' && session.wrongGuesses.length > 0 && (
               <p className="tried">

@@ -69,7 +69,7 @@ function Scene() {
           <rect x={10 + i * 31} y="133" width="14" height="9" rx="2" fill="currentColor" opacity="0.3" />
         </g>
       ))}
-      <path d="M84 76 L84 104 L106 90 Z" fill="#0a0a12" opacity="0.85" />
+      <path d="M84 76 L84 104 L106 90 Z" fill="#ffffff" opacity="0.85" />
     </svg>
   );
 }
@@ -138,10 +138,10 @@ function Quote() {
       {[0, 1, 2, 3].map((i) => (
         <g key={i} opacity={i === 2 ? 0.9 : 0.2}>
           <circle cx={132 + (i % 2) * 74} cy={58 + Math.floor(i / 2) * 66} r="26" fill="currentColor" />
-          <circle cx={132 + (i % 2) * 74} cy={50 + Math.floor(i / 2) * 66} r="9" fill="#0a0a12" opacity="0.55" />
+          <circle cx={132 + (i % 2) * 74} cy={50 + Math.floor(i / 2) * 66} r="9" fill="#ffffff" opacity="0.55" />
           <path
             d={`M${112 + (i % 2) * 74} ${76 + Math.floor(i / 2) * 66} a20 16 0 0 1 40 0 z`}
-            fill="#0a0a12"
+            fill="#ffffff"
             opacity="0.55"
           />
         </g>
@@ -268,7 +268,7 @@ function Landmark() {
     <svg viewBox={VB} className="art" aria-hidden>
       <line x1="20" y1="150" x2="300" y2="150" stroke="currentColor" strokeWidth="2" opacity="0.35" />
       <path d="M160 26 L196 150 L124 150 Z" fill="currentColor" opacity="0.75" />
-      <path d="M160 26 L172 68 L148 68 Z" fill="#0a0a12" opacity="0.5" />
+      <path d="M160 26 L172 68 L148 68 Z" fill="#ffffff" opacity="0.5" />
       <rect x="60" y="96" width="34" height="54" rx="3" fill="currentColor" opacity="0.3" />
       <rect x="228" y="82" width="30" height="68" rx="3" fill="currentColor" opacity="0.3" />
       <circle cx="243" cy="70" r="13" fill="currentColor" opacity="0.45" />
@@ -286,9 +286,9 @@ function Animal() {
           rx={11} ry={7} fill="currentColor" opacity={0.1 + ((i * 7) % 5) * 0.05}
           transform={`rotate(${(i % 3) * 22 - 22} ${26 + (i % 8) * 39} ${30 + Math.floor(i / 8) * 30})`} />
       ))}
-      <circle cx="196" cy="90" r="40" fill="#0a0a12" opacity="0.55" />
+      <circle cx="196" cy="90" r="40" fill="#ffffff" opacity="0.55" />
       <circle cx="196" cy="90" r="22" fill="currentColor" opacity="0.9" />
-      <circle cx="196" cy="90" r="9" fill="#0a0a12" />
+      <circle cx="196" cy="90" r="9" fill="#ffffff" />
       <circle cx="205" cy="80" r="4" fill="#fff" opacity="0.75" />
     </svg>
   );

@@ -5,6 +5,7 @@ import { findTrack } from '../content/itunes';
 import { streamDeck } from '../content/deck';
 import { normalize } from '../content/cache';
 import { isAudioUnlocked, playClip, preloadClip, unlockAudio, type Playback } from '../lib/audio';
+import { usePlayAction } from '../engine/player';
 
 /** The ladder the whole game is built around: a tenth of a second, then more. */
 const DURATIONS = [0.1, 0.5, 1.5, 3, 5];
@@ -85,6 +86,9 @@ function SongStage({ round, level, revealed, accent }: StageProps) {
     raf.current = requestAnimationFrame(tick);
   }, [buffer, clipSec]);
 
+  // Space bar plays (or re-plays) the clip.
+  usePlayAction(buffer && !failed ? () => void play() : null, [buffer, failed, play]);
+
   // Once audio is unlocked, each new rung plays itself — pressing play again
   // after every skip gets old fast.
   useEffect(() => {
@@ -131,6 +135,7 @@ function SongStage({ round, level, revealed, accent }: StageProps) {
         style={{ borderColor: accent }}
       >
         {failed ? 'Preview unavailable' : !buffer ? 'Loading…' : playing ? '■ Stop' : `▶ Play ${clipSec}s`}
+        <kbd>space</kbd>
       </button>
 
       {revealed && (
@@ -183,7 +188,7 @@ export const songGame: GameDef = {
   blurb:
     'You get 0.1 seconds of the track. Not enough? Trade points for more — half a second, a second and a half, three, five. Then name it.',
   emoji: '🎧',
-  accent: '#ff4d6d',
+  accent: '#9E2B3F',
   guess: 'search',
   levels: ['0.1s', '0.5s', '1.5s', '3s', '5s'],
   skipLabel: 'Hear more',

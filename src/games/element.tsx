@@ -103,7 +103,7 @@ export const elementGame: GameDef = {
   blurb:
     'A chemical symbol, blown up large, and four element names under it. The obvious ones are obvious; K, W, Sb and Sn are where it gets you. Skips buy the atomic number, then the category, then something you own that contains it.',
   emoji: '⚗️',
-  accent: '#90be6d',
+  accent: '#4E6B1C',
   guess: 'choice',
   levels: ['Symbol only', 'Atomic number', 'Category', 'Everyday use'],
   skipLabel: 'Give me a clue',

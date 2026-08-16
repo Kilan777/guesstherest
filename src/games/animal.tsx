@@ -73,7 +73,7 @@ export const animalGame: GameDef = {
   blurb:
     'One patch of coat, feather or scale, magnified until it is just texture. Pull back a step at a time. Pattern narrows it down long before an eye or a beak appears.',
   emoji: '🦋',
-  accent: '#2a9d8f',
+  accent: '#2F6B3D',
   guess: 'search',
   levels: ['14×', '8×', '4.5×', '2.6×', '1.5×'],
   skipLabel: 'Zoom out',

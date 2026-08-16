@@ -68,7 +68,7 @@ export const actorGame: GameDef = {
   blurb:
     'Portraits of screen actors from the silent era to last year, blurred to a smudge. Hair and jawline come back first; the eyes are what settle it.',
   emoji: '🎭',
-  accent: '#ff006e',
+  accent: '#92315F',
   guess: 'search',
   levels: ['Smudge', 'Blurry', 'Soft', 'Nearly there', 'Almost sharp'],
   skipLabel: 'Sharpen',

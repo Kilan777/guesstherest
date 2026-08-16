@@ -73,7 +73,7 @@ export const openingLineGame: GameDef = {
   blurb:
     'The first line of a famous novel, quoted exactly. Some give the whole book away in six words; some tell you nothing at all until you have spent a clue on the decade.',
   emoji: '📖',
-  accent: '#9d4edd',
+  accent: '#4E3F80',
   guess: 'search',
   levels: ['Cold', 'Decade', 'About it', 'Author'],
   skipLabel: 'Give me a clue',

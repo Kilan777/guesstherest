@@ -74,7 +74,7 @@ export const dishGame: GameDef = {
   blurb:
     'Plates from every cuisine that travels, zoomed until they are just texture. A grain of rice, a bit of sauce, and the country it came from.',
   emoji: '🍜',
-  accent: '#f77f00',
+  accent: '#B0551F',
   guess: 'search',
   levels: ['13×', '7.5×', '4.2×', '2.4×', '1.4×'],
   skipLabel: 'Zoom out',
