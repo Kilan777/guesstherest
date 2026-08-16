@@ -367,8 +367,11 @@ export function GameScreen(props: { game: GameDef; onExit: () => void; onOpenSet
 function TopBar(props: { game: GameDef; onExit: () => void }) {
   return (
     <header className="topbar">
-      <button type="button" className="icon-btn" onClick={props.onExit} aria-label="Back to all games">
-        ←
+      {/* A bare arrow was too easy to miss, especially once the page went
+          light — this says where it goes. */}
+      <button type="button" className="back-btn" onClick={props.onExit}>
+        <span aria-hidden>←</span>
+        <em style={{ fontStyle: 'normal' }}>All games</em>
       </button>
       <div className="topbar-title">
         <span className="topbar-emoji" aria-hidden>
