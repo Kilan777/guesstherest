@@ -46,6 +46,11 @@ and a streak multiplier up to 2×. A wrong guess costs a rung, exactly like a
 skip — so guessing early is a real gamble, not a free roll. Guess the Year pays
 partial credit: one year off is 60%, two 35%, three 15%.
 
+**Two ways out of a round.** *Reveal more* (**R**) buys the next rung and costs
+points; *Skip round* (**S**) abandons it for zero and shows you the answer.
+**Enter** moves to the next round. In search games the shortcuts stay out of the
+way while you are typing — press **Esc** to leave the box and they come back.
+
 Five games need no network at all — **Emoji**, **Film Line**, **Opening Line**,
 **Capital** and **Element** — and **Guess the Object** falls back to zooming
 into an emoji when Wikipedia is unreachable.

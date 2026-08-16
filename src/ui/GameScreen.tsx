@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { GameDef } from '../engine/types';
 import { useGameSession } from '../engine/session';
 import { GuessSearch } from './GuessSearch';
@@ -18,6 +18,38 @@ export function GameScreen(props: { game: GameDef; onExit: () => void; onOpenSet
     () => new Set(session.wrongGuesses.map((o) => o.id)),
     [session.wrongGuesses],
   );
+
+  // Keyboard shortcuts. Deliberately inert while a text field has focus —
+  // "s" and "r" are letters people need for typing a guess — so the search box
+  // also takes Escape to blur, which hands the keys back.
+  const { phase, revealMore, skipRound, next } = session;
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const el = e.target as HTMLElement | null;
+      if (el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable)) {
+        return;
+      }
+      const key = e.key.toLowerCase();
+      if (phase === 'revealed') {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          next();
+        }
+        return;
+      }
+      if (phase !== 'playing') return;
+      if (key === 'r' || e.key === ' ') {
+        e.preventDefault();
+        revealMore();
+      } else if (key === 's') {
+        e.preventDefault();
+        skipRound();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [phase, revealMore, skipRound, next]);
 
   // Games that offer variants ask first; the answer decides the deck and, for
   // the emoji game, what the guess list contains.
@@ -253,6 +285,7 @@ export function GameScreen(props: { game: GameDef; onExit: () => void; onOpenSet
             autoFocus
           >
             {session.roundIndex + 1 >= session.totalRounds ? 'See results' : 'Next round'}
+            <kbd className="kbd-on-solid">↵</kbd>
           </button>
         </div>
       ) : (
@@ -290,16 +323,25 @@ export function GameScreen(props: { game: GameDef; onExit: () => void; onOpenSet
           )}
 
           <div className="control-row">
-            {/* On the last rung there is nothing left to unlock, so skipping
-                ends the round — say that rather than quoting a −0 cost. */}
-            <button type="button" className="btn btn-skip" onClick={session.skip}>
-              {lastRung ? 'Give up' : game.skipLabel}
-              <em>
-                {lastRung
-                  ? `forfeit ${formatScore(atStake)} pts`
-                  : `−${formatScore(atStake - levelValue(session.level + 1, session.totalLevels))} pts`}
-              </em>
+            {/* Two different things: buy another rung, or abandon the round.
+                On the last rung there is nothing left to buy. */}
+            {!lastRung && (
+              <button type="button" className="btn btn-skip" onClick={session.revealMore}>
+                {game.skipLabel}
+                <em>−{formatScore(atStake - levelValue(session.level + 1, session.totalLevels))} pts</em>
+                <kbd>R</kbd>
+              </button>
+            )}
+            <button type="button" className="btn btn-skip btn-forfeit" onClick={session.skipRound}>
+              Skip round
+              <em>scores 0</em>
+              <kbd>S</kbd>
             </button>
+            <p className="shortcut-hint">
+              {game.guess === 'search'
+                ? 'Esc leaves the search box, then R and S work'
+                : 'R reveals more · S skips the round'}
+            </p>
             {game.guess === 'search' && session.wrongGuesses.length > 0 && (
               <p className="tried">
                 Tried: {session.wrongGuesses.map((o) => o.label).join(', ')}

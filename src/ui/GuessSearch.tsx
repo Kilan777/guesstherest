@@ -80,6 +80,14 @@ export function GuessSearch(props: {
           onFocus={() => setOpen(true)}
           onBlur={() => window.setTimeout(() => setOpen(false), 120)}
           onKeyDown={(e) => {
+            // Escape is handled before the match check — it has to work even
+            // with an empty box, since that's how the keyboard gets handed back
+            // to the game's R and S shortcuts.
+            if (e.key === 'Escape') {
+              setOpen(false);
+              e.currentTarget.blur();
+              return;
+            }
             if (!matches.length) return;
             if (e.key === 'ArrowDown') {
               e.preventDefault();
@@ -91,8 +99,6 @@ export function GuessSearch(props: {
               e.preventDefault();
               const chosen = matches[active];
               if (chosen) commit(chosen);
-            } else if (e.key === 'Escape') {
-              setOpen(false);
             }
           }}
         />

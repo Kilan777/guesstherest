@@ -36,7 +36,8 @@ export type Session = {
   submitted: 'pending' | 'global' | 'local' | null;
   guess: (option: Option) => void;
   guessYear: (year: number) => void;
-  skip: () => void;
+  revealMore: () => void;
+  skipRound: () => void;
   next: () => void;
   restart: () => void;
 };
@@ -203,7 +204,8 @@ export function useGameSession(game: GameDef, option?: string): Session {
     [phase, round, level, totalLevels, streak, finishRound, missStep],
   );
 
-  const skip = useCallback(() => {
+  /** Buy another rung of the reveal ladder at the cost of points. */
+  const revealMore = useCallback(() => {
     if (phase !== 'playing') return;
     const next = level + 1;
     if (next >= totalLevels) {
@@ -212,6 +214,12 @@ export function useGameSession(game: GameDef, option?: string): Session {
     }
     setLevel(next);
   }, [phase, level, totalLevels, finishRound]);
+
+  /** Give up on this round entirely. The answer is shown, and it scores zero. */
+  const skipRound = useCallback(() => {
+    if (phase !== 'playing') return;
+    finishRound(false, 0, 0);
+  }, [phase, finishRound]);
 
   const expected = deck ? (deck.expected ?? deck.rounds.length) : game.rounds;
 
@@ -299,7 +307,8 @@ export function useGameSession(game: GameDef, option?: string): Session {
     submitted,
     guess,
     guessYear,
-    skip,
+    revealMore,
+    skipRound,
     next,
     restart,
   };

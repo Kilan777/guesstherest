@@ -1375,6 +1375,34 @@ a {
   color: var(--bad);
 }
 
+.btn-forfeit:hover { border-color: var(--bad); color: var(--text); }
+
+kbd {
+  font: inherit;
+  font-size: 0.66rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 3px 6px;
+  border-radius: 5px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-faint);
+  margin-left: 2px;
+}
+
+/* On a filled button the low-contrast default would disappear. */
+.kbd-on-solid {
+  border-color: rgba(10, 10, 18, 0.35);
+  background: rgba(10, 10, 18, 0.16);
+  color: rgba(10, 10, 18, 0.75);
+}
+
+.shortcut-hint {
+  font-size: 0.72rem;
+  color: var(--text-faint);
+  margin: 0;
+}
+
 .tried {
   margin: 0;
   font-size: 0.82rem;
