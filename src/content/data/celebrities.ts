@@ -1,5 +1,6 @@
 /**
- * Screen actors with a face the world knows, keyed to their Wikipedia articles.
+ * Famous faces — screen actors, musicians, athletes and other public figures —
+ * keyed to their Wikipedia articles.
  *
  * Actor articles are the most fragile seeds in the project: a bare name is very
  * often a disambiguation page (Chris Evans is a British broadcaster first), and
@@ -9,9 +10,9 @@
  * rather than percent-encoded — `pageInfo` encodes them itself, and a
  * pre-encoded title comes back 403.
  */
-export type ActorSeed = { wiki: string; label: string };
+export type CelebritySeed = { wiki: string; label: string };
 
-export const ACTORS: ActorSeed[] = [
+export const CELEBRITIES: CelebritySeed[] = [
   { wiki: 'Meryl_Streep', label: 'Meryl Streep' },
   { wiki: 'Tom_Hanks', label: 'Tom Hanks' },
   { wiki: 'Denzel_Washington', label: 'Denzel Washington' },
@@ -80,4 +81,57 @@ export const ACTORS: ActorSeed[] = [
   { wiki: 'Robin_Williams', label: 'Robin Williams' },
   { wiki: 'Jodie_Foster', label: 'Jodie Foster' },
   { wiki: 'Arnold_Schwarzenegger', label: 'Arnold Schwarzenegger' },
+
+  // ── beyond the screen: musicians, athletes and other public faces ─────────
+  { wiki: 'Beyoncé', label: 'Beyoncé' },
+  { wiki: 'Taylor_Swift', label: 'Taylor Swift' },
+  { wiki: 'Adele', label: 'Adele' },
+  { wiki: 'Ed_Sheeran', label: 'Ed Sheeran' },
+  { wiki: 'Rihanna', label: 'Rihanna' },
+  { wiki: 'Drake_(musician)', label: 'Drake' },
+  { wiki: 'Eminem', label: 'Eminem' },
+  { wiki: 'Bruno_Mars', label: 'Bruno Mars' },
+  { wiki: 'Lady_Gaga', label: 'Lady Gaga' },
+  { wiki: 'Elton_John', label: 'Elton John' },
+  { wiki: 'Paul_McCartney', label: 'Paul McCartney' },
+  { wiki: 'Mick_Jagger', label: 'Mick Jagger' },
+  { wiki: 'Bob_Dylan', label: 'Bob Dylan' },
+  { wiki: 'Dolly_Parton', label: 'Dolly Parton' },
+  { wiki: 'Billie_Eilish', label: 'Billie Eilish' },
+  { wiki: 'Shakira', label: 'Shakira' },
+  { wiki: 'Bad_Bunny', label: 'Bad Bunny' },
+  { wiki: 'Freddie_Mercury', label: 'Freddie Mercury' },
+  { wiki: 'David_Bowie', label: 'David Bowie' },
+  { wiki: 'Michael_Jackson', label: 'Michael Jackson' },
+  { wiki: 'Madonna', label: 'Madonna' },
+  { wiki: 'Prince_(musician)', label: 'Prince' },
+  { wiki: 'Stevie_Wonder', label: 'Stevie Wonder' },
+  { wiki: 'Whitney_Houston', label: 'Whitney Houston' },
+  { wiki: 'Björk', label: 'Björk' },
+  { wiki: 'Lionel_Messi', label: 'Lionel Messi' },
+  { wiki: 'Cristiano_Ronaldo', label: 'Cristiano Ronaldo' },
+  { wiki: 'Serena_Williams', label: 'Serena Williams' },
+  { wiki: 'Roger_Federer', label: 'Roger Federer' },
+  { wiki: 'LeBron_James', label: 'LeBron James' },
+  { wiki: 'Michael_Jordan', label: 'Michael Jordan' },
+  { wiki: 'Usain_Bolt', label: 'Usain Bolt' },
+  { wiki: 'Muhammad_Ali', label: 'Muhammad Ali' },
+  { wiki: 'Tiger_Woods', label: 'Tiger Woods' },
+  { wiki: 'Simone_Biles', label: 'Simone Biles' },
+  { wiki: 'Lewis_Hamilton', label: 'Lewis Hamilton' },
+  { wiki: 'Rafael_Nadal', label: 'Rafael Nadal' },
+  { wiki: 'Tom_Brady', label: 'Tom Brady' },
+  { wiki: "Shaquille_O'Neal", label: "Shaquille O'Neal" },
+  { wiki: 'Novak_Djokovic', label: 'Novak Djokovic' },
+  { wiki: 'Pelé', label: 'Pelé' },
+  { wiki: 'Diego_Maradona', label: 'Diego Maradona' },
+  { wiki: 'Elon_Musk', label: 'Elon Musk' },
+  { wiki: 'Bill_Gates', label: 'Bill Gates' },
+  { wiki: 'Steve_Jobs', label: 'Steve Jobs' },
+  { wiki: 'Barack_Obama', label: 'Barack Obama' },
+  { wiki: 'Greta_Thunberg', label: 'Greta Thunberg' },
+  { wiki: 'David_Attenborough', label: 'David Attenborough' },
+  { wiki: 'Gordon_Ramsay', label: 'Gordon Ramsay' },
+  { wiki: 'Stephen_Hawking', label: 'Stephen Hawking' },
+  { wiki: 'Nelson_Mandela', label: 'Nelson Mandela' },
 ];

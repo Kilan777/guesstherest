@@ -13,7 +13,7 @@ import { landmarkGame } from './landmark';
 import { animalGame } from './animal';
 import { dishGame } from './dish';
 import { videoGameGame } from './videogame';
-import { actorGame } from './actor';
+import { celebrityGame } from './celebrity';
 import { openingLineGame } from './openingline';
 import { filmLineGame } from './filmline';
 import { capitalGame } from './capital';
@@ -29,6 +29,8 @@ import { instrumentGame } from './instrument';
 import { skylineGame } from './skyline';
 import { outlineGame } from './outline';
 import { boardgameGame } from './boardgame';
+import { appGame } from './app';
+import { logoGame } from './logo';
 
 /**
  * Order here is the order on the home page: the headline games first, then the
@@ -48,9 +50,11 @@ export const GAMES: GameDef[] = [
   outlineGame,
   paintingGame,
   albumGame,
-  actorGame,
+  celebrityGame,
   videoGameGame,
   boardgameGame,
+  logoGame,
+  appGame,
   carGame,
   planetGame,
   dishGame,

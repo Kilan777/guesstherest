@@ -10,6 +10,9 @@ type RawResult = {
   collectionName?: string;
   artistName?: string;
   artworkUrl100?: string;
+  artworkUrl512?: string;
+  sellerName?: string;
+  primaryGenreName?: string;
   previewUrl?: string;
   releaseDate?: string;
 };
@@ -22,6 +25,14 @@ export type Track = {
   artwork: string;
   previewUrl: string;
   year: number;
+};
+
+export type App = {
+  id: string;
+  name: string;
+  seller: string;
+  genre: string;
+  artwork: string;
 };
 
 export type Album = {
@@ -162,6 +173,57 @@ export async function findTrack(title: string, artist: string): Promise<Track | 
       previewUrl: match.previewUrl ?? '',
       year: yearOf(match.releaseDate),
     } satisfies Track;
+  });
+}
+
+/**
+ * App Store icon lookup.
+ *
+ * The store is full of near-namesakes — searching "Signal" returns a dozen
+ * signal-booster utilities before the messenger — so a result only counts if
+ * its name starts with the requested one *and* the developer lines up. Where
+ * the seller string has drifted (Apple rewrites these on acquisitions) an exact
+ * name match is still accepted, but a prefix match on its own never is.
+ *
+ * Throws rather than returning null when iTunes is unreachable, so a throttled
+ * response is never cached as "this app doesn't exist".
+ */
+export async function findApp(name: string, seller: string): Promise<App | null> {
+  const key = `itunes:app:${normalize(name)}|${normalize(seller)}`;
+  return cached(key, MONTH, async () => {
+    const results = await query({
+      term: name,
+      entity: 'software',
+      // The big names rank first, but regional clones and "… for X" companions
+      // pad the top of the list often enough to want the depth.
+      limit: '25',
+    });
+
+    const wantName = normalize(name);
+    const wantSeller = normalize(seller);
+
+    const nameOk = (r: RawResult) => {
+      const got = normalize(r.trackName ?? '');
+      return got === wantName || got.startsWith(`${wantName} `);
+    };
+    const sellerOk = (r: RawResult) => {
+      const got = normalize(r.sellerName ?? '');
+      return !!got && (got.includes(wantSeller) || wantSeller.includes(got));
+    };
+    const usable = results.filter((r) => r.artworkUrl512 && r.trackName);
+
+    const match =
+      usable.find((r) => nameOk(r) && sellerOk(r)) ??
+      usable.find((r) => normalize(r.trackName ?? '') === wantName);
+
+    if (!match) return null;
+    return {
+      id: String(match.trackId ?? name),
+      name: match.trackName ?? name,
+      seller: match.sellerName ?? seller,
+      genre: match.primaryGenreName ?? '',
+      artwork: match.artworkUrl512 ?? '',
+    } satisfies App;
   });
 }
 

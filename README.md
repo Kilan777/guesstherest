@@ -2,7 +2,7 @@
 
 **[guesstherest.com](https://guesstherest.com)**
 
-Thirty guessing games behind one shared mechanic: you start with almost
+Thirty-two guessing games behind one shared mechanic: you start with almost
 nothing, and every extra look costs you points.
 
 ```bash
@@ -10,7 +10,7 @@ npm install
 npm run dev      # http://localhost:5173
 ```
 
-That's the whole setup. **No API keys. No account.** All thirty games work
+That's the whole setup. **No API keys. No account.** All thirty-two games work
 immediately. Signing in with Google and the global leaderboard are optional
 extras that need a Supabase project; without one, scores still save per-device.
 
@@ -30,7 +30,7 @@ extras that need a Supabase project; without one, scores still save per-device.
 | 🏳️ **Guess the Flag** | 2 tiles of 24 | 2 → 5 → 9 → 14 → 20 tiles |
 | 🖼️ **Guess the Painting** | one brushstroke at 16× | 16× → 9 → 5 → 2.8 → 1.6× |
 | 💿 **Guess the Album** | cover blurred to mush | five sharpening steps |
-| 🎭 **Guess the Actor** | a face out of focus | five sharpening steps |
+| 🎭 **Guess the Celebrity** | a face out of focus | three sharpening steps |
 | 🕹️ **Guess the Video Game** | box art behind tiles | 2 → 6 → 13 → 24 → 36 tiles |
 | 🍜 **Guess the Dish** | one forkful at 13× | 13× → 7.5 → 4.2 → 2.4 → 1.4× |
 | 💬 **Guess Who Said It** | a real quote, four faces | field → role → initials |
@@ -50,8 +50,10 @@ extras that need a Supabase project; without one, scores still save per-device.
 | 🎬 **Guess the Plot** | a film summarised badly | decade → genre → clue |
 | 📣 **Guess the Slogan** | an advertising line | sector → era → clue |
 | 🗣️ **Guess the Language** | a sentence in its own script | script → family → where |
+| 📱 **Guess the App** | an icon at 7× | 7× → 4.5 → 3 → 2 → 1.3× |
+| ✳️ **Guess the Logo** | 2 windows onto a brand mark | 2 → 5 → 9 → 14 → 20 windows |
 
-**Scoring** is shared by all thirty. A round is worth 1000 points at the top of the
+**Scoring** is shared by all thirty-two. A round is worth 1000 points at the top of the
 ladder and decays ~38% per rung, plus a speed bonus that tapers over 20 seconds
 and a streak multiplier up to 2×. A wrong guess costs a rung, exactly like a
 skip — so guessing early is a real gamble, not a free roll. Guess the Year pays

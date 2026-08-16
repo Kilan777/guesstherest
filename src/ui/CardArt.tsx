@@ -579,6 +579,42 @@ function BoardGame() {
   );
 }
 
+
+function AppIcon() {
+  return (
+    <svg viewBox={VB} className="art" aria-hidden>
+      {Array.from({ length: 9 }, (_, i) => {
+        const c = i % 3;
+        const r = Math.floor(i / 3);
+        return (
+          <rect key={i} x={92 + c * 50} y={16 + r * 50} width="42" height="42" rx="11"
+            fill="currentColor" opacity={i === 4 ? 0.95 : 0.16} />
+        );
+      })}
+      <circle cx="163" cy="87" r="9" fill="#ffffff" opacity="0.55" />
+    </svg>
+  );
+}
+
+function Logo() {
+  const open = new Set([7, 14]);
+  return (
+    <svg viewBox={VB} className="art" aria-hidden>
+      <circle cx="118" cy="90" r="40" fill="currentColor" opacity="0.6" />
+      <rect x="150" y="66" width="110" height="16" rx="8" fill="currentColor" opacity="0.5" />
+      <rect x="150" y="94" width="76" height="16" rx="8" fill="currentColor" opacity="0.3" />
+      {Array.from({ length: 24 }, (_, i) => {
+        const c = i % 6;
+        const r = Math.floor(i / 6);
+        return (
+          <rect key={i} x={22 + c * 46} y={26 + r * 33} width="42" height="29" rx="3"
+            fill="currentColor" opacity={open.has(i) ? 0 : 0.2} />
+        );
+      })}
+    </svg>
+  );
+}
+
 const ART: Record<string, () => React.ReactElement> = {
   song: Song,
   scene: Scene,
@@ -594,7 +630,7 @@ const ART: Record<string, () => React.ReactElement> = {
   animal: Animal,
   dish: Dish,
   videogame: VideoGame,
-  actor: Actor,
+  celebrity: Actor,
   openingline: OpeningLine,
   filmline: FilmLine,
   capital: Capital,
@@ -610,6 +646,8 @@ const ART: Record<string, () => React.ReactElement> = {
   skyline: Skyline,
   outline: Outline,
   boardgame: BoardGame,
+  app: AppIcon,
+  logo: Logo,
 };
 
 export function CardArt({ slug }: { slug: string }) {

@@ -1,5 +1,5 @@
 import type { Deck, GameDef, Option, StageProps } from '../engine/types';
-import { ACTORS } from '../content/data/actors';
+import { CELEBRITIES } from '../content/data/celebrities';
 import { pageInfo } from '../content/wikipedia';
 import { streamDeck } from '../content/deck';
 import { BlurStage } from './stages';
@@ -9,10 +9,10 @@ import { BlurStage } from './stages';
 const BLURS = [9, 4, 1.5];
 const SCALES = [1.26, 1.14, 1.05];
 
-type ActorPayload = { portrait: string | null; label: string; note: string };
+type CelebrityPayload = { portrait: string | null; label: string; note: string };
 
-function ActorStage({ round, level, revealed }: StageProps) {
-  const p = round.payload as ActorPayload;
+function CelebrityStage({ round, level, revealed }: StageProps) {
+  const p = round.payload as CelebrityPayload;
   return (
     <BlurStage
       src={p.portrait}
@@ -31,13 +31,13 @@ function ActorStage({ round, level, revealed }: StageProps) {
 }
 
 async function loadDeck(count: number, rng: () => number): Promise<Deck> {
-  const catalog: Option[] = ACTORS.map((a) => ({
-    id: `actor:${a.wiki}`,
+  const catalog: Option[] = CELEBRITIES.map((a) => ({
+    id: `celeb:${a.wiki}`,
     label: a.label,
   }));
 
   return streamDeck({
-    pool: ACTORS,
+    pool: CELEBRITIES,
     count,
     rng,
     catalog,
@@ -47,23 +47,23 @@ async function loadDeck(count: number, rng: () => number): Promise<Deck> {
       return info?.image ? info : null;
     },
     toRound: (seed, info) => ({
-      id: `actor:${seed.wiki}`,
-      answer: { id: `actor:${seed.wiki}`, label: seed.label },
+      id: `celeb:${seed.wiki}`,
+      answer: { id: `celeb:${seed.wiki}`, label: seed.label },
       payload: {
         portrait: info.image,
         label: seed.label,
         // The article's one-line description, e.g. "American actress".
         note: info.description,
-      } satisfies ActorPayload,
+      } satisfies CelebrityPayload,
     }),
     emptyError: 'Could not reach Wikipedia for actor portraits.',
   });
 }
 
-export const actorGame: GameDef = {
-  slug: 'actor',
-  title: 'Guess the Actor',
-  short: 'Actor',
+export const celebrityGame: GameDef = {
+  slug: 'celebrity',
+  title: 'Guess the Celebrity',
+  short: 'Celebrity',
   tagline: 'A face, out of focus.',
   blurb:
     'Portraits of screen actors from the silent era to last year, blurred to a smudge. Hair and jawline come back first; the eyes are what settle it.',
@@ -74,11 +74,11 @@ export const actorGame: GameDef = {
   skipLabel: 'Sharpen',
   needsNetwork: true,
   rounds: 10,
-  keywords: ['actor', 'actress', 'film', 'movie', 'star', 'face', 'blur'],
+  keywords: ['celebrity', 'famous', 'face', 'star', 'actor', 'musician', 'blur'],
   prefetch: (round) => {
-    const p = round.payload as ActorPayload | undefined;
+    const p = round.payload as CelebrityPayload | undefined;
     if (p?.portrait) new Image().src = p.portrait;
   },
   loadDeck,
-  Stage: ActorStage,
+  Stage: CelebrityStage,
 };
