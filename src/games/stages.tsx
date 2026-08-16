@@ -110,20 +110,24 @@ export function ZoomStage(props: {
 }
 
 /**
- * Tile reveal: the image sits behind a grid of panels that lift a few at a
- * time. Zooming needs a high-resolution source, and Wikipedia's fair-use film
- * posters are only ~220px wide — magnifying those is unreadable mush. Opening
- * tiles works at any resolution, and reads as a game rather than an effect.
+ * Windowed reveal: the picture sits behind a blur, and each rung cuts a few
+ * sharp windows into it.
+ *
+ * This was originally opaque grey tiles laid over the image, which looked like
+ * scaffolding and — worse — animated back in on a round change, flashing the
+ * whole picture for the length of the transition. Now a blurred copy is always
+ * the base layer, and a sharp copy on top is masked to just the revealed cells,
+ * so there is never a frame where the full picture is visible.
  */
 export function TileStage(props: {
   src: string | null;
-  /** Tiles open by this rung. */
+  /** Cells revealed by this rung. */
   opened: number[];
   level: number;
   revealed: boolean;
   cols: number;
   rows: number;
-  /** Stable per-round tile order. */
+  /** Stable per-round cell order. */
   seed: string;
   caption?: React.ReactNode;
 }) {
@@ -131,7 +135,7 @@ export function TileStage(props: {
   const state = useImageState([src]);
   const total = cols * rows;
 
-  // Deterministic shuffle so the same round always opens the same tiles.
+  // Deterministic shuffle so the same round always opens the same cells.
   const order = useMemo(() => {
     let h = 2166136261;
     for (let i = 0; i < props.seed.length; i++) {
@@ -154,23 +158,66 @@ export function TileStage(props: {
   }, [props.seed, total]);
 
   const openCount = revealed ? total : (opened[Math.min(level, opened.length - 1)] ?? 0);
-  const open = new Set(order.slice(0, openCount));
+  const open = order.slice(0, openCount);
+
+  // One mask layer per revealed cell. Percentage positions follow the same
+  // rule as background-position: c/(cols-1) aligns that fraction of the layer
+  // with that fraction of the box, which lands each cell exactly on its grid.
+  const mask = useMemo(() => {
+    if (!open.length) return { WebkitMaskImage: 'none', maskImage: 'none', opacity: 0 };
+    const layers: string[] = [];
+    const sizes: string[] = [];
+    const positions: string[] = [];
+    for (const i of open) {
+      const c = i % cols;
+      const r = Math.floor(i / cols);
+      // A touch of feather stops the windows reading as hard tiles.
+      layers.push('radial-gradient(closest-side, #000 72%, rgba(0,0,0,0) 100%)');
+      sizes.push(`${(100 / cols) * 1.35}% ${(100 / rows) * 1.35}%`);
+      positions.push(`${cols > 1 ? (c / (cols - 1)) * 100 : 50}% ${rows > 1 ? (r / (rows - 1)) * 100 : 50}%`);
+    }
+    const common = {
+      maskRepeat: 'no-repeat',
+      WebkitMaskRepeat: 'no-repeat',
+      maskImage: layers.join(','),
+      WebkitMaskImage: layers.join(','),
+      maskSize: sizes.join(','),
+      WebkitMaskSize: sizes.join(','),
+      maskPosition: positions.join(','),
+      WebkitMaskPosition: positions.join(','),
+    } as React.CSSProperties;
+    return common;
+  }, [open.join(','), cols, rows]);
+
+  const baseBlur = revealed ? 0 : 26;
 
   return (
     <div className="stage">
       <div className="frame frame-poster">
         {state.status === 'ready' ? (
-          <img className="tile-img" src={state.url} alt="" draggable={false} />
+          <>
+            <img
+              className="tile-img tile-base"
+              src={state.url}
+              alt=""
+              draggable={false}
+              style={{ filter: `blur(${baseBlur}px)`, transform: 'scale(1.08)' }}
+            />
+            {(openCount > 0 || revealed) && (
+              <img
+                className="tile-img tile-sharp"
+                src={state.url}
+                alt=""
+                draggable={false}
+                style={revealed ? undefined : mask}
+              />
+            )}
+          </>
         ) : state.status === 'failed' || state.status === 'idle' ? (
           <div className="frame-msg">Poster unavailable.</div>
         ) : (
           <div className="frame-msg shimmer">Loading…</div>
         )}
-        <div className="tile-grid" style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}>
-          {Array.from({ length: total }, (_, i) => (
-            <span key={i} className={`tile ${open.has(i) ? 'open' : ''}`} />
-          ))}
-        </div>
       </div>
       {revealed && props.caption ? <div className="stage-caption">{props.caption}</div> : null}
     </div>

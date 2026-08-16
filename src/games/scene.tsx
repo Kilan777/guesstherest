@@ -38,12 +38,20 @@ function SceneStage({ round, level, revealed, accent }: StageProps) {
   const mountRef = useRef<HTMLDivElement | null>(null);
   const playerRef = useRef<YTPlayer | null>(null);
   const stopTimer = useRef<number>(0);
+  const giveUpTimer = useRef<number>(0);
+  // Read inside the state callback, which is created once per player.
+  const clipRef = useRef(0);
 
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [playing, setPlaying] = useState(false);
+  // Whether YouTube is *actually* rendering video, as opposed to us having
+  // asked it to. Between those two moments it shows its poster frame, which
+  // for most trailers has the film's title printed on it.
+  const [showingVideo, setShowingVideo] = useState(false);
 
   const clipSec = revealed ? 25 : (DURATIONS[Math.min(level, DURATIONS.length - 1)] ?? 15);
+  clipRef.current = clipSec;
 
   useEffect(() => {
     let disposed = false;
@@ -71,6 +79,29 @@ function SceneStage({ round, level, revealed, accent }: StageProps) {
           events: {
             onReady: () => !disposed && setReady(true),
             onError: () => !disposed && setError('This trailer will not play here.'),
+            // 1 = PLAYING. The shield lifts here and the clip timer starts
+            // here, so the player always gets the full duration of footage
+            // however long YouTube took to buffer.
+            onStateChange: (e) => {
+              if (disposed) return;
+              if (e.data === 1) {
+                window.clearTimeout(giveUpTimer.current);
+                setShowingVideo(true);
+                window.clearTimeout(stopTimer.current);
+                stopTimer.current = window.setTimeout(() => {
+                  try {
+                    playerRef.current?.pauseVideo();
+                  } catch {
+                    /* ignore */
+                  }
+                  setPlaying(false);
+                  setShowingVideo(false);
+                }, clipRef.current * 1000);
+              } else if (e.data === 0) {
+                setPlaying(false);
+                setShowingVideo(false);
+              }
+            },
           },
         });
       })
@@ -79,6 +110,7 @@ function SceneStage({ round, level, revealed, accent }: StageProps) {
     return () => {
       disposed = true;
       window.clearTimeout(stopTimer.current);
+      window.clearTimeout(giveUpTimer.current);
       try {
         playerRef.current?.destroy();
       } catch {
@@ -92,6 +124,7 @@ function SceneStage({ round, level, revealed, accent }: StageProps) {
     const player = playerRef.current;
     if (!player) return;
     window.clearTimeout(stopTimer.current);
+    window.clearTimeout(giveUpTimer.current);
 
     let duration = 0;
     try {
@@ -109,14 +142,14 @@ function SceneStage({ round, level, revealed, accent }: StageProps) {
     player.playVideo();
     setPlaying(true);
 
-    stopTimer.current = window.setTimeout(() => {
-      try {
-        playerRef.current?.pauseVideo();
-      } catch {
-        /* ignore */
-      }
+    // No stop timer here. YouTube buffers for a second or two, and at the first
+    // rung the clip is only one second long — starting the countdown on the
+    // click meant it expired before a single frame rendered, so the round
+    // showed a poster and no footage. onStateChange starts it instead.
+    giveUpTimer.current = window.setTimeout(() => {
       setPlaying(false);
-    }, clipSec * 1000);
+      setError('YouTube would not start this clip. Try again, or skip the round.');
+    }, 12000);
   }, [clipSec, round.id]);
 
   // Space bar plays the clip.
@@ -130,13 +163,15 @@ function SceneStage({ round, level, revealed, accent }: StageProps) {
         </div>
         {/* Blocks clicks, the title bar, and the paused frame — a freeze-frame
             would hand over more of the film than the player paid for. */}
-        <div className={`yt-shield ${playing ? 'clear' : ''}`}>
-          {!playing && (
+        <div className={`yt-shield ${showingVideo ? 'clear' : ''}`}>
+          {!showingVideo && (
             <div className="yt-shield-inner">
               {error ? (
                 <span className="frame-msg">{error}</span>
               ) : !ready ? (
                 <span className="frame-msg shimmer">Cueing up…</span>
+              ) : playing ? (
+                <span className="frame-msg shimmer">Starting…</span>
               ) : (
                 <span className="yt-idle">▶</span>
               )}

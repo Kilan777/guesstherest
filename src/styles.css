@@ -785,30 +785,26 @@ a {
   user-select: none;
 }
 
-/* No gap and no radius: any space between tiles lets the hidden poster show
-   through as a bright grid, which leaks the image it is supposed to cover.
-   The tile edges are drawn with an inset shadow instead. */
-.tile-grid {
+.tile-base,
+.tile-sharp {
   position: absolute;
   inset: 0;
-  display: grid;
-  gap: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  user-select: none;
 }
 
-.tile {
-  background: linear-gradient(150deg, #35513f, #1f3527);
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.14),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  /* Tiles flip away rather than fading, which reads as a deliberate reveal. */
-  transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-  transform-origin: center;
+/* The sharp layer fades its new windows in; the blurred base never moves, so
+   the picture underneath is never exposed between rounds. */
+.tile-sharp {
+  transition: mask-position 0.35s ease, -webkit-mask-position 0.35s ease;
 }
 
-.tile.open {
-  opacity: 0;
-  transform: scale(0.55) rotate(8deg);
+.tile-base {
+  transition: filter 0.45s ease;
 }
+
 
 .frame-wide {
   aspect-ratio: 16 / 9;
