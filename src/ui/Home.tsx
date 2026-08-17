@@ -55,6 +55,13 @@ export function Home(props: { onPlay: (slug: string) => void; onOpenSettings: ()
   const trendingList = (trending?.slugs ?? []).map(gameBySlug).filter((g): g is GameDef => !!g);
   const searching = query.trim().length > 0;
 
+  // A game featured in a row above shouldn't appear again in the grid. Search
+  // hides those rows entirely, so when searching nothing is held back.
+  const shownAbove = new Set(
+    searching ? [] : [...recentGamesList, ...trendingList].map((g) => g.slug),
+  );
+  const gridGames = matches.filter((g) => !shownAbove.has(g.slug));
+
   return (
     <div className="home">
       {askName && auth.player && (
@@ -116,17 +123,19 @@ export function Home(props: { onPlay: (slug: string) => void; onOpenSettings: ()
           <h2>
             {searching
               ? `${matches.length} result${matches.length === 1 ? '' : 's'}`
-              : `All ${GAMES.length} games`}
+              : shownAbove.size
+                ? `The other ${gridGames.length} games`
+                : `All ${GAMES.length} games`}
           </h2>
         </div>
 
-        {matches.length === 0 ? (
+        {gridGames.length === 0 ? (
           <p className="no-results">
             Nothing matches “{query}”. Try <em>song</em>, <em>movie</em>, <em>art</em> or <em>emoji</em>.
           </p>
         ) : (
           <div className="grid">
-            {matches.map((g) => (
+            {gridGames.map((g) => (
               <Card key={g.slug} game={g} onPlay={props.onPlay} />
             ))}
           </div>
