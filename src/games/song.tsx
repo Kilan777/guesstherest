@@ -10,6 +10,7 @@ import {
   preloadClip,
   preloadFullClip,
   primeAudio,
+  type Clip,
   type Playback,
 } from '../lib/audio';
 import { usePlayAction } from '../engine/player';
@@ -29,33 +30,48 @@ const seedId = (t: string, a: string) => `song:${normalize(t)}|${normalize(a)}`;
 
 function SongStage({ round, level, revealed, accent }: StageProps) {
   const p = round.payload as SongPayload;
-  const [buffer, setBuffer] = useState<AudioBuffer | null>(null);
+  // The clip arrives playable — a tenth of a second — and grows as the rest of
+  // the ladder downloads behind it. `covered` is what it can honour right now.
+  const [clip, setClip] = useState<Clip | null>(null);
+  const [covered, setCovered] = useState(0);
   const [failed, setFailed] = useState(false);
   const [playing, setPlaying] = useState(false);
+  const [waiting, setWaiting] = useState(false);
   const [elapsed, setElapsed] = useState(0);
 
   const playback = useRef<Playback | null>(null);
   const raf = useRef(0);
   const startedAt = useRef(0);
+  // Bumped whenever a pending "wait for this rung's audio" is abandoned.
+  const waitFor = useRef(0);
 
   // While the round is live only the opening seconds have been downloaded; the
   // rest arrives once the answer is out and there is time to spare for it.
   const [fullBuffer, setFullBuffer] = useState<AudioBuffer | null>(null);
-  const active = (revealed && fullBuffer) || buffer;
+  const active = (revealed && fullBuffer) || clip?.buffer || null;
 
   const unlockedSec = DURATIONS[Math.min(level, DURATIONS.length - 1)] ?? 5;
   const clipSec = revealed ? Math.min(active?.duration ?? FULL_PREVIEW, FULL_PREVIEW) : unlockedSec;
 
   useEffect(() => {
     let alive = true;
-    setBuffer(null);
+    let unsubscribe = () => {};
+    setClip(null);
+    setCovered(0);
     setFullBuffer(null);
     setFailed(false);
+    setWaiting(false);
     preloadClip(p.previewUrl)
-      .then((b) => alive && setBuffer(b))
+      .then((c) => {
+        if (!alive) return;
+        setClip(c);
+        setCovered(c.covered);
+        unsubscribe = c.subscribe(() => alive && setCovered(c.covered));
+      })
       .catch(() => alive && setFailed(true));
     return () => {
       alive = false;
+      unsubscribe();
     };
   }, [p.previewUrl]);
 
@@ -77,6 +93,10 @@ function SongStage({ round, level, revealed, accent }: StageProps) {
     playback.current?.stop();
     playback.current = null;
     cancelAnimationFrame(raf.current);
+    // Abandon any rung that was still waiting on its audio, or it would start
+    // playing on its own once the download landed.
+    waitFor.current++;
+    setWaiting(false);
     setPlaying(false);
     setElapsed(0);
   }, []);
@@ -84,22 +104,17 @@ function SongStage({ round, level, revealed, accent }: StageProps) {
   // Never let one round's audio bleed into the next.
   useEffect(() => stop, [stop, round.id]);
 
-  // Deliberately not async. A phone only lets the audio hardware start from
-  // inside the gesture's own task, and the `await unlockAudio()` this used to
-  // open with handed the rest of the handler to a later one — by which point the
-  // tap no longer counted and the clip played into a context that was never
-  // running. Starting the context is now synchronous and everything that could
-  // yield has gone.
-  const play = useCallback(() => {
-    if (!active) return;
-    primeAudio();
-    playback.current?.stop();
-    cancelAnimationFrame(raf.current);
-
-    const duration = clipSec;
+  // Schedules the clip and runs the progress bar with it. Split out of `play`
+  // because a rung whose audio has not landed yet gets here later, off the back
+  // of the download rather than off the tap.
+  const start = useCallback((buffer: AudioBuffer, want: number) => {
+    // Never promise more than the buffer holds: a clip scheduled past the end of
+    // the audio plays its last stretch as silence.
+    const duration = Math.min(want, buffer.duration);
+    setWaiting(false);
     setPlaying(true);
 
-    playback.current = playClip(active, {
+    playback.current = playClip(buffer, {
       startSec: 0,
       durationSec: duration,
       onEnd: () => {
@@ -120,19 +135,56 @@ function SongStage({ round, level, revealed, accent }: StageProps) {
       if (t < duration) raf.current = requestAnimationFrame(tick);
     };
     raf.current = requestAnimationFrame(tick);
-  }, [active, clipSec]);
+  }, []);
+
+  // Deliberately not async. A phone only lets the audio hardware start from
+  // inside the gesture's own task, and the `await unlockAudio()` this used to
+  // open with handed the rest of the handler to a later one — by which point the
+  // tap no longer counted and the clip played into a context that was never
+  // running. `primeAudio` therefore stays ahead of everything that can yield,
+  // the wait for a late rung's bytes included.
+  const play = useCallback(() => {
+    primeAudio();
+    playback.current?.stop();
+    cancelAnimationFrame(raf.current);
+    const want = clipSec;
+
+    // The reveal plays whatever is in hand; a rung plays only if the audio it
+    // promises has actually arrived.
+    const ready = revealed ? active : clip && covered >= want - 0.001 ? clip.buffer : null;
+    if (ready) {
+      start(ready, want);
+      return;
+    }
+    if (!clip) return;
+
+    // Reached before its download did. Say so, and play it the moment it lands
+    // rather than quietly playing a shorter clip.
+    const token = ++waitFor.current;
+    setWaiting(true);
+    clip
+      .need(want)
+      .then((buffer) => {
+        if (waitFor.current === token) start(buffer, want);
+      })
+      .catch(() => {
+        if (waitFor.current !== token) return;
+        setWaiting(false);
+        setFailed(true);
+      });
+  }, [active, clip, covered, revealed, clipSec, start]);
 
   // Space bar plays (or re-plays) the clip.
-  usePlayAction(active && !failed ? play : null, [active, failed, play]);
+  usePlayAction(clip && !failed ? play : null, [clip, failed, play]);
 
   // Once audio is unlocked, each new rung plays itself — pressing play again
   // after every skip gets old fast.
   useEffect(() => {
-    if (buffer && isAudioUnlocked() && !revealed) play();
+    if (clip && isAudioUnlocked() && !revealed) play();
     // Deliberately keyed on the rung, not on `play`, which changes identity
     // whenever the window does.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [level, buffer, round.id]);
+  }, [level, clip, round.id]);
 
   // The bar measures against whatever is actually playable right now.
   const scale = revealed ? Math.min(active?.duration ?? FULL_PREVIEW, FULL_PREVIEW) : 5;
@@ -167,11 +219,19 @@ function SongStage({ round, level, revealed, accent }: StageProps) {
       <button
         type="button"
         className="play-btn"
-        onClick={() => (playing ? stop() : play())}
-        disabled={!buffer || failed}
+        onClick={() => (playing || waiting ? stop() : play())}
+        disabled={!clip || failed}
         style={{ borderColor: accent }}
       >
-        {failed ? 'Preview unavailable' : !buffer ? 'Loading…' : playing ? '■ Stop' : `▶ Play ${clipSec}s`}
+        {failed
+          ? 'Preview unavailable'
+          : !clip
+            ? 'Loading…'
+            : waiting
+              ? 'Loading…'
+              : playing
+                ? '■ Stop'
+                : `▶ Play ${clipSec}s`}
         <kbd>space</kbd>
       </button>
 

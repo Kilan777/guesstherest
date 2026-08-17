@@ -9,7 +9,6 @@
  */
 
 let ctx: AudioContext | null = null;
-const buffers = new Map<string, Promise<AudioBuffer>>();
 
 function audioCtx(): AudioContext {
   if (!ctx) {
@@ -141,29 +140,56 @@ export function isAudioUnlocked(): boolean {
 }
 
 /**
- * How much of a preview to fetch for play. A round never needs more than five
- * seconds, but an iTunes preview is a whole 30 seconds — a megabyte — and on a
- * phone that download was 81% of the time between opening the game and being
- * able to press play.
+ * How much of a preview to fetch, and when.
  *
- * The files are MPEG-4/AAC and, usefully, faststart: the `moov` header sits in
- * the first ~6.4 KB, so a byte prefix is a valid, decodable file covering the
- * opening seconds. Apple serves them with `Accept-Ranges: bytes` and permissive
- * CORS, so one ranged request gets exactly that prefix. The decoded samples are
- * bit-identical to the full download — this is not a lossy shortcut.
+ * An iTunes preview is 30 seconds and about a megabyte. A round never plays more
+ * than five of those seconds — but the *first* rung is a tenth of a second, and
+ * nobody reaches the five-second rung without spending three clues first, which
+ * is many seconds of wall clock. Downloading five seconds of audio before the
+ * play button lights up is buying audio nobody needs yet. So the fetch is
+ * tiered: enough to play, immediately; the rest of the ladder behind it.
  *
- * 320 KB is the size, not less: the padding between the header and the audio
- * data varies from 8 bytes to 96 KB, and across 199 previews the worst case
- * needed 288 KB to reach five seconds. 320 KB cleared every one of them with
- * room to spare, at roughly a third of the bytes.
+ * The files are MPEG-4/AAC and faststart — the `moov` header sits in the first
+ * ~6.4 KB, so a byte prefix is a valid, decodable file, and Apple serves them
+ * with `Accept-Ranges: bytes` and permissive CORS. The decoded samples are
+ * bit-identical to the full download; this is not a lossy shortcut.
+ *
+ * What makes a prefix expensive is the `free` padding Apple leaves between
+ * `moov` and `mdat`. Measured over 40 previews it is 8 bytes for 26 of them and
+ * 18–92 KB for the other 14, which is the whole reason a fixed prefix had to be
+ * 320 KB to be safe: on the worst file the first audio sample does not start
+ * until byte 98,304. Padding is dead space by definition, so it is no longer
+ * downloaded — the layout is parsed out of the opening 20 KB and the gap is
+ * filled in locally with zeros. What is left is the audio, and the audio is
+ * small: across those 40 previews, 11.7 KB of `mdat` covered the first tenth of
+ * a second in the worst case and 201.8 KB covered all five seconds.
  */
-const PREFIX_BYTES = 327680;
+const PROBE_BYTES = 20480;
+
+/**
+ * The ladder, as byte budgets into `mdat`.
+ *
+ * Measured worst cases were 27.4 / 66.1 / 124.7 / 201.8 KB for the four rungs;
+ * these sizes cleared every one of the 40 previews with a third to spare (the
+ * tightest decoded 0.79 s where 0.5 s was promised). Nothing trusts the numbers
+ * regardless: what a tier is allowed to claim is its *decoded* duration, so an
+ * unusually dense file simply moves on to the next tier.
+ */
+const TIERS: { sec: number; mdat: number }[] = [
+  { sec: 0.5, mdat: 32768 },
+  { sec: 1.5, mdat: 76800 },
+  { sec: 3, mdat: 143360 },
+  { sec: 5, mdat: 233472 },
+];
+
+/** The shortest rung — all the play button ever has to wait for. */
+const MIN_SEC = 0.1;
 
 /** Full 30-second decodes, kept apart from the prefixes and only for reveals. */
 const fullBuffers = new Map<string, Promise<AudioBuffer>>();
 
 /**
- * Prefixes are downloaded strictly one at a time.
+ * Clip downloads run strictly one at a time, urgent ones first.
  *
  * The next round's clip is fetched during the current one, and when both were in
  * flight together they simply split the connection: measured on a throttled
@@ -171,8 +197,40 @@ const fullBuffers = new Map<string, Promise<AudioBuffer>>();
  * bandwidth and took twice as long to become playable. A queue costs the
  * prefetch nothing — it has a whole round to finish in — and gives the clip
  * somebody is waiting on the entire pipe.
+ *
+ * "Urgent" means somebody is looking at a disabled button: the opening tier of
+ * any round, and any rung whose audio has not arrived by the time it is bought.
+ * Topping this round's ladder up to five seconds is not urgent, and must never
+ * push the *next* round's opening tier back — a round that cannot start yet
+ * beats a rung nobody has reached. Each tier is a separate job for that reason:
+ * a waiting round only ever sits behind one block of bytes, not the whole
+ * remaining ladder.
  */
-let chain: Promise<unknown> = Promise.resolve();
+type Job = { urgent: boolean; run: () => Promise<void> };
+
+const queue: Job[] = [];
+let draining = false;
+
+function enqueue(job: Job): void {
+  queue.push(job);
+  void drain();
+}
+
+async function drain(): Promise<void> {
+  if (draining) return;
+  draining = true;
+  while (queue.length) {
+    let i = queue.findIndex((j) => j.urgent);
+    if (i < 0) i = 0;
+    const [job] = queue.splice(i, 1);
+    try {
+      await (job as Job).run();
+    } catch {
+      /* every job records its own failure; the queue must keep moving */
+    }
+  }
+  draining = false;
+}
 
 /** Longest rung the ladder can ask for; a prefix shorter than this is no use. */
 const LADDER_SEC = 5;
@@ -224,12 +282,15 @@ function withTimeout<T>(p: Promise<T>, ms: number, why: string): Promise<T> {
 }
 
 /**
- * Every channel flat for the whole stretch the ladder can play.
+ * Every channel flat, for the whole buffer or the whole ladder, whichever ends
+ * first.
  *
  * A truncated MPEG-4 is not a decode error to every decoder. Safari's is
  * stricter than Chrome's about the prefix and can *succeed* while handing back a
  * buffer that is all zeros — which plays perfectly and makes no sound, exactly
- * the symptom being chased. Real music is never silent for five seconds.
+ * the symptom being chased. Real music is never silent for five seconds; what a
+ * *short* silent buffer means is decided by the caller, since songs are allowed
+ * to open quietly.
  */
 function isSilent(buffer: AudioBuffer): boolean {
   const upto = Math.min(buffer.length, Math.ceil(buffer.sampleRate * LADDER_SEC));
@@ -244,48 +305,346 @@ function isSilent(buffer: AudioBuffer): boolean {
   return true;
 }
 
-/** Long enough for the whole ladder, and audible. */
-function usable(buffer: AudioBuffer): boolean {
-  return buffer.duration >= LADDER_SEC && !isSilent(buffer);
+/* ── the tiered loader ───────────────────────────────────────────────────── */
+
+/**
+ * Where the audio lives in the file: the first byte of `mdat`, and the first
+ * byte of the run of padding in front of it that needn't be downloaded.
+ */
+type Layout = { mdatStart: number; padFrom: number };
+
+/**
+ * Walk the top-level atoms of a faststart MPEG-4 and find `mdat`.
+ *
+ * Only the top level is read, and only for its lengths — every atom declares its
+ * own size, so `mdat` can be located even when the padding in front of it runs
+ * off the end of what has been downloaded. `free`/`skip` immediately before
+ * `mdat` is padding and is the run that gets skipped; anything else in front of
+ * `mdat` is real and must be fetched, so it does not count.
+ *
+ * Returns null on anything unexpected, and the caller falls back to plain
+ * contiguous prefixes.
+ */
+function layoutOf(head: Uint8Array): Layout | null {
+  const dv = new DataView(head.buffer, head.byteOffset, head.byteLength);
+  let pad: { start: number; end: number } | null = null;
+  let p = 0;
+  while (p + 8 <= head.length) {
+    let size = dv.getUint32(p);
+    let header = 8;
+    if (size === 1) {
+      // 64-bit size. Read it as two halves rather than a BigInt, which this
+      // build target does not have.
+      if (p + 16 > head.length) return null;
+      size = dv.getUint32(p + 8) * 4294967296 + dv.getUint32(p + 12);
+      header = 16;
+    } else if (size === 0) {
+      // "runs to the end of the file" — nothing follows it to find.
+      return null;
+    }
+    if (size < header || !Number.isSafeInteger(size)) return null;
+    const type = String.fromCharCode(head[p + 4] as number, head[p + 5] as number, head[p + 6] as number, head[p + 7] as number);
+    if (type === 'mdat') return { mdatStart: p, padFrom: pad && pad.end === p ? pad.start : p };
+    pad = type === 'free' || type === 'skip' ? { start: p, end: p + size } : null;
+    p += size;
+    // The padding is allowed to run past what we hold — that is the whole point,
+    // since it is exactly what we are not downloading. Anything else running
+    // past the end means the header is incomplete and unusable.
+    if (p > head.length) return pad && pad.end === p ? { mdatStart: p, padFrom: pad.start } : null;
+  }
+  return null;
 }
 
-/** The opening seconds of a preview — everything the reveal ladder can play. */
-export function preloadClip(url: string): Promise<AudioBuffer> {
-  const cached = buffers.get(url);
-  if (cached) return cached;
+type Waiter = { sec: number; resolve: (b: AudioBuffer) => void; reject: (e: unknown) => void };
 
-  const p = chain.then(async () => {
-    const { bytes, status } = await download(url, `bytes=0-${PREFIX_BYTES - 1}`);
-    // A 200 means the range was ignored and the whole file arrived anyway;
-    // those bytes are already paid for, so keep them for the reveal.
-    if (status === 200) {
-      const full = decode(bytes.slice(0));
-      full.catch(() => fullBuffers.delete(url));
-      fullBuffers.set(url, full);
-    }
+type Loader = {
+  url: string;
+  /** The file as assembled so far: real bytes, with zeros where padding was skipped. */
+  image: Uint8Array;
+  layout: Layout | null;
+  /** Index of the next tier to fetch; -1 until the opening probe has landed. */
+  next: number;
+  buffer: AudioBuffer | null;
+  /** Seconds this buffer is known to hold — its decoded duration, nothing softer. */
+  covered: number;
+  /** No more tiers to try; only the whole file is left. */
+  exhausted: boolean;
+  finished: boolean;
+  running: boolean;
+  queued: Job | null;
+  waiters: Waiter[];
+  listeners: Set<() => void>;
+  /** One handle per URL, so React sees a stable identity across rungs. */
+  handle: Clip | null;
+};
 
-    // Two ways the prefix lets us down, and only one of them throws. Chrome
-    // rejects a truncated MPEG-4 it cannot use; Safari has been known to return
-    // a short or entirely silent buffer instead, which is worse — it plays, and
-    // nothing comes out. Both end up on the whole file.
-    const prefix = await decode(bytes).catch(() => null);
-    if (prefix && usable(prefix)) return prefix;
+const loaders = new Map<string, Loader>();
+
+/** A growing clip. `buffer` and `covered` change as tiers land. */
+export type Clip = {
+  readonly buffer: AudioBuffer;
+  readonly covered: number;
+  /** Resolves once the clip can honour `sec`, fetching more if that is what it takes. */
+  need: (sec: number) => Promise<AudioBuffer>;
+  /** Fires whenever the clip grows. Returns an unsubscribe. */
+  subscribe: (fn: () => void) => () => void;
+};
+
+function notify(L: Loader): void {
+  for (const fn of L.listeners) {
     try {
-      return await loadFull(url);
-    } catch (err) {
-      // Short but audible still beats an unplayable round; the ladder clamps
-      // every rung to whatever the buffer actually holds.
-      if (prefix && !isSilent(prefix)) return prefix;
-      throw err;
+      fn();
+    } catch {
+      /* a listener must not stall the loader */
     }
+  }
+}
+
+/** Copy, because `decodeAudioData` detaches what it is given and the image is reused. */
+function decodeImage(L: Loader): Promise<AudioBuffer> {
+  return decode(L.image.slice().buffer);
+}
+
+/**
+ * Take a decoded tier — or don't.
+ *
+ * A truncated MPEG-4 is not a decode error to every decoder. Safari's can
+ * *succeed* and hand back a buffer that is all zeros, which plays perfectly and
+ * makes no sound. But real songs open quietly too — of the 40 previews measured,
+ * one peaks at 0.0055 across its whole first half-second — so a short silent
+ * buffer is not evidence of anything. It is simply not accepted yet: the next
+ * tier costs a few tens of KB and settles it. Silence over a stretch long enough
+ * to be sure is treated as the broken decode it is, and the whole file is
+ * fetched instead.
+ */
+const SILENCE_TRUST = 1.4;
+
+async function decodeTier(L: Loader): Promise<void> {
+  const buffer = await decodeImage(L).catch(() => null);
+  if (!buffer) return;
+  if (isSilent(buffer)) {
+    if (buffer.duration >= SILENCE_TRUST) {
+      L.buffer = null;
+      L.covered = 0;
+      L.exhausted = true;
+    }
+    return;
+  }
+  if (buffer.duration <= L.covered) return;
+  L.buffer = buffer;
+  L.covered = buffer.duration;
+  notify(L);
+}
+
+/** The whole file arrived despite the range request; keep it, it is already paid for. */
+async function takeWholeFile(L: Loader, bytes: ArrayBuffer): Promise<void> {
+  const full = decode(bytes.slice(0));
+  full.catch(() => fullBuffers.delete(L.url));
+  fullBuffers.set(L.url, full);
+  const buffer = await full;
+  if (isSilent(buffer)) throw new Error('preview is silent');
+  L.buffer = buffer;
+  L.covered = buffer.duration;
+  L.exhausted = true;
+  notify(L);
+}
+
+/** Fetch up to absolute byte `want`, skipping the padding if there is any. */
+async function growTo(L: Loader, want: number): Promise<'grown' | 'short' | 'whole'> {
+  if (want <= L.image.length) return 'grown';
+  const skipTo = L.layout && L.image.length >= L.layout.padFrom ? L.layout.mdatStart : 0;
+  const from = Math.max(L.image.length, skipTo);
+  const { bytes, status } = await download(L.url, `bytes=${from}-${want - 1}`);
+  if (status === 200) {
+    await takeWholeFile(L, bytes);
+    return 'whole';
+  }
+  const piece = new Uint8Array(bytes);
+  if (piece.length === 0) return 'short';
+  const grown = new Uint8Array(from + piece.length);
+  grown.set(L.image.subarray(0, Math.min(L.image.length, from)));
+  grown.set(piece, from);
+  L.image = grown;
+  // A short read means the file ended; there is nothing further to fetch.
+  return from + piece.length >= want ? 'grown' : 'short';
+}
+
+/** One fetch-and-decode. Advances the loader by exactly one tier. */
+async function step(L: Loader): Promise<void> {
+  if (L.next < 0) {
+    const { bytes, status } = await download(L.url, `bytes=0-${PROBE_BYTES - 1}`);
+    if (status === 200) {
+      await takeWholeFile(L, bytes);
+      return;
+    }
+    L.image = new Uint8Array(bytes);
+    L.layout = layoutOf(L.image);
+    L.next = 0;
+    await decodeTier(L);
+    return;
+  }
+  const tier = TIERS[L.next] as { sec: number; mdat: number };
+  L.next++;
+  // Without a parsed layout there is no way to know where the padding ends, so
+  // the budget is spent as a plain contiguous prefix — which is what the fixed
+  // 320 KB prefix always was, and it still works, it is just less of a bargain.
+  const want = (L.layout ? L.layout.mdatStart : 0) + tier.mdat;
+  const got = await growTo(L, want);
+  // The whole file turning up replaces everything, decode included.
+  if (got === 'whole') return;
+  if (got === 'short' || L.next >= TIERS.length) L.exhausted = true;
+  await decodeTier(L);
+}
+
+/** The longest stretch anybody is currently waiting on. */
+function demand(L: Loader): number {
+  let sec = MIN_SEC;
+  for (const w of L.waiters) sec = Math.max(sec, w.sec);
+  return sec;
+}
+
+function settle(L: Loader): void {
+  const still: Waiter[] = [];
+  for (const w of L.waiters) {
+    if (L.buffer && L.covered >= w.sec - 0.001) w.resolve(L.buffer);
+    else if (L.finished) {
+      // Nothing left to try. Short but audible still beats a dead round, and
+      // every rung is clamped to what the buffer actually holds.
+      if (L.buffer) w.resolve(L.buffer);
+      else w.reject(new Error('preview unavailable'));
+    } else still.push(w);
+  }
+  L.waiters = still;
+}
+
+/** Give up on tiers and take the whole 30 seconds. */
+async function fallback(L: Loader): Promise<void> {
+  try {
+    const buffer = await loadFull(L.url);
+    if (isSilent(buffer)) throw new Error('preview is silent');
+    L.buffer = buffer;
+    L.covered = buffer.duration;
+    notify(L);
+  } finally {
+    finish(L);
+  }
+}
+
+/** Nothing more will be fetched, so the assembled bytes can go. */
+function finish(L: Loader): void {
+  L.finished = true;
+  L.image = new Uint8Array(0);
+}
+
+function pump(L: Loader): void {
+  if (L.finished || L.running || L.queued) return;
+  const wantFull = L.exhausted && L.covered < demand(L) - 0.001;
+  if (L.exhausted && !wantFull) {
+    finish(L);
+    return;
+  }
+  const job: Job = {
+    // The opening tier of a round is always urgent — a disabled play button is
+    // the one thing a player cannot work around.
+    urgent: L.covered < MIN_SEC || L.waiters.some((w) => w.sec > L.covered),
+    run: async () => {
+      L.queued = null;
+      L.running = true;
+      try {
+        await (wantFull ? fallback(L) : step(L));
+      } catch {
+        // A failed tier is not fatal while the clip already plays; it just ends
+        // the tiering, and the whole file is there if a rung really needs it.
+        L.exhausted = true;
+      } finally {
+        L.running = false;
+      }
+      settle(L);
+      pump(L);
+    },
+  };
+  L.queued = job;
+  enqueue(job);
+}
+
+function loaderFor(url: string): Loader {
+  const existing = loaders.get(url);
+  if (existing) return existing;
+  const L: Loader = {
+    url,
+    image: new Uint8Array(0),
+    layout: null,
+    next: -1,
+    buffer: null,
+    covered: 0,
+    exhausted: false,
+    finished: false,
+    running: false,
+    queued: null,
+    waiters: [],
+    listeners: new Set(),
+    handle: null,
+  };
+  loaders.set(url, L);
+  pump(L);
+  return L;
+}
+
+function clipOf(L: Loader): Clip {
+  if (L.handle) return L.handle;
+  L.handle = {
+    get buffer() {
+      return L.buffer as AudioBuffer;
+    },
+    get covered() {
+      return L.covered;
+    },
+    need: (sec: number) =>
+      new Promise<AudioBuffer>((resolve, reject) => {
+        if (L.buffer && L.covered >= sec - 0.001) {
+          resolve(L.buffer);
+          return;
+        }
+        if (L.finished) {
+          if (L.buffer) resolve(L.buffer);
+          else reject(new Error('preview unavailable'));
+          return;
+        }
+        L.waiters.push({ sec, resolve, reject });
+        // Somebody is now watching a loading spinner, so this stops being
+        // background work and goes to the front of the queue.
+        if (L.queued) L.queued.urgent = true;
+        pump(L);
+      }),
+    subscribe: (fn: () => void) => {
+      L.listeners.add(fn);
+      return () => {
+        L.listeners.delete(fn);
+      };
+    },
+  };
+  return L.handle;
+}
+
+/**
+ * Start a clip and resolve as soon as it can play its first rung — a tenth of a
+ * second. The rest of the ladder keeps loading behind it.
+ */
+export function preloadClip(url: string): Promise<Clip> {
+  const L = loaderFor(url);
+  return new Promise<Clip>((resolve, reject) => {
+    void clipOf(L)
+      .need(MIN_SEC)
+      .then(
+        () => resolve(clipOf(L)),
+        (err) => {
+          // Don't cache a dead loader — a flaky network shouldn't poison the
+          // round for good.
+          if (loaders.get(url) === L) loaders.delete(url);
+          reject(err);
+        },
+      );
   });
-  // The queue must survive a failed download, so it waits on the settled state
-  // rather than on `p` itself.
-  chain = p.catch(() => {});
-  // Don't cache a rejection — a flaky network shouldn't poison the round.
-  p.catch(() => buffers.delete(url));
-  buffers.set(url, p);
-  return p;
 }
 
 function loadFull(url: string): Promise<AudioBuffer> {
