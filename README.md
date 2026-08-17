@@ -2,7 +2,7 @@
 
 **[guesstherest.com](https://guesstherest.com)**
 
-Thirty guessing games behind one shared mechanic: you start with almost
+Thirty-one guessing games behind one shared mechanic: you start with almost
 nothing, and every extra look costs you points.
 
 ```bash
@@ -10,7 +10,7 @@ npm install
 npm run dev      # http://localhost:5173
 ```
 
-That's the whole setup. **No API keys. No account.** All thirty games work
+That's the whole setup. **No API keys. No account.** All thirty-one games work
 immediately. Signing in with Google and the global leaderboard are optional
 extras that need a Supabase project; without one, scores still save per-device.
 
@@ -22,6 +22,7 @@ extras that need a Supabase project; without one, scores still save per-device.
 |---|---|---|
 | 🎧 **Guess the Song** | 0.1s of the track | 0.1s → 0.5 → 1.5 → 3 → 5s |
 | 🎬 **Guess the Movie** | 1 second of trailer footage | 1s → 2 → 4 → 8 → 15s |
+| 📺 **Guess the TV Show** | a theme tune, sound only | 1s → 2 → 5 → 10 → 20s |
 | 🧩 **Guess by Emoji** | a rebus, in your chosen category | 2 emoji → +1 → +1 → written clue |
 | 🔍 **Guess the Object** | an everyday thing at 11× | 11× → 6.5 → 3.8 → 2.2 → 1.4× |
 | 🦋 **Guess the Animal** | one patch of coat or feather at 14× | 14× → 8 → 4.5 → 2.6 → 1.5× |
@@ -48,7 +49,7 @@ extras that need a Supabase project; without one, scores still save per-device.
 | 📱 **Guess the App** | an icon at 7× | 7× → 4.5 → 3 → 2 → 1.3× |
 | ✳️ **Guess the Logo** | 2 windows onto a brand mark | 2 → 5 → 9 → 14 → 20 windows |
 
-**Scoring** is shared by all thirty. A round is worth 1000 points at the top of the
+**Scoring** is shared by all thirty-one. A round is worth 1000 points at the top of the
 ladder and decays ~38% per rung, plus a speed bonus that tapers over 20 seconds
 and a streak multiplier up to 2×. A wrong guess costs a rung, exactly like a
 skip — so guessing early is a real gamble, not a free roll. Guess the Year pays

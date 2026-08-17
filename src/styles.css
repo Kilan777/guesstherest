@@ -2449,10 +2449,11 @@ kbd {
 }
 
 /* The YouTube player, playing, at a real size, where nobody can see it.
-   It must stay laid out — `display:none`, `visibility:hidden` and a 0×0 box
-   all stop Chrome playing the audio — so it is pushed out of the viewport
-   instead. `overflow:hidden` on the stage would clip it into existence again,
-   which is why it is fixed rather than absolute. */
+   Pushed out of the viewport rather than hidden: a full-size laid-out element
+   is the safest thing to ask a browser to keep decoding audio for, where a
+   zero-sized or display:none one has historically been throttled or refused.
+   `position: fixed` rather than absolute, so no ancestor's overflow can clip
+   it back into view. */
 .tv-audio-host {
   position: fixed;
   left: -10000px;
@@ -2539,14 +2540,14 @@ kbd {
 
 .tv-legs {
   display: flex;
-  gap: 46%;
-  width: 68%;
+  justify-content: space-between;
+  width: 56%;
 }
 
 .tv-legs span {
-  flex: 1;
-  height: 10px;
-  border-radius: 0 0 5px 5px;
+  width: 26px;
+  height: 9px;
+  border-radius: 0 0 4px 4px;
   background: var(--line);
 }
 

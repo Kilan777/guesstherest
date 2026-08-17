@@ -5,7 +5,7 @@ import { gameBySlug } from './games';
 /**
  * The launcher is a route, not a prerequisite.
  *
- * Home is the biggest screen in the app — thirty cards, ~18 KB of hand-drawn
+ * Home is the biggest screen in the app — thirty-one cards, ~18 KB of hand-drawn
  * inline SVG in CardArt, the art credits, the suggestion box, sign-in — and a
  * player who opens `#/play/song` from a shared link never sees any of it. Kept
  * in the entry chunk it was downloaded, parsed and executed on the phone radio

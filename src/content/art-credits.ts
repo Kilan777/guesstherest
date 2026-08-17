@@ -319,5 +319,13 @@ export const ART_CREDITS: Record<string, ArtCredit[]> = {
       "author": "Headspace Inc.",
       "file": null
     }
+  ],
+  "show": [
+    {
+      "subject": "Television set",
+      "licence": "CC BY-SA 2.0",
+      "author": "Klaus Nahr from Germany",
+      "file": "File:Museum_für_Kommunikation_-_Depot_Heusenstamm_-_Technik_12_-_Flickr_-_KlausNahr.jpg"
+    }
   ]
 };

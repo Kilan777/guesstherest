@@ -1,6 +1,7 @@
 import type { GameDef, GameMeta } from '../engine/types';
 import { songMeta } from './song.meta';
 import { sceneMeta } from './scene.meta';
+import { showMeta } from './show.meta';
 import { objectMeta } from './object.meta';
 import { quoteMeta } from './quote.meta';
 import { rebusMeta } from './rebus.meta';
@@ -44,6 +45,7 @@ import { logoMeta } from './logo.meta';
 export const GAMES: GameMeta[] = [
   songMeta,
   sceneMeta,
+  showMeta,
   countryMeta,
   rebusMeta,
   objectMeta,
@@ -85,6 +87,7 @@ export function gameBySlug(slug: string): GameMeta | undefined {
 const loaders: Record<string, () => Promise<GameDef>> = {
   song: () => import('./song').then((m) => m.songGame),
   scene: () => import('./scene').then((m) => m.sceneGame),
+  show: () => import('./show').then((m) => m.showGame),
   country: () => import('./country').then((m) => m.countryGame),
   rebus: () => import('./rebus').then((m) => m.rebusGame),
   object: () => import('./object').then((m) => m.objectGame),

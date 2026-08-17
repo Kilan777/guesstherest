@@ -15,7 +15,7 @@
  * back from the Commons API and are written to src/content/art-credits.ts, which
  * the credits page renders. Run: node scripts/build-card-art.mjs
  */
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import sharp from 'sharp';
 
@@ -49,6 +49,7 @@ const PLAN = {
   outline: { layout: 'photo', wiki: ['World map'] },
   videogame: { layout: 'photo', wiki: ['Game controller'] },
   scene: { layout: 'photo', files: ['File:Kino Atlas Interier J.jpg'] },
+  show: { layout: 'photo', wiki: ['Television set'] },
   year: { layout: 'photo', wiki: ['Marquee (structure)'] },
   rebus: { layout: 'photo', wiki: ['Emoji'] },
   // Sets of things rather than one thing.
@@ -192,10 +193,29 @@ async function compose(spec, sources) {
 }
 
 await mkdir(OUT, { recursive: true });
-const credits = {};
+
+/**
+ * `node scripts/build-card-art.mjs show logo` rebuilds just those cards and
+ * keeps every other card's credit line as it is.
+ *
+ * Adding one game should not mean re-downloading twenty-nine pictures — and it
+ * certainly should not mean losing the credits for the ones whose source is
+ * having a bad day, which is what a full rebuild does: a card that fails is
+ * simply absent from the regenerated file, so an unrelated outage silently
+ * strips an attribution the licence requires us to show.
+ */
+const only = process.argv.slice(2);
+const plan = only.length ? Object.fromEntries(only.map((s) => [s, PLAN[s]])) : PLAN;
+for (const [slug, spec] of Object.entries(plan)) {
+  if (!spec) throw new Error(`no card art plan for "${slug}"`);
+}
+
+// The credits file is TypeScript, which node cannot import — but its payload is
+// plain JSON.stringify output, so the object literal is read back out directly.
+const credits = only.length ? JSON.parse(/ART_CREDITS[^=]*= (\{[\s\S]*\});\s*$/.exec(await readFile(CREDITS, 'utf8'))[1]) : {};
 const failures = [];
 
-for (const [slug, spec] of Object.entries(PLAN)) {
+for (const [slug, spec] of Object.entries(plan)) {
   try {
     const names = spec.wiki ?? spec.files ?? spec.apps;
     const lookup = spec.wiki ? wikiImage : spec.files ? commonsFile : appImage;

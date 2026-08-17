@@ -612,7 +612,7 @@ const ART: Record<string, () => React.ReactElement> = {
 const PHOTO = new Set([
   'animal', 'bird', 'insect', 'plant', 'dish', 'recipe', 'landmark', 'capital',
   'skyline', 'country', 'car', 'sport', 'boardgame', 'object', 'word', 'outline',
-  'videogame', 'scene', 'year', 'rebus', 'logo', 'celebrity', 'quote', 'app',
+  'videogame', 'scene', 'show', 'year', 'rebus', 'logo', 'celebrity', 'quote', 'app',
 ]);
 
 /** True when this card is a photograph, which needs no emoji badge on top. */
