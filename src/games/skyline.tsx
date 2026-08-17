@@ -1,6 +1,6 @@
 import type { Deck, GameDef, Option, StageProps } from '../engine/types';
 import { skylineMeta } from './skyline.meta';
-import { pageInfo } from '../content/wikipedia';
+import { pageInfo, type ImageCredit } from '../content/wikipedia';
 import { streamDeck } from '../content/deck';
 import { ZoomStage, focalOf } from './stages';
 
@@ -15,6 +15,8 @@ type SkylinePayload = {
   srcFull: string | null;
   label: string;
   country: string;
+  /** Attribution for the photograph, shown on the reveal. */
+  credit: ImageCredit | null;
 };
 
 function SkylineStage({ round, level, revealed }: StageProps) {
@@ -27,6 +29,7 @@ function SkylineStage({ round, level, revealed }: StageProps) {
       level={level}
       revealed={revealed}
       focal={focalOf(round.id)}
+      credit={p.credit}
       caption={
         <>
           <strong>{p.label}</strong>
@@ -63,6 +66,7 @@ async function loadDeck(count: number, rng: () => number): Promise<Deck> {
         srcFull: info.imageFull,
         label: seed.label,
         country: seed.country,
+        credit: info.credit,
       } satisfies SkylinePayload,
     }),
     emptyError: 'Could not reach Wikipedia for city photographs.',

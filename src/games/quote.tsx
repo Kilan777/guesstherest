@@ -5,7 +5,7 @@ import { pageInfo } from '../content/wikipedia';
 import { mapLimit } from '../content/cache';
 import { streamDeck } from '../content/deck';
 import { sample, shuffle } from '../lib/rng';
-import { TextStage } from './stages';
+import { TextStage, type CreditItem } from './stages';
 
 const FIELD_LABEL: Record<QuoteSeed['field'], string> = {
   science: 'Science & invention',
@@ -16,7 +16,13 @@ const FIELD_LABEL: Record<QuoteSeed['field'], string> = {
   art: 'Art',
 };
 
-type QuotePayload = { quote: string; who: string; role: string };
+type QuotePayload = {
+  quote: string;
+  who: string;
+  role: string;
+  /** Attribution for the four portraits on screen, shown on the reveal. */
+  credits: CreditItem[];
+};
 
 function initialsOf(name: string): string {
   return name
@@ -35,6 +41,7 @@ function QuoteStage({ round, level, revealed }: StageProps) {
       hints={round.hints ?? []}
       level={level}
       revealed={revealed}
+      credit={p.credits}
       caption={
         <>
           <strong>{p.who}</strong>
@@ -73,17 +80,29 @@ async function loadDeck(count: number, rng: () => number): Promise<Deck> {
       }
 
       const people = shuffle([seed, ...decoys], rng);
-      return mapLimit(people, 4, async (person) => {
+      const resolved = await mapLimit(people, 4, async (person) => {
         const info = await pageInfo(person.wiki);
         return {
-          id: `who:${person.who}`,
-          label: person.who,
-          sublabel: person.role,
-          image: info?.thumb ?? undefined,
-        } satisfies Option;
+          option: {
+            id: `who:${person.who}`,
+            label: person.who,
+            sublabel: person.role,
+            image: info?.thumb ?? undefined,
+          } satisfies Option,
+          // All four portraits are on screen for the whole round, so all four
+          // need crediting — not just the speaker's. The name is carried with
+          // the link so one line can say which credit belongs to which face.
+          credit: (info?.credit && info.thumb
+            ? { ...info.credit, label: person.who }
+            : null) as CreditItem | null,
+        };
       });
+      return {
+        options: resolved.map((r) => r.option),
+        credits: resolved.map((r) => r.credit).filter((c): c is CreditItem => !!c),
+      };
     },
-    toRound: (seed, withPortraits) => ({
+    toRound: (seed, { options: withPortraits, credits }) => ({
       id: `quote:${seed.who}:${seed.q.slice(0, 24)}`,
       answer: withPortraits.find((o) => o.id === `who:${seed.who}`) ?? {
         id: `who:${seed.who}`,
@@ -95,7 +114,7 @@ async function loadDeck(count: number, rng: () => number): Promise<Deck> {
         `They are best known as: ${seed.role}`,
         `Initials: ${initialsOf(seed.who)}`,
       ],
-      payload: { quote: seed.q, who: seed.who, role: seed.role } satisfies QuotePayload,
+      payload: { quote: seed.q, who: seed.who, role: seed.role, credits } satisfies QuotePayload,
     }),
     eager: 2,
     concurrency: 3,

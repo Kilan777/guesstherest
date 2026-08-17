@@ -1,6 +1,6 @@
 import type { Deck, GameDef, Option, StageProps } from '../engine/types';
 import { carMeta } from './car.meta';
-import { pageInfo } from '../content/wikipedia';
+import { pageInfo, type ImageCredit } from '../content/wikipedia';
 import { streamDeck } from '../content/deck';
 import { BlurStage } from './stages';
 
@@ -10,7 +10,13 @@ import { BlurStage } from './stages';
 const BLURS = [19, 11, 5, 2];
 const SCALES = [1, 1, 1, 1];
 
-type CarPayload = { src: string | null; label: string; era: string };
+type CarPayload = {
+  src: string | null;
+  label: string;
+  era: string;
+  /** Attribution for the photograph, shown on the reveal. */
+  credit: ImageCredit | null;
+};
 
 function CarStage({ round, level, revealed }: StageProps) {
   const p = round.payload as CarPayload;
@@ -23,6 +29,7 @@ function CarStage({ round, level, revealed }: StageProps) {
       fit="contain"
       level={level}
       revealed={revealed}
+      credit={p.credit}
       caption={
         <>
           <strong>{p.label}</strong>
@@ -58,6 +65,7 @@ async function loadDeck(count: number, rng: () => number): Promise<Deck> {
         src: info.image,
         label: seed.label,
         era: seed.era,
+        credit: info.credit,
       } satisfies CarPayload,
     }),
     emptyError: 'Could not reach Wikipedia for car photographs.',

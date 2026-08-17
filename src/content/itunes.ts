@@ -15,6 +15,10 @@ type RawResult = {
   primaryGenreName?: string;
   previewUrl?: string;
   releaseDate?: string;
+  /** 'explicit' | 'cleaned' | 'notExplicit' — Apple's parental advisory flag. */
+  trackExplicitness?: string;
+  /** Same, for a collection: 'explicit' | 'cleaned' | 'notExplicit'. */
+  collectionExplicitness?: string;
 };
 
 export type Track = {
@@ -54,6 +58,27 @@ export class ItunesUnavailable extends Error {}
  */
 const IMPOSTER =
   /karaoke|tribute|made popular|originally performed|cover version|lullaby|rockabye|sparrow sleeps|string quartet|vitamin string|8-bit|8 bit|solo violin|piano tribute|music box|instrumental version|in the style of/i;
+
+/**
+ * Apple flags a parental advisory on each result as 'explicit', 'cleaned' or
+ * 'notExplicit'. A clip is auto-played on a page that carries advertising, so
+ * an explicit master is never an acceptable pick — a title that exists only in
+ * an explicit cut is dropped from the deck rather than played.
+ *
+ * Measured against the live API over all 170 songs in the deck, Apple currently
+ * ranks a clean master first every time, so this changes nothing today. That is
+ * exactly why it belongs here: the ordering is Apple's to change, and nothing
+ * else in the pipeline would notice if it did.
+ *
+ * The *track* flag is the one that matters for audio. `collectionExplicitness`
+ * deliberately is not consulted here: a clean cut sitting on an album marked
+ * explicit plays clean audio, and rejecting on the album flag cost four titles
+ * their round for nothing. It is checked in {@link findAlbum}, where the album
+ * — and its advisory sticker — is the thing on screen.
+ */
+function isExplicitTrack(r: RawResult): boolean {
+  return r.trackExplicitness === 'explicit';
+}
 
 /* ── rate limiting ──────────────────────────────────────────────────────────
    iTunes caps search traffic per IP, and when it cuts you off it answers 403
@@ -156,6 +181,8 @@ export async function findTrack(title: string, artist: string): Promise<Track | 
 
     const match = results.find((r) => {
       if (!r.previewUrl || !r.artworkUrl100 || !r.trackName || !r.artistName) return false;
+      // Nothing with a parental advisory is ever auto-played on an ad-carrying page.
+      if (isExplicitTrack(r)) return false;
       const gotTitle = normalize(r.trackName);
       const gotArtist = normalize(r.artistName);
       const titleOk = gotTitle === wantTitle || gotTitle.startsWith(wantTitle);
@@ -187,6 +214,14 @@ export async function findTrack(title: string, artist: string): Promise<Track | 
  *
  * Throws rather than returning null when iTunes is unreachable, so a throttled
  * response is never cached as "this app doesn't exist".
+ *
+ * No explicitness guard here, and deliberately: software results carry no
+ * `trackExplicitness` at all — only an age rating (`contentAdvisoryRating`),
+ * which is a different thing. Checked against the live API, the ratings on this
+ * deck run 4+ to 17+, with LinkedIn and Reddit both sitting at 17+; filtering
+ * on it would drop mainstream apps and guard nothing, since the round shows a
+ * store icon and plays no audio. The one thing that auto-plays is the song
+ * clip, and {@link findTrack} is where that is handled.
  */
 export async function findApp(name: string, seller: string): Promise<App | null> {
   const key = `itunes:app:${normalize(name)}|${normalize(seller)}`;
@@ -242,6 +277,9 @@ export async function findAlbum(title: string, artist: string): Promise<Album | 
 
     const match = results.find((r) => {
       if (!r.artworkUrl100 || !r.collectionName || !r.artistName) return false;
+      // No audio here, but an explicit collection carries the advisory sticker
+      // on its cover art, which is the thing this game puts on screen.
+      if (r.collectionExplicitness === 'explicit' || isExplicitTrack(r)) return false;
       const gotTitle = normalize(r.collectionName);
       const gotArtist = normalize(r.artistName);
       // Ignore the endless "(Deluxe Edition)" / "(Remastered)" suffixes.

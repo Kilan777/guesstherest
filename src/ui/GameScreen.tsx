@@ -9,8 +9,8 @@ import { Leaderboard } from './Leaderboard';
 import { formatScore, levelValue } from '../lib/scoring';
 import { localBest } from '../lib/leaderboard';
 import { triggerPlay } from '../engine/player';
-import { AdSlot, AD_SLOTS } from './AdSlot';
 import { ModeratorTools } from './ModeratorTools';
+import { SiteLinks } from './SiteLinks';
 
 /**
  * The game's code arrives separately from its card.
@@ -261,8 +261,17 @@ function GamePlay(props: { game: GameDef; onExit: () => void; onOpenSettings: ()
             </button>
           </div>
         </div>
-        <AdSlot slot={AD_SLOTS.results} format="horizontal" />
+        {/* No ad unit here, deliberately. The results screen is a score, a
+            couple of buttons and a leaderboard — "screens used for alerts,
+            navigation or other behavioural purposes" in AdSense's words, and
+            the screen you play on is emptier still. The ads live where there is
+            something to read: the home page and the written pages under
+            /games/ and /guides/. */}
         <Leaderboard slug={game.slug} accent={game.accent} refreshKey={boardKey} />
+        {/* Someone who deep-linked straight into a game may never see the home
+            page's footer, and the privacy policy has to be reachable from
+            wherever they are. */}
+        <SiteLinks className="screen-links" />
       </div>
     );
   }

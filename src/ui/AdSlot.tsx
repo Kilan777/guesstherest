@@ -29,10 +29,18 @@ export const adsEnabled = () => CLIENT.trim().length > 0;
  * Ad unit ids, set once you create units in the AdSense dashboard. Until then
  * the placements render nothing — auto ads still run from the loader script,
  * and an empty `<ins>` would just log errors.
+ *
+ * One entry, on purpose. Every screen the app itself draws after the home page
+ * is interactive: a stage waiting for a guess, a score, a leaderboard. AdSense
+ * calls those "screens used for alerts, navigation or other behavioral
+ * purposes" and declined the site over exactly that, so the app carries a
+ * single unit under the game list and nothing else. The written pages under
+ * /games/ and /guides/ carry their own, from VITE_ADSENSE_SLOT_ARTICLE — they
+ * are static HTML, so that one is read by scripts/prerender.mjs rather than
+ * here.
  */
 export const AD_SLOTS = {
   home: (import.meta.env.VITE_ADSENSE_SLOT_HOME as string) || '',
-  results: (import.meta.env.VITE_ADSENSE_SLOT_RESULTS as string) || '',
 };
 
 /**

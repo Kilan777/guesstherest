@@ -1,6 +1,6 @@
 import type { Deck, GameDef, Option, StageProps } from '../engine/types';
 import { logoMeta } from './logo.meta';
-import { pageInfo } from '../content/wikipedia';
+import { pageInfo, type ImageCredit } from '../content/wikipedia';
 import { streamDeck } from '../content/deck';
 import { TileStage } from './stages';
 
@@ -14,7 +14,13 @@ const OPENED = [2, 5, 9, 14, 20];
  * Two things TileStage does for flags are wrong for logos, and both are fixed
  */
 
-type LogoPayload = { src: string | null; label: string; sector: string };
+type LogoPayload = {
+  src: string | null;
+  label: string;
+  sector: string;
+  /** Attribution for the mark's image file, shown on the reveal. */
+  credit: ImageCredit | null;
+};
 
 function LogoStage({ round, level, revealed }: StageProps) {
   const p = round.payload as LogoPayload;
@@ -34,6 +40,7 @@ function LogoStage({ round, level, revealed }: StageProps) {
         aspect="landscape"
         backing="light"
         fit="contain"
+        credit={p.credit}
         caption={
           <>
             <strong>{p.label}</strong>
@@ -61,15 +68,18 @@ async function loadDeck(count: number, rng: () => number): Promise<Deck> {
     eager: 2,
     resolve: async (seed) => {
       const info = await pageInfo(seed.wiki);
-      // Logos are small non-free files as often as not, and the 1280px render
-      // Wikimedia caches for larger images frequently isn't there for them —
-      // so take the original first and fall back to the render.
-      return info?.imageFull ?? info?.image ?? null;
+      // Logos are small files — usually an SVG only a few kilobytes wide — and
+      // the 1280px render Wikimedia caches for large photographs frequently
+      // isn't there for them. So take the original first and fall back to the
+      // render. (Every file in this deck is a free Commons file; see the
+      // licence audit at the top of `content/data/logos.ts`.)
+      const src = info?.imageFull ?? info?.image ?? null;
+      return src ? { src, credit: info?.credit ?? null } : null;
     },
-    toRound: (seed, src) => ({
+    toRound: (seed, { src, credit }) => ({
       id: `logo:${seed.label}`,
       answer: { id: `logo:${seed.label}`, label: seed.label, sublabel: seed.sector },
-      payload: { src, label: seed.label, sector: seed.sector } satisfies LogoPayload,
+      payload: { src, label: seed.label, sector: seed.sector, credit } satisfies LogoPayload,
     }),
     emptyError: 'Could not reach Wikipedia for logo images.',
   });

@@ -20,14 +20,45 @@
  *
  * Naming a brand from its mark is nominative use; the marks are shown as
  * published, unaltered apart from the reveal, and no endorsement is implied.
+ *
+ * ── FREE FILES ONLY ────────────────────────────────────────────────────────
+ * Every entry has additionally been checked for where its file is *hosted*,
+ * which is what decides whether this site may show it at all.
+ *
+ * English Wikipedia hosts a large number of logos locally, under its own
+ * fair-use rationale. That rationale covers en.wikipedia's encyclopedic use and
+ * nobody else's — it does not extend to an ad-supported game hotlinking the
+ * same file. Wikimedia Commons, by contrast, accepts only freely licensed or
+ * public-domain media, so a file that lives there is one we may use.
+ *
+ * The signal is in the URL the loader ends up fetching:
+ *
+ *   upload.wikimedia.org/wikipedia/commons/…  → free, keep
+ *   upload.wikimedia.org/wikipedia/en/…       → local en upload, drop
+ *
+ * Sixteen entries were removed on that basis. Eleven were outright non-free
+ * (Starbucks, Red Bull, Nestlé, Pringles, Guinness, Jack Daniel's, Ferrari,
+ * Puma, Shell, BP, TotalEnergies — all categorised "All non-free logos" with a
+ * fair-use rationale attached). Four more (Huawei, Chanel, Carrefour, Xbox) are
+ * tagged public domain *in the United States only* and sit in "Wikipedia files
+ * not suitable for Commons" — Commons rejects them because they are still
+ * copyrighted in their country of origin, which is not a bet worth taking for a
+ * commercial site with a worldwide audience. Instagram was dropped for a
+ * different reason: its article's lead image is now a screenshot of the app,
+ * not the mark, so the round was unplayable anyway.
+ *
+ * Wikipedia's own globe survives the cut and is not an oversight: the file is
+ * CC BY-SA 3.0, exists on Commons, and is kept locally only because the page is
+ * upload-protected.
+ *
+ * Adding an entry means re-running that check. A title whose lead image quietly
+ * moves to a non-free file will keep working and stop being allowed.
  */
 export type LogoSeed = { wiki: string; label: string; sector: string };
 
 export const LOGOS: LogoSeed[] = [
   // ── technology and internet ────────────────────────────────────────────────
   { wiki: 'Apple Inc.', label: 'Apple', sector: 'Technology' }, // Apple_logo_black.svg
-  { wiki: 'Huawei', label: 'Huawei', sector: 'Electronics' }, // Huawei_Standard_logo.svg
-  { wiki: 'Instagram', label: 'Instagram', sector: 'Social media' }, // Instagram_logo_2022.svg
   { wiki: 'WhatsApp', label: 'WhatsApp', sector: 'Messaging' }, // WhatsApp_Logo_green.svg
   { wiki: 'X (social network)', label: 'X', sector: 'Social media' }, // X_(formerly_Twitter)_logo_late_2025.svg
   { wiki: 'Firefox', label: 'Firefox', sector: 'Software' }, // Firefox_logo,_2019.svg
@@ -36,21 +67,14 @@ export const LOGOS: LogoSeed[] = [
   // ── food and drink ─────────────────────────────────────────────────────────
   { wiki: "McDonald's", label: "McDonald's", sector: 'Fast food' }, // McDonald's_Golden_Arches.svg
   { wiki: 'Burger King', label: 'Burger King', sector: 'Fast food' }, // Burger_King_2020.svg
-  { wiki: 'Starbucks', label: 'Starbucks', sector: 'Coffee' }, // Starbucks_Corporation_Logo_2011.svg
   { wiki: 'Pepsi', label: 'Pepsi', sector: 'Soft drinks' }, // Pepsi_2023.svg
-  { wiki: 'Red Bull', label: 'Red Bull', sector: 'Energy drinks' }, // RedBullEnergyDrink.svg
-  { wiki: 'Nestlé', label: 'Nestlé', sector: 'Food' }, // Nestlé.svg
   { wiki: "Lay's", label: "Lay's", sector: 'Snacks' }, // Lay's_2025.svg
-  { wiki: 'Pringles', label: 'Pringles', sector: 'Snacks' }, // Pringles_2021.svg
   { wiki: 'Kit Kat', label: 'Kit Kat', sector: 'Confectionery' }, // Logo_of_the_KitKat.svg
-  { wiki: 'Guinness', label: 'Guinness', sector: 'Beer' }, // Guinness_logo_dark_text.svg
-  { wiki: "Jack Daniel's", label: "Jack Daniel's", sector: 'Whiskey' }, // Jack_Daniels_Logo.svg
 
   // ── cars and motoring ──────────────────────────────────────────────────────
   { wiki: 'Volkswagen', label: 'Volkswagen', sector: 'Cars' }, // Volkswagen_logo_2019.svg
   { wiki: 'BMW', label: 'BMW', sector: 'Cars' }, // Logo_BMW_Group_2021.svg
   { wiki: 'Mercedes-Benz', label: 'Mercedes-Benz', sector: 'Cars' }, // Mercedes-Benz_Star_(1969-1986,_2025-).svg
-  { wiki: 'Ferrari', label: 'Ferrari', sector: 'Cars' }, // Prancing_horse.svg
   { wiki: 'Volvo Cars', label: 'Volvo', sector: 'Cars' }, // Volvo-Iron-Mark-Black.svg
   { wiki: 'Tesla, Inc.', label: 'Tesla', sector: 'Cars' }, // Tesla_Motors.svg
   { wiki: 'Harley-Davidson', label: 'Harley-Davidson', sector: 'Motorcycles' }, // Harley_Davidson_orange_logo.svg
@@ -60,8 +84,6 @@ export const LOGOS: LogoSeed[] = [
   // the article about the mark itself.
   { wiki: 'Swoosh', label: 'Nike', sector: 'Sportswear' }, // Logo_NIKE.svg
   { wiki: 'Adidas', label: 'Adidas', sector: 'Sportswear' }, // Adidas_2022_logo.svg
-  { wiki: 'Puma (brand)', label: 'Puma', sector: 'Sportswear' }, // Puma_complete_logo.svg
-  { wiki: 'Chanel', label: 'Chanel', sector: 'Fashion' }, // Chanel_logo_interlocking_cs.svg
   { wiki: 'H&M', label: 'H&M', sector: 'Clothing retail' }, // H&M-Logo.svg
   { wiki: 'Rolex', label: 'Rolex', sector: 'Watches' }, // Logo_da_Rolex.png
   { wiki: 'Ray-Ban', label: 'Ray-Ban', sector: 'Eyewear' }, // Ray-Ban_logo.svg
@@ -83,7 +105,6 @@ export const LOGOS: LogoSeed[] = [
   // ── retail ─────────────────────────────────────────────────────────────────
   { wiki: 'Walmart', label: 'Walmart', sector: 'Retail' }, // Walmart_spark_(2025).svg
   { wiki: 'Target Corporation', label: 'Target', sector: 'Retail' }, // Target_2004_bullseye.svg
-  { wiki: 'Carrefour', label: 'Carrefour', sector: 'Retail' }, // Carrefour_Groupe.svg
   { wiki: 'Lidl', label: 'Lidl', sector: 'Retail' }, // Lidl-Logo.svg
   { wiki: 'eBay', label: 'eBay', sector: 'Retail' }, // EBay_logo.svg
 
@@ -96,12 +117,6 @@ export const LOGOS: LogoSeed[] = [
 
   // ── games and toys ─────────────────────────────────────────────────────────
   { wiki: 'Lego', label: 'Lego', sector: 'Toys' }, // LEGO_logo.svg
-  { wiki: 'Xbox', label: 'Xbox', sector: 'Video games' }, // XBOX_logo_(2026).png
-
-  // ── energy ─────────────────────────────────────────────────────────────────
-  { wiki: 'Shell plc', label: 'Shell', sector: 'Oil and gas' }, // Shell_logo.svg
-  { wiki: 'BP', label: 'BP', sector: 'Oil and gas' }, // BP_Helios_logo.svg
-  { wiki: 'TotalEnergies', label: 'TotalEnergies', sector: 'Oil and gas' }, // TotalEnergies_logo.svg
 
   // ── everything else ────────────────────────────────────────────────────────
   { wiki: 'United Parcel Service', label: 'UPS', sector: 'Logistics' }, // United_Parcel_Service_logo_2014.svg

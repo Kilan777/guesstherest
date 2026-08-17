@@ -1,7 +1,7 @@
 {
   "name": "Guess The Rest",
   "short_name": "GuessTheRest",
-  "description": "Twenty-seven guessing games. A tenth of a second of a song, one second of a film, a street corner somewhere on Earth.",
+  "description": "Thirty-one guessing games. A tenth of a second of a song, one second of a film, a street corner somewhere on Earth.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#f4f3ec",

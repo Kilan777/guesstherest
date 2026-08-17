@@ -4,6 +4,20 @@
  * Every photograph on a game card, with the licence it came under and who made
  * it. The credits page renders this; CC-BY and CC-BY-SA both require the
  * attribution to be shown, so it has to live somewhere a reader can reach.
+ *
+ * MANUAL CORRECTION — the six `logo` entries.
+ * The generator copies Commons' `LicenseShortName` and nothing else, which for
+ * these six reads "Public domain" and stops there. That is true of the
+ * copyright and silent about the rest: all six are tagged PD-textlogo (a plain
+ * wordmark, below the threshold of originality) *and* carry Commons'
+ * `Restrictions: trademarked`. Stating only "Public domain" reads as a blanket
+ * free-to-use claim over a registered trademark, so the licence strings were
+ * widened by hand to say both. If `scripts/build-card-art.mjs` is ever re-run,
+ * teach it to read `extmetadata.Restrictions` first or this is lost again.
+ *
+ * These entries cover the launcher card art only. Photographs shown during play
+ * are credited at the point of use — see `ImageCredit` in `src/games/stages.tsx`
+ * and `creditFor` in `src/content/wikipedia.ts`.
  */
 export type ArtCredit = { subject: string; licence: string; author: string; file: string | null };
 
@@ -171,37 +185,37 @@ export const ART_CREDITS: Record<string, ArtCredit[]> = {
   "logo": [
     {
       "subject": "Coca-Cola logo",
-      "licence": "Public domain",
+      "licence": "Public domain (PD-textlogo); trademarked",
       "author": "The Coca-Cola Company",
       "file": "File:Coca-Cola logo.svg"
     },
     {
       "subject": "Logo NIKE",
-      "licence": "Public domain",
+      "licence": "Public domain (PD-textlogo); trademarked",
       "author": "Carolyn Davidson, Nike",
       "file": "File:Logo NIKE.svg"
     },
     {
       "subject": "IBM logo",
-      "licence": "Public domain",
+      "licence": "Public domain (PD-textlogo); trademarked",
       "author": "Paul Rand",
       "file": "File:IBM logo.svg"
     },
     {
       "subject": "McDonald's Golden Arches",
-      "licence": "Public domain",
+      "licence": "Public domain (PD-textlogo); trademarked",
       "author": "McDonald's",
       "file": "File:McDonald's Golden Arches.svg"
     },
     {
       "subject": "Adidas Logo",
-      "licence": "Public domain",
+      "licence": "Public domain (PD-textlogo); trademarked",
       "author": "Adidas",
       "file": "File:Adidas Logo.svg"
     },
     {
       "subject": "LEGO logo",
-      "licence": "Public domain",
+      "licence": "Public domain (PD-textlogo); trademarked",
       "author": "The Lego Group",
       "file": "File:LEGO logo.svg"
     }

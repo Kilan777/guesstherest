@@ -1,6 +1,6 @@
 import type { Deck, GameDef, Option, StageProps } from '../engine/types';
 import { outlineMeta } from './outline.meta';
-import { pageInfo } from '../content/wikipedia';
+import { pageInfo, type ImageCredit } from '../content/wikipedia';
 import { streamDeck } from '../content/deck';
 import { TileStage } from './stages';
 
@@ -10,7 +10,14 @@ const ROWS = 4;
 /** Windows cut at each rung, out of 24. */
 const OPENED = [3, 7, 12, 18, 24];
 
-type OutlinePayload = { map: string | null; label: string; region: string; wide: boolean };
+type OutlinePayload = {
+  map: string | null;
+  label: string;
+  region: string;
+  wide: boolean;
+  /** Attribution for the map image file, shown on the reveal. */
+  credit: ImageCredit | null;
+};
 
 function OutlineStage({ round, level, revealed }: StageProps) {
   const p = round.payload as OutlinePayload;
@@ -31,6 +38,7 @@ function OutlineStage({ round, level, revealed }: StageProps) {
       // third of the country. Thirty of the sixty-eight maps are portrait, so
       // the seed carries the orientation its own lead image was measured at.
       aspect={p.wide ? 'landscape' : 'portrait'}
+      credit={p.credit}
       caption={
         <>
           <strong>{p.label}</strong>
@@ -59,9 +67,10 @@ async function loadDeck(count: number, rng: () => number): Promise<Deck> {
       const info = await pageInfo(seed.wiki);
       // Maps are mostly flat colour, so the 1280px render is plenty and loads in
       // a fraction of the time the original takes.
-      return info?.image ?? info?.imageFull ?? null;
+      const map = info?.image ?? info?.imageFull ?? null;
+      return map ? { map, credit: info?.credit ?? null } : null;
     },
-    toRound: (seed, map) => ({
+    toRound: (seed, { map, credit }) => ({
       id: `outline:${seed.wiki}`,
       answer: { id: `outline:${seed.wiki}`, label: seed.label, sublabel: seed.region },
       payload: {
@@ -69,6 +78,7 @@ async function loadDeck(count: number, rng: () => number): Promise<Deck> {
         label: seed.label,
         region: seed.region,
         wide: seed.wide,
+        credit,
       } satisfies OutlinePayload,
     }),
     emptyError: 'Could not reach Wikipedia for country maps.',

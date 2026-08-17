@@ -11,6 +11,7 @@ import { CardArt, hasCardPhoto } from './CardArt';
 import { ART_CREDITS } from '../content/art-credits';
 import { NamePrompt } from './NamePrompt';
 import { AdSlot, AD_SLOTS } from './AdSlot';
+import { SiteLinks } from './SiteLinks';
 import { Suggest } from './Suggest';
 
 /**
@@ -188,11 +189,12 @@ export function Home(props: { onPlay: (slug: string) => void; onOpenSettings: ()
           Wikipedia · trailers from YouTube. No API keys, no account required. The only thing stored
           about you is the name you pick.
         </p>
-        <p>
+        <div className="foot-links">
           <button type="button" className="link-btn" onClick={() => setCredits(true)}>
             Photo credits
           </button>
-        </p>
+          <SiteLinks />
+        </div>
       </footer>
 
       {credits && <CreditsPanel onClose={() => setCredits(false)} />}

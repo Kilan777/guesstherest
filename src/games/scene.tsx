@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Deck, GameDef, Option, StageProps } from '../engine/types';
 import { sceneMeta } from './scene.meta';
-import { pageInfo } from '../content/wikipedia';
 import { streamDeck } from '../content/deck';
 import { loadYouTubeApi, type YTPlayer } from '../lib/youtube';
 import { usePlayAction } from '../engine/player';
@@ -10,7 +9,6 @@ const DURATIONS = [1, 2, 4, 8, 15];
 
 type ScenePayload = {
   video: string;
-  poster: string | null;
   title: string;
   year: number;
   start: number;
@@ -230,23 +228,34 @@ async function loadDeck(count: number, rng: () => number): Promise<Deck> {
     sublabel: String(m.year),
   }));
 
-  // Every trailer id in MOVIES was checked, so this needs no network at all —
-  // the poster lookup is only for the reveal card and may fail harmlessly.
+  /*
+   * No Wikipedia lookup, and that is a deliberate removal rather than an
+   * oversight.
+   *
+   * This used to fetch each film's lead image "for the reveal card". Nothing
+   * ever rendered it: `SceneStage` shows the trailer, and its reveal card shows
+   * the title and the year — the poster was written into the payload and read
+   * by no one. So it bought nothing and cost two things. One was a Wikipedia
+   * round trip per round, on the critical path of dealing the deck, for a value
+   * that was thrown away. The other was a licensing trap: a film article's lead
+   * image is almost always a poster hosted locally on en.wikipedia under a
+   * fair-use rationale that does not extend to this site, and it was sitting in
+   * the payload waiting for someone to render it.
+   *
+   * Every trailer id in MOVIES was verified when the deck was written, so a
+   * round now needs no network at all to be dealt.
+   */
   return streamDeck({
     pool: MOVIES,
     count,
     rng,
     catalog,
-    resolve: async (seed) => {
-      const info = await pageInfo(seed.wiki).catch(() => null);
-      return { poster: info?.imageFull ?? null };
-    },
-    toRound: (seed, value) => ({
+    resolve: async (seed) => seed,
+    toRound: (seed) => ({
       id: `scene:${seed.wiki}`,
       answer: { id: `scene:${seed.wiki}`, label: seed.title, sublabel: String(seed.year) },
       payload: {
         video: seed.yt,
-        poster: value.poster,
         title: seed.title,
         year: seed.year,
         start: seed.start,

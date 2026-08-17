@@ -1,6 +1,6 @@
 import type { Deck, GameDef, Option, StageProps } from '../engine/types';
 import { celebrityMeta } from './celebrity.meta';
-import { pageInfo } from '../content/wikipedia';
+import { pageInfo, type ImageCredit } from '../content/wikipedia';
 import { streamDeck } from '../content/deck';
 import { BlurStage } from './stages';
 
@@ -9,7 +9,13 @@ import { BlurStage } from './stages';
 const BLURS = [9, 4, 1.5];
 const SCALES = [1.26, 1.14, 1.05];
 
-type CelebrityPayload = { portrait: string | null; label: string; note: string };
+type CelebrityPayload = {
+  portrait: string | null;
+  label: string;
+  note: string;
+  /** Attribution for the portrait, shown on the reveal. */
+  credit: ImageCredit | null;
+};
 
 function CelebrityStage({ round, level, revealed }: StageProps) {
   const p = round.payload as CelebrityPayload;
@@ -20,6 +26,7 @@ function CelebrityStage({ round, level, revealed }: StageProps) {
       scales={SCALES}
       level={level}
       revealed={revealed}
+      credit={p.credit}
       caption={
         <>
           <strong>{p.label}</strong>
@@ -55,6 +62,7 @@ async function loadDeck(count: number, rng: () => number): Promise<Deck> {
         label: seed.label,
         // The article's one-line description, e.g. "American actress".
         note: info.description,
+        credit: info.credit,
       } satisfies CelebrityPayload,
     }),
     emptyError: 'Could not reach Wikipedia for actor portraits.',

@@ -1,9 +1,21 @@
 import type { Deck, GameDef, StageProps } from '../engine/types';
 import { yearMeta, YEAR_MIN, YEAR_MAX } from './year.meta';
-import { pageInfo } from '../content/wikipedia';
+import { pageInfo, type ImageCredit } from '../content/wikipedia';
 import { streamDeck } from '../content/deck';
+import { ImageCredit as ImageCreditLine } from './stages';
 
-type YearPayload = { poster: string | null; title: string; blurb: string; year: number };
+type YearPayload = {
+  poster: string | null;
+  title: string;
+  blurb: string;
+  year: number;
+  /**
+   * Attribution for the poster. Held back until the reveal like every other
+   * credit: poster file names on Wikipedia routinely carry the release year,
+   * which in this game is the answer.
+   */
+  credit: ImageCredit | null;
+};
 
 /**
  * Wikipedia's one-line description for a film is almost always "2010 film by
@@ -48,9 +60,12 @@ function YearStage({ round, level, revealed }: StageProps) {
             </ul>
           )}
           {revealed && (
-            <div className="year-answer">
-              Released <strong>{p.year}</strong>
-            </div>
+            <>
+              <div className="year-answer">
+                Released <strong>{p.year}</strong>
+              </div>
+              <ImageCreditLine credit={p.credit} />
+            </>
           )}
         </div>
       </div>
@@ -69,7 +84,11 @@ async function loadDeck(count: number, rng: () => number): Promise<Deck> {
     catalog: [],
     resolve: async (seed) => {
       const info = await pageInfo(seed.wiki);
-      return { poster: info?.imageFull ?? null, blurb: stripYears(info?.description ?? '') };
+      return {
+        poster: info?.imageFull ?? null,
+        blurb: stripYears(info?.description ?? ''),
+        credit: info?.credit ?? null,
+      };
     },
     toRound: (seed, value) => {
       const decade = Math.floor(seed.year / 10) * 10;
@@ -90,6 +109,7 @@ async function loadDeck(count: number, rng: () => number): Promise<Deck> {
           title: seed.title,
           blurb: value.blurb,
           year: seed.year,
+          credit: value.credit,
         } satisfies YearPayload,
       };
     },

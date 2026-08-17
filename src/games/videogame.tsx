@@ -1,6 +1,6 @@
 import type { Deck, GameDef, Option, StageProps } from '../engine/types';
 import { videoGameMeta } from './videogame.meta';
-import { pageInfo } from '../content/wikipedia';
+import { pageInfo, type ImageCredit } from '../content/wikipedia';
 import { streamDeck } from '../content/deck';
 import { TileStage } from './stages';
 
@@ -9,7 +9,13 @@ const ROWS = 8;
 /** Tiles lifted at each rung, out of 48. */
 const OPENED = [2, 6, 13, 24, 36];
 
-type VideoGamePayload = { cover: string | null; label: string; year: number };
+type VideoGamePayload = {
+  cover: string | null;
+  label: string;
+  year: number;
+  /** Attribution for the cover image file, shown on the reveal. */
+  credit: ImageCredit | null;
+};
 
 function VideoGameStage({ round, level, revealed }: StageProps) {
   const p = round.payload as VideoGamePayload;
@@ -31,6 +37,7 @@ function VideoGameStage({ round, level, revealed }: StageProps) {
       // round actually loaded instead, and `contain` guarantees the rest.
       aspect="auto"
       fit="contain"
+      credit={p.credit}
       caption={
         <>
           <strong>{p.label}</strong>
@@ -59,12 +66,13 @@ async function loadDeck(count: number, rng: () => number): Promise<Deck> {
       const info = await pageInfo(seed.wiki);
       // Box art is non-free media, hosted at a few hundred pixels wide. The
       // un-resized original is the sharpest thing on offer and costs nothing.
-      return info?.imageFull ?? info?.image ?? null;
+      const cover = info?.imageFull ?? info?.image ?? null;
+      return cover ? { cover, credit: info?.credit ?? null } : null;
     },
-    toRound: (seed, cover) => ({
+    toRound: (seed, { cover, credit }) => ({
       id: `game:${seed.wiki}`,
       answer: { id: `game:${seed.wiki}`, label: seed.label, sublabel: String(seed.year) },
-      payload: { cover, label: seed.label, year: seed.year } satisfies VideoGamePayload,
+      payload: { cover, label: seed.label, year: seed.year, credit } satisfies VideoGamePayload,
     }),
     emptyError: 'Could not reach Wikipedia for game cover art.',
   });

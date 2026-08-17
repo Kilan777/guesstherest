@@ -1,6 +1,6 @@
 import type { Deck, GameDef, Option, StageProps } from '../engine/types';
 import { boardgameMeta } from './boardgame.meta';
-import { pageInfo } from '../content/wikipedia';
+import { pageInfo, type ImageCredit } from '../content/wikipedia';
 import { streamDeck } from '../content/deck';
 import { TileStage } from './stages';
 
@@ -10,7 +10,13 @@ const ROWS = 8;
 /** Windows cut at each rung, out of 48. */
 const OPENED = [2, 6, 13, 24, 36];
 
-type BoardGamePayload = { box: string | null; label: string; year: number };
+type BoardGamePayload = {
+  box: string | null;
+  label: string;
+  year: number;
+  /** Attribution for the box-art image file, shown on the reveal. */
+  credit: ImageCredit | null;
+};
 
 /** Four of these predate the calendar most people use. */
 function displayYear(year: number): string {
@@ -32,6 +38,7 @@ function BoardGameStage({ round, level, revealed }: StageProps) {
       // tiles near the edge then open onto blank bars instead of the picture.
       aspect="auto"
       fit="contain"
+      credit={p.credit}
       caption={
         <>
           <strong>{p.label}</strong>
@@ -61,12 +68,13 @@ async function loadDeck(count: number, rng: () => number): Promise<Deck> {
       // Box art is non-free media uploaded at whatever size the uploader had, so
       // the /thumb/ render this width is frequently missing. Ask for the
       // original first — it is small to begin with.
-      return info?.imageFull ?? info?.image ?? null;
+      const box = info?.imageFull ?? info?.image ?? null;
+      return box ? { box, credit: info?.credit ?? null } : null;
     },
-    toRound: (seed, box) => ({
+    toRound: (seed, { box, credit }) => ({
       id: `bg:${seed.wiki}`,
       answer: { id: `bg:${seed.wiki}`, label: seed.label, sublabel: displayYear(seed.year) },
-      payload: { box, label: seed.label, year: seed.year } satisfies BoardGamePayload,
+      payload: { box, label: seed.label, year: seed.year, credit } satisfies BoardGamePayload,
     }),
     emptyError: 'Could not reach Wikipedia for board game images.',
   });

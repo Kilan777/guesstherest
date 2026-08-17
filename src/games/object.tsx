@@ -1,6 +1,6 @@
 import type { Deck, GameDef, Option, StageProps } from '../engine/types';
 import { objectMeta } from './object.meta';
-import { pageInfo } from '../content/wikipedia';
+import { pageInfo, type ImageCredit } from '../content/wikipedia';
 import { streamDeck } from '../content/deck';
 import { ZoomStage, focalOf } from './stages';
 
@@ -12,6 +12,8 @@ type ObjectPayload = {
   emoji: string;
   label: string;
   description: string;
+  /** Attribution for the photograph, shown on the reveal. */
+  credit: ImageCredit | null;
 };
 
 function ObjectStage({ round, level, revealed }: StageProps) {
@@ -25,6 +27,7 @@ function ObjectStage({ round, level, revealed }: StageProps) {
       level={level}
       revealed={revealed}
       focal={focalOf(round.id)}
+      credit={p.credit}
       caption={
         <>
           <strong>{p.label}</strong>
@@ -57,6 +60,7 @@ async function loadDeck(count: number, rng: () => number): Promise<Deck> {
         emoji: seed.emoji,
         label: seed.label,
         description: info?.description ?? '',
+        credit: info?.credit ?? null,
       } satisfies ObjectPayload,
     }),
     eager: 2,

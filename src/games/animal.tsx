@@ -1,6 +1,6 @@
 import type { Deck, GameDef, Option, StageProps } from '../engine/types';
 import { animalMeta } from './animal.meta';
-import { pageInfo } from '../content/wikipedia';
+import { pageInfo, type ImageCredit } from '../content/wikipedia';
 import { streamDeck } from '../content/deck';
 import { ZoomStage, focalOf } from './stages';
 
@@ -12,6 +12,8 @@ type AnimalPayload = {
   srcFull: string | null;
   label: string;
   note: string;
+  /** Attribution for the photograph, shown on the reveal. */
+  credit: ImageCredit | null;
 };
 
 function AnimalStage({ round, level, revealed }: StageProps) {
@@ -24,6 +26,7 @@ function AnimalStage({ round, level, revealed }: StageProps) {
       level={level}
       revealed={revealed}
       focal={focalOf(round.id)}
+      credit={p.credit}
       caption={
         <>
           <strong>{p.label}</strong>
@@ -60,6 +63,7 @@ async function loadDeck(count: number, rng: () => number): Promise<Deck> {
         label: seed.label,
         // Wikipedia's one-line description, e.g. "species of carnivore".
         note: info.description,
+        credit: info.credit,
       } satisfies AnimalPayload,
     }),
     emptyError: 'Could not reach Wikipedia for animal photographs.',

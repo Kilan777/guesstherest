@@ -20,6 +20,14 @@ const ADSENSE_CLIENT = 'ca-pub-8046311729398937';
  * with the thing the player is waiting for.
  *
  * Build-only, so local dev and headless test runs never load a tracker.
+ *
+ * One thing this tag cannot decide, and the console must: Auto ads have to stay
+ * OFF for this site. The whole app is one URL, so auto ads cannot be excluded
+ * from the play and results screens by URL the way they normally would be — the
+ * loader would place units on a screen showing a stopwatch and a leaderboard,
+ * which is the exact placement the site was declined for. With auto ads off,
+ * the loader fills only the units that are explicitly written into a page: one
+ * under the game list on the home page, and one on each prerendered article.
  */
 function adsenseTag(): Plugin {
   return {

@@ -628,6 +628,35 @@ a {
   margin-top: 8px;
 }
 
+.foot-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  align-items: baseline;
+  margin-top: 8px;
+}
+
+/* The written pages, linked from inside the app (SiteLinks.tsx). Quiet by
+   design — it is a footer, not a nav — but present on every screen a visitor
+   can be standing on. */
+.site-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  font-size: 0.8rem;
+}
+
+.site-links a {
+  color: var(--forest);
+}
+
+/* Under a finished run, below the leaderboard. */
+.screen-links {
+  justify-content: center;
+  margin-top: 6px;
+  color: var(--text-faint);
+}
+
 .link-btn {
   font: inherit;
   font-size: 0.8rem;
@@ -1005,6 +1034,34 @@ a {
   margin: 0;
   color: var(--text-faint);
   font-size: 0.82rem;
+}
+
+/**
+ * Attribution under a revealed picture. Deliberately the quietest thing on the
+ * stage — it has to be legible and clickable to do its job, and no louder than
+ * that, because it appears under every photograph in the game.
+ */
+.img-credit {
+  margin: 4px 0 0;
+  color: var(--text-faint);
+  font-size: 0.72rem;
+  line-height: 1.35;
+  text-align: center;
+  max-width: 42ch;
+  overflow-wrap: anywhere;
+}
+
+.img-credit a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
+  text-underline-offset: 2px;
+}
+
+.img-credit a:hover,
+.img-credit a:focus-visible {
+  color: var(--text-dim);
+  text-decoration-color: currentColor;
 }
 
 .rebus {
@@ -1936,6 +1993,43 @@ kbd {
   font-variant-numeric: tabular-nums;
 }
 
+/* Moderator takedown. The extra column exists only when a moderator is signed
+   in — `board-list-mod` is not on the list otherwise — so nobody else's board
+   reflows to make room for a control they will never see.
+
+   Same treatment as .mod-tools: dimmed until you go looking for it, so it reads
+   as an admin affordance sitting beside the board rather than part of it. It
+   comes up to full opacity on hover, and on keyboard focus too, since a control
+   you can tab to but not see is worse than no control at all. */
+.board-list-mod .board-row {
+  grid-template-columns: 2.2rem 1fr auto auto auto;
+}
+
+.board-mod {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  opacity: 0.5;
+  transition: opacity 0.15s ease;
+}
+
+.board-row:hover .board-mod,
+.board-mod:focus-within {
+  opacity: 1;
+}
+
+/* Smaller than .btn-sm: a leaderboard row is 0.92rem tall and this must not be
+   the biggest thing on it. */
+.board-mod .btn-sm {
+  padding: 3px 9px;
+  font-size: 0.72rem;
+}
+
+.board-mod .mod-note {
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+
 /* ── settings modal ───────────────────────────────────────────────────────── */
 
 .modal-backdrop {
@@ -2218,6 +2312,22 @@ kbd {
 
   .board-row {
     grid-template-columns: 1.8rem 1fr auto;
+  }
+
+  /* .board-meta is gone at this width, so the moderator column takes its slot
+     rather than adding a fifth. */
+  .board-list-mod .board-row {
+    grid-template-columns: 1.8rem 1fr auto auto;
+  }
+
+  /* Confirming needs three controls' worth of room, which on a phone would
+     squeeze the handle column down to one letter — and the name is the whole
+     reason you are deleting the row. So the confirmation drops onto its own
+     line under the entry instead. */
+  .board-mod-confirm {
+    grid-column: 1 / -1;
+    justify-content: flex-end;
+    margin-top: 4px;
   }
 
   .board-meta {

@@ -1,6 +1,6 @@
 import type { Deck, GameDef, Option, StageProps } from '../engine/types';
 import { birdMeta } from './bird.meta';
-import { pageInfo } from '../content/wikipedia';
+import { pageInfo, type ImageCredit } from '../content/wikipedia';
 import { streamDeck } from '../content/deck';
 import { ZoomStage, focalOf } from './stages';
 
@@ -12,6 +12,8 @@ type BirdPayload = {
   srcFull: string | null;
   label: string;
   where: string;
+  /** Attribution for the photograph, shown on the reveal. */
+  credit: ImageCredit | null;
 };
 
 function BirdStage({ round, level, revealed }: StageProps) {
@@ -25,6 +27,7 @@ function BirdStage({ round, level, revealed }: StageProps) {
       level={level}
       revealed={revealed}
       focal={focalOf(round.id)}
+      credit={p.credit}
       caption={
         <>
           <strong>{p.label}</strong>
@@ -60,6 +63,7 @@ async function loadDeck(count: number, rng: () => number): Promise<Deck> {
         srcFull: info.imageFull,
         label: seed.label,
         where: seed.where,
+        credit: info.credit,
       } satisfies BirdPayload,
     }),
     emptyError: 'Could not reach Wikipedia for bird photographs.',

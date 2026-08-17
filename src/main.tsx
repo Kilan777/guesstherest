@@ -28,6 +28,17 @@ if (target) warmDeck(target);
 // browsers, so local runs and screenshot tests never load a tracker.
 initAds();
 
+/**
+ * The built HTML ships #root with real content in it — an introduction and the
+ * whole game list, written by scripts/prerender.mjs so the document says
+ * something before any of this runs. The app is about to replace it. Emptying
+ * it first is not required (Preact reconciles against existing DOM), but it
+ * makes the handover exact rather than a diff against markup React never
+ * produced, and it happens in the same task as the render, so nothing paints
+ * in between.
+ */
+root.textContent = '';
+
 createRoot(root).render(
   <StrictMode>
     <App />

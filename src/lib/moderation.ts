@@ -302,6 +302,56 @@ export async function unhideItem(gameSlug: string, itemId: string): Promise<bool
   }
 }
 
+// ── taking a handle off a board ─────────────────────────────────────────────
+
+/**
+ * Remove a player's scores for one game, which is how a bad handle comes off a
+ * leaderboard.
+ *
+ * Scores are otherwise immutable — 0001 gave the table no UPDATE or DELETE
+ * policy at all — and that is still true for players. `0005_handle_guard.sql`
+ * adds a DELETE policy for moderators only, checked against the verified email
+ * claim in the JWT exactly as the hide-list is.
+ *
+ * It deletes every score that player has for that game rather than the single
+ * row on screen, because `leaderboard` is a DISTINCT ON view showing each
+ * player's personal best: delete only their best run and their second-best run
+ * takes its place, under the same name, and the moderator gets to play
+ * whack-a-mole with one person's ten attempts. The handle is the problem, so
+ * the handle has to go.
+ *
+ * Their scores on OTHER games are untouched. Those are separate boards with
+ * their own rows, and a moderator looking at one board has only judged that
+ * board; a name bad enough to remove everywhere is easier to sweep in the
+ * dashboard than to guess at from here.
+ *
+ * Returns whether anything was actually removed. That distinction matters: a
+ * non-moderator now holds the DELETE privilege but not the policy, so their
+ * request is not an error — it matches zero rows and returns 200. Asking for
+ * the deleted rows back with `.select()` and counting them is the only honest
+ * way to tell "removed" from "refused".
+ */
+export async function removeScores(gameSlug: string, playerId: string): Promise<boolean> {
+  try {
+    const sb = await getSupabase();
+    if (!sb) return false;
+
+    const { data, error } = await sb
+      .from('scores')
+      .delete()
+      .eq('game_slug', gameSlug)
+      .eq('player_id', playerId)
+      .select('id');
+    if (error) {
+      console.warn('[guess-the] score removal failed:', error.message);
+      return false;
+    }
+    return (data?.length ?? 0) > 0;
+  } catch {
+    return false;
+  }
+}
+
 /** Both cache tiers now hold a stale list; drop them so the next read refetches. */
 function refresh(): void {
   rowsPromise = null;

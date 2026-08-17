@@ -1,4 +1,99 @@
-import { useEffect, useMemo, useState } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
+import { imageLicence, type ImageCredit as Credit, type ImageLicence } from '../content/wikipedia';
+
+export type { Credit };
+
+/** A credit, optionally named — used where a round shows more than one picture. */
+export type CreditItem = Credit & { label?: string };
+
+/**
+ * One picture's credit: a link to its file description page, upgraded to
+ * "Image: <author> / <licence>" if and when the lazy lookup lands.
+ */
+function OneCredit({ credit }: { credit: CreditItem }) {
+  const [detail, setDetail] = useState<ImageLicence | null>(null);
+
+  useEffect(() => {
+    setDetail(null);
+    let alive = true;
+    imageLicence(credit)
+      .then((d) => {
+        if (alive) setDetail(d);
+      })
+      .catch(() => {
+        /* The link stands on its own — a failed upgrade changes nothing. */
+      });
+    return () => {
+      alive = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [credit.page]);
+
+  const named = [detail?.author, detail?.licence].filter(Boolean).join(' / ');
+  return (
+    <p className="img-credit">
+      <a href={credit.page} target="_blank" rel="noopener noreferrer">
+        {named ? `Image: ${named}` : 'Image source'}
+      </a>
+    </p>
+  );
+}
+
+/**
+ * The attribution line under a revealed picture.
+ *
+ * Most Wikimedia photographs are CC BY-SA, which requires the author and the
+ * licence to travel with the picture. Two rules govern this component and
+ * neither is negotiable:
+ *
+ *  - It renders *only* on the reveal. A Wikimedia file name almost always
+ *    contains the subject's name, so a credit shown mid-round is the answer.
+ *    Every stage below therefore places it inside its `revealed` branch, and
+ *    nothing here is mounted — or fetched — before then.
+ *  - It degrades to nothing. With no derivable file page there is no link and
+ *    no line, rather than a plausible-looking URL that 404s.
+ *
+ * The link is a complete attribution on its own and is there from the first
+ * frame. Author and licence are an upgrade fetched afterwards; if that request
+ * is slow or fails, the line simply stays as "Image source".
+ */
+export function ImageCredit({ credit }: { credit?: CreditItem | CreditItem[] | null }) {
+  const list = (Array.isArray(credit) ? credit : credit ? [credit] : []).filter((c) => !!c?.page);
+
+  if (list.length === 0) return null;
+  if (list.length === 1) return <OneCredit credit={list[0] as CreditItem} />;
+
+  // A round that shows several pictures at once (the quote game's four
+  // portraits) gets one line of links rather than four stacked credits. Each
+  // link still lands on the file page that carries its author and licence.
+  return (
+    <p className="img-credit">
+      Images:{' '}
+      {list.map((c, i) => (
+        <Fragment key={c.page}>
+          {i > 0 ? ' · ' : ''}
+          <a href={c.page} target="_blank" rel="noopener noreferrer">
+            {c.label ?? 'source'}
+          </a>
+        </Fragment>
+      ))}
+    </p>
+  );
+}
+
+/** Caption plus credit, the way every stage renders them once a round is over. */
+function Reveal(props: {
+  caption?: React.ReactNode;
+  credit?: CreditItem | CreditItem[] | null;
+}) {
+  if (!props.caption && !props.credit) return null;
+  return (
+    <div className="stage-caption">
+      {props.caption}
+      <ImageCredit credit={props.credit} />
+    </div>
+  );
+}
 
 /** Deterministic focal point per round, so the zoom target doesn't jump on re-render. */
 export function focalOf(seedText: string): [number, number] {
@@ -79,6 +174,11 @@ export function ZoomStage(props: {
   focal: [number, number];
   /** Rendered under the frame once the round is over. */
   caption?: React.ReactNode;
+  /**
+   * Attribution for the picture being shown. Rendered on the reveal only — see
+   * {@link ImageCredit}.
+   */
+  credit?: CreditItem | CreditItem[] | null;
 }) {
   const { src, srcFallback, scales, level, revealed, focal, fallbackEmoji } = props;
   const state = useImageState([src, srcFallback ?? null]);
@@ -108,7 +208,7 @@ export function ZoomStage(props: {
         )}
         {!revealed && <div className="frame-vignette" aria-hidden />}
       </div>
-      {revealed && props.caption ? <div className="stage-caption">{props.caption}</div> : null}
+      <Reveal caption={revealed ? props.caption : null} credit={revealed ? props.credit : null} />
     </div>
   );
 }
@@ -168,6 +268,11 @@ export function TileStage(props: {
    */
   fit?: 'cover' | 'contain';
   caption?: React.ReactNode;
+  /**
+   * Attribution for the picture being shown. Rendered on the reveal only — see
+   * {@link ImageCredit}.
+   */
+  credit?: CreditItem | CreditItem[] | null;
 }) {
   const { src, opened, level, revealed } = props;
   const conceal = props.conceal ?? 'blur';
@@ -316,7 +421,7 @@ export function TileStage(props: {
           <div className="frame-msg shimmer">Loading…</div>
         )}
       </div>
-      {revealed && props.caption ? <div className="stage-caption">{props.caption}</div> : null}
+      <Reveal caption={revealed ? props.caption : null} credit={revealed ? props.credit : null} />
     </div>
   );
 }
@@ -340,6 +445,11 @@ export function BlurStage(props: {
   level: number;
   revealed: boolean;
   caption?: React.ReactNode;
+  /**
+   * Attribution for the picture being shown. Rendered on the reveal only — see
+   * {@link ImageCredit}.
+   */
+  credit?: CreditItem | CreditItem[] | null;
 }) {
   const { src, blurs, scales, level, revealed } = props;
   const fit = props.fit ?? 'cover';
@@ -369,7 +479,7 @@ export function BlurStage(props: {
           <div className="frame-msg shimmer">Loading…</div>
         )}
       </div>
-      {revealed && props.caption ? <div className="stage-caption">{props.caption}</div> : null}
+      <Reveal caption={revealed ? props.caption : null} credit={revealed ? props.credit : null} />
     </div>
   );
 }
@@ -385,6 +495,11 @@ export function TextStage(props: {
   level: number;
   revealed: boolean;
   caption?: React.ReactNode;
+  /**
+   * Attribution for the picture being shown. Rendered on the reveal only — see
+   * {@link ImageCredit}.
+   */
+  credit?: CreditItem | CreditItem[] | null;
 }) {
   const visible = props.hints.slice(0, props.revealed ? props.hints.length : props.level);
   return (
@@ -402,7 +517,7 @@ export function TextStage(props: {
           ))}
         </ul>
       )}
-      {props.revealed && props.caption ? <div className="stage-caption">{props.caption}</div> : null}
+      <Reveal caption={props.revealed ? props.caption : null} credit={props.revealed ? props.credit : null} />
     </div>
   );
 }
@@ -431,6 +546,11 @@ export function StreetViewStage(props: {
   hints?: string[];
   level?: number;
   caption?: React.ReactNode;
+  /**
+   * Attribution for the picture being shown. Rendered on the reveal only — see
+   * {@link ImageCredit}.
+   */
+  credit?: CreditItem | CreditItem[] | null;
 }) {
   const { lat, lng, seed, revealed } = props;
   const hints = props.hints ?? [];
@@ -471,7 +591,7 @@ export function StreetViewStage(props: {
           ))}
         </ul>
       )}
-      {revealed && props.caption ? <div className="stage-caption">{props.caption}</div> : null}
+      <Reveal caption={revealed ? props.caption : null} credit={revealed ? props.credit : null} />
     </div>
   );
 }
