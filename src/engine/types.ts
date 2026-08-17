@@ -61,7 +61,13 @@ export type GameOption = {
   blurb?: string;
 };
 
-export type GameDef = {
+/**
+ * Everything the launcher needs to describe a game — and nothing that has to be
+ * executed to play one. Each game keeps its own copy in a `<slug>.meta.ts`
+ * sibling, which is what `src/games/index.ts` imports statically: the home page
+ * can render all thirty cards without pulling in a single Stage component.
+ */
+export type GameMeta = {
   slug: string;
   title: string;
   /** Short name for tight spaces (nav, board headers). */
@@ -93,6 +99,13 @@ export type GameDef = {
    * also decides what the guess list contains.
    */
   options?: { label: string; hint?: string; choices: GameOption[] };
+};
+
+/**
+ * The metadata plus the code that plays the game. Only loaded once a game is
+ * actually opened — see `loadGame` in `src/games/index.ts`.
+ */
+export type GameDef = GameMeta & {
   loadDeck: (count: number, rng: () => number, option?: string) => Promise<Deck>;
   /**
    * Pull the next round's media into cache while the current one is being

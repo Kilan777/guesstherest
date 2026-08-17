@@ -1,4 +1,5 @@
 import type { Deck, GameDef, Option, StageProps } from '../engine/types';
+import { outlineMeta } from './outline.meta';
 import { pageInfo } from '../content/wikipedia';
 import { streamDeck } from '../content/deck';
 import { TileStage } from './stages';
@@ -75,20 +76,7 @@ async function loadDeck(count: number, rng: () => number): Promise<Deck> {
 }
 
 export const outlineGame: GameDef = {
-  slug: 'outline',
-  title: 'Guess the Country by Outline',
-  short: 'Outline',
-  tagline: 'Name the country from the shape of it on a map.',
-  blurb:
-    'A map of one country behind a panel of twenty-four windows. Three open to start, which is usually one stretch of border and two of nothing. Coastline gives it away faster than anything inland does.',
-  emoji: '🗺️',
-  accent: '#4E6B1C',
-  guess: 'search',
-  levels: ['3 windows', '7 windows', '12 windows', '18 windows', '24 windows'],
-  skipLabel: 'Open more',
-  needsNetwork: true,
-  rounds: 10,
-  keywords: ['country', 'map', 'outline', 'border', 'geography', 'world', 'shape'],
+  ...outlineMeta,
   prefetch: (round) => {
     const p = round.payload as OutlinePayload | undefined;
     if (p?.map) new Image().src = p.map;

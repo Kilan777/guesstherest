@@ -12,6 +12,20 @@
     <meta property="og:title" content="Guess The Rest" />
     <meta property="og:description" content="Thirty guessing games. A tenth of a second of a song. One second of a film. A street corner somewhere on Earth." />
     <meta name="twitter:card" content="summary_large_image" />
+    <!--
+      On a phone, opening a fresh connection to a new host costs a DNS lookup, a
+      TCP handshake and a TLS handshake before a single byte of useful data
+      moves. The song game needs two hosts it cannot know about until its
+      JavaScript has parsed; starting those handshakes while the HTML is still
+      being read takes that cost off the critical path. The audio host is the
+      one that matters most, since that is the largest download in the game.
+    -->
+    <link rel="preconnect" href="https://itunes.apple.com" crossorigin />
+    <link rel="preconnect" href="https://audio-ssl.itunes.apple.com" crossorigin />
+    <link rel="dns-prefetch" href="https://en.wikipedia.org" />
+    <link rel="dns-prefetch" href="https://upload.wikimedia.org" />
+    <link rel="dns-prefetch" href="https://maps.google.com" />
+
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />

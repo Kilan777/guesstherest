@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { getSettings, updateSettings } from '../lib/settings';
 import { setHandle, randomHandle } from '../lib/identity';
+import { checkHandle } from '../lib/handle-filter';
 
 /**
  * Player-facing settings only: what you're called, and whether it makes noise.
@@ -24,7 +25,15 @@ export function Settings(props: { onClose: () => void }) {
     return () => window.removeEventListener('keydown', onKey);
   }, [props]);
 
+  // Names go on a public board, so a rejected one can't be saved. The message
+  // says the name is out without saying which part of it tripped the check.
+  const nameProblem = useMemo(() => {
+    const verdict = checkHandle(handle);
+    return verdict.ok ? null : verdict.reason;
+  }, [handle]);
+
   function save() {
+    if (nameProblem) return;
     setHandle(handle);
     updateSettings({ sfx });
     props.onClose();
@@ -49,16 +58,24 @@ export function Settings(props: { onClose: () => void }) {
               maxLength={20}
               onChange={(e) => setHandleValue(e.target.value)}
               placeholder="Pick a name"
+              aria-invalid={nameProblem ? true : undefined}
+              aria-describedby={nameProblem ? 'set-handle-error' : undefined}
               onKeyDown={(e) => e.key === 'Enter' && save()}
             />
             <button type="button" className="btn btn-ghost" onClick={() => setHandleValue(randomHandle())}>
               Random
             </button>
           </div>
-          <p className="hint-text">
-            Shown next to your scores. Yours to choose — signing in with Google suggests your
-            Google name, but never overwrites a name you set here.
-          </p>
+          {nameProblem ? (
+            <p className="hint-text bad" id="set-handle-error" role="alert">
+              {nameProblem}
+            </p>
+          ) : (
+            <p className="hint-text">
+              Shown next to your scores. Yours to choose — signing in with Google suggests your
+              Google name, but never overwrites a name you set here.
+            </p>
+          )}
         </section>
 
         <section className="field">
@@ -75,7 +92,7 @@ export function Settings(props: { onClose: () => void }) {
           <button type="button" className="btn btn-ghost" onClick={props.onClose}>
             Cancel
           </button>
-          <button type="button" className="btn btn-primary" onClick={save}>
+          <button type="button" className="btn btn-primary" onClick={save} disabled={!!nameProblem}>
             Save
           </button>
         </div>

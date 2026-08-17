@@ -43,19 +43,98 @@ export function isAudioUnlocked(): boolean {
   return unlocked;
 }
 
+/**
+ * How much of a preview to fetch for play. A round never needs more than five
+ * seconds, but an iTunes preview is a whole 30 seconds — a megabyte — and on a
+ * phone that download was 81% of the time between opening the game and being
+ * able to press play.
+ *
+ * The files are MPEG-4/AAC and, usefully, faststart: the `moov` header sits in
+ * the first ~6.4 KB, so a byte prefix is a valid, decodable file covering the
+ * opening seconds. Apple serves them with `Accept-Ranges: bytes` and permissive
+ * CORS, so one ranged request gets exactly that prefix. The decoded samples are
+ * bit-identical to the full download — this is not a lossy shortcut.
+ *
+ * 320 KB is the size, not less: the padding between the header and the audio
+ * data varies from 8 bytes to 96 KB, and across 199 previews the worst case
+ * needed 288 KB to reach five seconds. 320 KB cleared every one of them with
+ * room to spare, at roughly a third of the bytes.
+ */
+const PREFIX_BYTES = 327680;
+
+/** Full 30-second decodes, kept apart from the prefixes and only for reveals. */
+const fullBuffers = new Map<string, Promise<AudioBuffer>>();
+
+/**
+ * Prefixes are downloaded strictly one at a time.
+ *
+ * The next round's clip is fetched during the current one, and when both were in
+ * flight together they simply split the connection: measured on a throttled
+ * phone, the round the player was actually waiting for got 49% of the available
+ * bandwidth and took twice as long to become playable. A queue costs the
+ * prefetch nothing — it has a whole round to finish in — and gives the clip
+ * somebody is waiting on the entire pipe.
+ */
+let chain: Promise<unknown> = Promise.resolve();
+
+async function decode(bytes: ArrayBuffer): Promise<AudioBuffer> {
+  return audioCtx().decodeAudioData(bytes);
+}
+
+/** The opening seconds of a preview — everything the reveal ladder can play. */
 export function preloadClip(url: string): Promise<AudioBuffer> {
   const cached = buffers.get(url);
   if (cached) return cached;
-  const p = (async () => {
-    const res = await fetch(url);
+
+  const p = chain.then(async () => {
+    const res = await fetch(url, { headers: { Range: `bytes=0-${PREFIX_BYTES - 1}` } });
     if (!res.ok) throw new Error(`preview ${res.status}`);
     const bytes = await res.arrayBuffer();
-    return await audioCtx().decodeAudioData(bytes);
-  })();
+    // A 200 means the range was ignored and the whole file arrived anyway;
+    // those bytes are already paid for, so keep them for the reveal.
+    if (res.status === 200) {
+      const full = decode(bytes.slice(0));
+      full.catch(() => fullBuffers.delete(url));
+      fullBuffers.set(url, full);
+    }
+    try {
+      return await decode(bytes);
+    } catch {
+      // Only reachable if a file ever ships with more padding than the prefix
+      // covers. Falling back to the whole file is still better than failing.
+      return loadFull(url);
+    }
+  });
+  // The queue must survive a failed download, so it waits on the settled state
+  // rather than on `p` itself.
+  chain = p.catch(() => {});
   // Don't cache a rejection — a flaky network shouldn't poison the round.
   p.catch(() => buffers.delete(url));
   buffers.set(url, p);
   return p;
+}
+
+function loadFull(url: string): Promise<AudioBuffer> {
+  const cached = fullBuffers.get(url);
+  if (cached) return cached;
+  const p = (async () => {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`preview ${res.status}`);
+    return decode(await res.arrayBuffer());
+  })();
+  p.catch(() => fullBuffers.delete(url));
+  fullBuffers.set(url, p);
+  return p;
+}
+
+/**
+ * The whole 30 seconds, fetched only once a round is over and the answer is on
+ * screen. Deliberately outside the prefix queue: the player is reading the
+ * result, so this can take its time, and it must not delay the next round's
+ * prefix by sitting in front of it.
+ */
+export function preloadFullClip(url: string): Promise<AudioBuffer> {
+  return loadFull(url);
 }
 
 export type Playback = { stop: () => void };

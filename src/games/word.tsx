@@ -1,5 +1,6 @@
 import type { Deck, GameDef, Option, StageProps } from '../engine/types';
-import { WORDS, type WordSeed } from '../content/data/words';
+import { wordMeta } from './word.meta';
+import type { WordSeed } from '../content/data/words';
 import { streamDeck } from '../content/deck';
 import { TextStage } from './stages';
 
@@ -43,6 +44,7 @@ function WordStage({ round, level, revealed }: StageProps) {
 }
 
 async function loadDeck(count: number, rng: () => number): Promise<Deck> {
+  const { WORDS } = await import('../content/data/words');
   // Every word in the file is in the guess list. That is the game: the answer
   // is somewhere in front of you and the definition is what narrows it down.
   const catalog: Option[] = WORDS.map((s) => ({
@@ -74,20 +76,7 @@ async function loadDeck(count: number, rng: () => number): Promise<Deck> {
 }
 
 export const wordGame: GameDef = {
-  slug: 'word',
-  title: 'Guess the Word',
-  short: 'Word',
-  tagline: 'Name the word from its definition.',
-  blurb:
-    'A definition on screen and the word missing from it. Mostly vocabulary worth owning, with a few rarities that are only in here because somebody had to name the smell of rain on dry ground. Skips buy you the part of speech and the length, then the first letter, then where it came from.',
-  emoji: '📕',
-  accent: '#4E3F80',
-  guess: 'search',
-  levels: ['Cold', 'Type', 'First letter', 'Origin'],
-  skipLabel: 'Give me a clue',
-  needsNetwork: false,
-  rounds: 10,
-  keywords: ['word', 'vocabulary', 'definition', 'dictionary', 'english', 'meaning', 'etymology'],
+  ...wordMeta,
   loadDeck,
   Stage: WordStage,
 };

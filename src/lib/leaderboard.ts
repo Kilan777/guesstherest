@@ -1,5 +1,6 @@
 import { getSupabase, ensureSession } from './supabase';
-import { getHandle, localPlayerId } from './identity';
+import { getHandle, localPlayerId, randomHandle } from './identity';
+import { checkHandle } from './handle-filter';
 import { load, save } from './storage';
 
 export type Entry = {
@@ -26,6 +27,19 @@ export type Board = {
 
 const localKey = (game: string) => `board:${game}`;
 
+/**
+ * Last gate before a name is written to a board.
+ *
+ * `getHandle` already vets what it returns, so this is belt-and-braces for a
+ * handle that reached storage some other way — hand-edited in devtools, say.
+ * A rejected name is swapped for a generated one rather than throwing: a rude
+ * handle should cost you the name, not the score.
+ */
+function boardHandle(): string {
+  const handle = getHandle();
+  return checkHandle(handle).ok ? handle : randomHandle();
+}
+
 function readLocal(game: string): Entry[] {
   return load<Entry[]>(localKey(game), []);
 }
@@ -34,7 +48,7 @@ function writeLocal(game: string, run: RunResult): Entry[] {
   const entries = readLocal(game);
   entries.push({
     playerId: localPlayerId(),
-    handle: getHandle(),
+    handle: boardHandle(),
     score: run.score,
     roundsWon: run.roundsWon,
     bestStreak: run.bestStreak,
@@ -63,7 +77,7 @@ export async function submitScore(game: string, run: RunResult): Promise<{ onlin
   const { error } = await sb.from('scores').insert({
     game_slug: game,
     player_id: uid,
-    handle: getHandle(),
+    handle: boardHandle(),
     score: run.score,
     rounds_won: run.roundsWon,
     best_streak: run.bestStreak,

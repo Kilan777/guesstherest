@@ -1,4 +1,4 @@
-import { load, save } from '../lib/storage';
+import { load, remove, save } from '../lib/storage';
 
 type Envelope<T> = { at: number; value: T };
 
@@ -21,6 +21,19 @@ export async function cached<T>(key: string, ttlMs: number, fetcher: () => Promi
   memory.set(key, value);
   save(`cache:${key}`, { at: Date.now(), value } satisfies Envelope<T>);
   return value;
+}
+
+/**
+ * Drops a cached entry from both tiers.
+ *
+ * Almost nothing needs this — an iTunes lookup is the same answer next week.
+ * The moderation hide-list is the exception: when a moderator hides a round,
+ * the list they cached seconds ago is now wrong, and it has to be refetched
+ * rather than sat on until the TTL expires.
+ */
+export function invalidate(key: string): void {
+  memory.delete(key);
+  remove(`cache:${key}`);
 }
 
 export const WEEK = 7 * 24 * 60 * 60 * 1000;

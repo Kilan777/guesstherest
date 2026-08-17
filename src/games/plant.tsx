@@ -1,5 +1,5 @@
 import type { Deck, GameDef, Option, StageProps } from '../engine/types';
-import { PLANTS } from '../content/data/plants';
+import { plantMeta } from './plant.meta';
 import { pageInfo } from '../content/wikipedia';
 import { streamDeck } from '../content/deck';
 import { ZoomStage, focalOf } from './stages';
@@ -36,6 +36,7 @@ function PlantStage({ round, level, revealed }: StageProps) {
 }
 
 async function loadDeck(count: number, rng: () => number): Promise<Deck> {
+  const { PLANTS } = await import('../content/data/plants');
   const catalog: Option[] = PLANTS.map((p) => ({
     id: `plant:${p.wiki}`,
     label: p.label,
@@ -66,20 +67,7 @@ async function loadDeck(count: number, rng: () => number): Promise<Deck> {
 }
 
 export const plantGame: GameDef = {
-  slug: 'plant',
-  title: 'Guess the Plant',
-  short: 'Plant',
-  tagline: 'Name the plant from a close crop of a leaf or a flower.',
-  blurb:
-    'Seventy trees, flowers, crops and oddities, magnified until they are just green. Leaf shape and bark do most of the work; the flower, if there is one, only shows up on the last rung or two.',
-  emoji: '🌿',
-  accent: '#2F6B3D',
-  guess: 'search',
-  levels: ['7×', '4.5×', '3×', '2×', '1.3×'],
-  skipLabel: 'Zoom out',
-  needsNetwork: true,
-  rounds: 10,
-  keywords: ['plant', 'plants', 'tree', 'trees', 'flower', 'botany', 'garden', 'leaf', 'zoom'],
+  ...plantMeta,
   prefetch: (round) => {
     const p = round.payload as PlantPayload | undefined;
     if (p?.src) new Image().src = p.src;

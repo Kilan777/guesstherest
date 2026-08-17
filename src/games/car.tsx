@@ -1,4 +1,5 @@
 import type { Deck, GameDef, Option, StageProps } from '../engine/types';
+import { carMeta } from './car.meta';
 import { pageInfo } from '../content/wikipedia';
 import { streamDeck } from '../content/deck';
 import { BlurStage } from './stages';
@@ -64,20 +65,7 @@ async function loadDeck(count: number, rng: () => number): Promise<Deck> {
 }
 
 export const carGame: GameDef = {
-  slug: 'car',
-  title: 'Guess the Car',
-  short: 'Car',
-  tagline: 'Name the car from its blurred silhouette.',
-  blurb:
-    'Ninety years of cars, blurred until only the proportions are left. Each skip sharpens it. Roofline and glasshouse usually settle it two rungs before the badge is readable.',
-  emoji: '🚗',
-  accent: '#26517E',
-  guess: 'search',
-  levels: ['Blurry', 'Soft', 'Nearly there', 'Almost sharp'],
-  skipLabel: 'Sharpen',
-  needsNetwork: true,
-  rounds: 10,
-  keywords: ['cars','automobile','vehicle','motor','classic','blur'],
+  ...carMeta,
   prefetch: (round) => { const p = round.payload as CarPayload | undefined; if (p?.src) new Image().src = p.src; },
   loadDeck,
   Stage: CarStage,

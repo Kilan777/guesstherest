@@ -1,4 +1,5 @@
 import type { Deck, GameDef, Option, StageProps } from '../engine/types';
+import { quoteMeta } from './quote.meta';
 import type { QuoteSeed } from '../content/data/quotes';
 import { pageInfo } from '../content/wikipedia';
 import { mapLimit } from '../content/cache';
@@ -103,20 +104,7 @@ async function loadDeck(count: number, rng: () => number): Promise<Deck> {
 }
 
 export const quoteGame: GameDef = {
-  slug: 'quote',
-  title: 'Guess Who Said It',
-  short: 'Quote',
-  tagline: 'Work out which famous person said it.',
-  blurb:
-    'A line somebody famous actually said — no internet misattributions here. Pick the face it belongs to. Stuck? Trade points for their field, their job, their initials.',
-  emoji: '💬',
-  accent: '#1F5136',
-  guess: 'choice',
-  levels: ['Cold', 'Field', 'Role', 'Initials'],
-  skipLabel: 'Give me a clue',
-  needsNetwork: false,
-  rounds: 10,
-  keywords: ['quote','saying','people','famous','who','history'],
+  ...quoteMeta,
   prefetch: (round) => { for (const c of round.choices ?? []) if (c.image) new Image().src = c.image; },
   loadDeck,
   Stage: QuoteStage,

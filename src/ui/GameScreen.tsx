@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { GameDef } from '../engine/types';
+import type { GameDef, GameMeta } from '../engine/types';
+import { loadGame } from '../games';
 import { useGameSession } from '../engine/session';
 import { GuessSearch } from './GuessSearch';
 import { ChoiceGrid } from './ChoiceGrid';
@@ -9,8 +10,73 @@ import { formatScore, levelValue } from '../lib/scoring';
 import { localBest } from '../lib/leaderboard';
 import { triggerPlay } from '../engine/player';
 import { AdSlot, AD_SLOTS } from './AdSlot';
+import { ModeratorTools } from './ModeratorTools';
 
-export function GameScreen(props: { game: GameDef; onExit: () => void; onOpenSettings: () => void }) {
+/**
+ * The game's code arrives separately from its card.
+ *
+ * The launcher only ever holds metadata, so opening a game is the moment its
+ * module — Stage component, deck builder and all — is fetched. That is one
+ * network hop on a warm connection, and the deck build behind it is longer
+ * still, so it shares the screen the deck build already uses rather than
+ * introducing a second kind of waiting.
+ */
+export function GameScreen(props: { game: GameMeta; onExit: () => void; onOpenSettings: () => void }) {
+  const { game } = props;
+  const [def, setDef] = useState<GameDef | null>(null);
+  const [failed, setFailed] = useState(false);
+  const [attempt, setAttempt] = useState(0);
+
+  useEffect(() => {
+    let alive = true;
+    setFailed(false);
+    loadGame(game.slug).then(
+      (d) => alive && setDef(d),
+      () => alive && setFailed(true),
+    );
+    return () => {
+      alive = false;
+    };
+  }, [game.slug, attempt]);
+
+  if (failed) {
+    return (
+      <div className="screen" style={{ ['--accent' as string]: game.accent }}>
+        <TopBar game={game} onExit={props.onExit} />
+        <div className="panel gate">
+          <h2>That didn't load</h2>
+          <p>Could not load this game. Check your connection.</p>
+          <div className="gate-actions">
+            <button type="button" className="btn btn-primary" onClick={() => setAttempt((a) => a + 1)}>
+              Try again
+            </button>
+            <button type="button" className="btn btn-ghost" onClick={props.onOpenSettings}>
+              Settings
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!def) {
+    return (
+      <div className="screen" style={{ ['--accent' as string]: game.accent }}>
+        <TopBar game={game} onExit={props.onExit} />
+        <div className="panel loading">
+          <div className="spinner" style={{ borderTopColor: game.accent }} />
+          <p>Dealing…</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <GamePlay game={def} onExit={props.onExit} onOpenSettings={props.onOpenSettings} />
+  );
+}
+
+function GamePlay(props: { game: GameDef; onExit: () => void; onOpenSettings: () => void }) {
   const { game } = props;
   const [option, setOption] = useState<string | undefined>(undefined);
   const session = useGameSession(game, option);
@@ -279,6 +345,7 @@ export function GameScreen(props: { game: GameDef; onExit: () => void; onOpenSet
       )}
 
       {revealed ? (
+        <>
         <div className={`verdict ${session.outcome}`}>
           <div className="verdict-text">
             {session.outcome === 'won' ? (
@@ -309,6 +376,9 @@ export function GameScreen(props: { game: GameDef; onExit: () => void; onOpenSet
             <kbd className="kbd-on-solid">↵</kbd>
           </button>
         </div>
+        {/* Renders nothing unless a moderator is signed in. */}
+        <ModeratorTools gameSlug={game.slug} round={round} />
+        </>
       ) : (
         <div className="controls">
           {game.guess === 'search' && session.deck && (
@@ -375,7 +445,7 @@ export function GameScreen(props: { game: GameDef; onExit: () => void; onOpenSet
   );
 }
 
-function TopBar(props: { game: GameDef; onExit: () => void }) {
+function TopBar(props: { game: GameMeta; onExit: () => void }) {
   return (
     <header className="topbar">
       {/* A bare arrow was too easy to miss, especially once the page went

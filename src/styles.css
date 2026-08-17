@@ -524,15 +524,28 @@ a {
   filter: drop-shadow(0 2px 5px rgba(20, 53, 36, 0.25));
 }
 
+/* Now that the cards are photographs, a bare number in the game's accent
+   colour disappears against whatever happens to be behind it. It gets its own
+   surface: a filled disc in the accent, white numeral, so it reads over a dark
+   night skyline and a pale bowl of paella alike. */
 .card-rank {
   position: absolute;
-  top: 12px;
-  left: 14px;
-  font-size: 1.5rem;
+  top: 10px;
+  left: 10px;
+  display: grid;
+  place-items: center;
+  min-width: 34px;
+  height: 34px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: var(--accent);
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  color: #fff;
+  font-size: 1rem;
   font-weight: 800;
-  color: var(--accent);
-  letter-spacing: -0.04em;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.6);
+  letter-spacing: -0.02em;
+  line-height: 1;
+  box-shadow: 0 2px 8px rgba(20, 53, 36, 0.35);
 }
 
 .card-flag {
@@ -2268,4 +2281,130 @@ kbd {
   .stage-quote {
     font-size: 0.98rem;
   }
+}
+
+/* ── suggestion form ──────────────────────────────────────────────────────── */
+
+.suggest {
+  margin: 8px var(--pad) 0;
+  padding: 22px;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius);
+  background: var(--forest-soft);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.suggest h2 {
+  font-size: 1.15rem;
+  color: var(--forest-deep);
+}
+
+.suggest p {
+  margin: 6px 0 0;
+  color: var(--text-dim);
+  font-size: 0.88rem;
+  max-width: 62ch;
+}
+
+.suggest-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.suggest-text,
+.suggest-contact {
+  font: inherit;
+  font-size: 0.92rem;
+  color: var(--text);
+  background: var(--bg-raise);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 11px 13px;
+  width: 100%;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.suggest-text {
+  resize: vertical;
+  min-height: 76px;
+}
+
+.suggest-text:focus,
+.suggest-contact:focus {
+  border-color: var(--forest);
+}
+
+.suggest-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.suggest-contact {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.suggest-row .btn {
+  flex: none;
+}
+
+.suggest-note {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-faint);
+}
+
+.suggest-bad {
+  color: var(--bad);
+}
+
+.suggest-done {
+  align-items: flex-start;
+}
+
+@media (max-width: 640px) {
+  .suggest {
+    padding: 16px;
+  }
+
+  /* The send button goes full width under the email rather than squeezing it. */
+  .suggest-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+/* ── moderator tools ──────────────────────────────────────────────────────── */
+
+/* Only ever on screen for a signed-in moderator, and only on the reveal. Sits
+   under the verdict rather than inside it: the verdict is about the round the
+   player just had, and this is not a game action. Quiet by design — it should
+   read as an admin affordance, not a fourth button competing with "Next". */
+.mod-tools {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+  opacity: 0.75;
+  transition: opacity 0.15s ease;
+}
+
+.mod-tools:hover {
+  opacity: 1;
+}
+
+.mod-note {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+}
+
+.mod-note-bad {
+  color: var(--bad);
 }

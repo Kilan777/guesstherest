@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { GAMES, gameBySlug } from '../games';
-import type { GameDef } from '../engine/types';
+import type { GameMeta } from '../engine/types';
 import { localBest } from '../lib/leaderboard';
 import { formatScore } from '../lib/scoring';
 import { getHandle, needsHandle } from '../lib/identity';
@@ -11,6 +11,7 @@ import { CardArt, hasCardPhoto } from './CardArt';
 import { ART_CREDITS } from '../content/art-credits';
 import { NamePrompt } from './NamePrompt';
 import { AdSlot, AD_SLOTS } from './AdSlot';
+import { Suggest } from './Suggest';
 
 /**
  * Builds the featured decks while the page is idle.
@@ -26,7 +27,7 @@ function warmFeatured(slugs: string[]): void {
   if (conn?.saveData || /2g/.test(conn?.effectiveType ?? '')) return;
 
   const start = () => {
-    const first = slugs.map(gameBySlug).find((g): g is GameDef => !!g && g.needsNetwork);
+    const first = slugs.map(gameBySlug).find((g): g is GameMeta => !!g && g.needsNetwork);
     if (first) warmDeck(first);
   };
 
@@ -81,8 +82,8 @@ export function Home(props: { onPlay: (slug: string) => void; onOpenSettings: ()
     );
   }, [query]);
 
-  const recentGamesList = recent.map(gameBySlug).filter((g): g is GameDef => !!g);
-  const trendingList = (trending?.slugs ?? []).map(gameBySlug).filter((g): g is GameDef => !!g);
+  const recentGamesList = recent.map(gameBySlug).filter((g): g is GameMeta => !!g);
+  const trendingList = (trending?.slugs ?? []).map(gameBySlug).filter((g): g is GameMeta => !!g);
   const searching = query.trim().length > 0;
 
   // A game featured in a row above shouldn't appear again in the grid. Search
@@ -104,7 +105,9 @@ export function Home(props: { onPlay: (slug: string) => void; onOpenSettings: ()
             <span className="brand-name">
               GuessThe<em>Rest</em>
             </span>
-            <span className="brand-strap">Every round gives you a little more to go on</span>
+            <span className="brand-strap">
+              {GAMES.length} guessing games — the fewer clues, the higher your score
+            </span>
           </span>
         </a>
 
@@ -177,6 +180,8 @@ export function Home(props: { onPlay: (slug: string) => void; onOpenSettings: ()
 
       <AdSlot slot={AD_SLOTS.home} format="horizontal" className="ad-home" />
 
+      <Suggest />
+
       <footer className="site-foot">
         <p>
           Audio previews from the iTunes Search API · posters, photographs and paintings from
@@ -208,7 +213,7 @@ function Row(props: { title: string; hint?: string; children: React.ReactNode })
 }
 
 function Card(props: {
-  game: GameDef;
+  game: GameMeta;
   onPlay: (slug: string) => void;
   compact?: boolean;
   rank?: number;

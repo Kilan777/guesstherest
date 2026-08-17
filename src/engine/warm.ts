@@ -1,4 +1,5 @@
-import type { Deck, GameDef } from './types';
+import type { Deck, GameDef, GameMeta } from './types';
+import { loadGame } from '../games';
 
 /**
  * Deck pre-warming.
@@ -19,19 +20,22 @@ const warmed = new Map<string, Entry>();
 /** Warmed content goes stale — a deck held too long may reference expired URLs. */
 const MAX_AGE_MS = 10 * 60 * 1000;
 
-export function warmDeck(game: GameDef): void {
+export function warmDeck(meta: GameMeta): void {
   // A game that asks a question first has nothing to warm — we don't know which
   // deck the player wants yet.
-  if (game.options) return;
-  const existing = warmed.get(game.slug);
+  if (meta.options) return;
+  const existing = warmed.get(meta.slug);
   if (existing && Date.now() - existing.startedAt < MAX_AGE_MS) return;
 
-  const promise = game.loadDeck(game.rounds, Math.random);
+  // Only the metadata is on hand here — the card that was hovered. Fetching the
+  // game's module is the first thing the click would have done anyway, so doing
+  // it now warms the code as well as the deck.
+  const promise = loadGame(meta.slug).then((game) => game.loadDeck(game.rounds, Math.random));
   // Nothing may be awaiting this yet; mark it handled so a failed warm-up
   // doesn't surface as an unhandled rejection. The stored promise keeps its
   // rejection for whoever eventually claims it.
-  promise.catch(() => warmed.delete(game.slug));
-  warmed.set(game.slug, { promise, startedAt: Date.now() });
+  promise.catch(() => warmed.delete(meta.slug));
+  warmed.set(meta.slug, { promise, startedAt: Date.now() });
 }
 
 /** Takes the warmed deck if there is a fresh one, otherwise null. */

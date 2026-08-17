@@ -1,4 +1,5 @@
 import type { Deck, GameDef, Option, StageProps } from '../engine/types';
+import { landmarkMeta } from './landmark.meta';
 import { pageInfo } from '../content/wikipedia';
 import { streamDeck } from '../content/deck';
 import { ZoomStage, focalOf } from './stages';
@@ -66,20 +67,7 @@ async function loadDeck(count: number, rng: () => number): Promise<Deck> {
 }
 
 export const landmarkGame: GameDef = {
-  slug: 'landmark',
-  title: 'Guess the Landmark',
-  short: 'Landmark',
-  tagline: 'Name the landmark from one fragment of stone.',
-  blurb:
-    'A place millions of people have photographed, cropped down to a patch of stone or steel. Pull back a step at a time until the shape gives it away.',
-  emoji: '🗿',
-  accent: '#7A4A24',
-  guess: 'search',
-  levels: ['7×', '4.5×', '3×', '2×', '1.3×'],
-  skipLabel: 'Zoom out',
-  needsNetwork: true,
-  rounds: 10,
-  keywords: ['landmark', 'monument', 'travel', 'geography', 'city', 'zoom'],
+  ...landmarkMeta,
   prefetch: (round) => {
     const p = round.payload as LandmarkPayload | undefined;
     if (p?.src) new Image().src = p.src;

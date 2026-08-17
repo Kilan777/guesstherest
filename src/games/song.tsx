@@ -1,9 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Deck, GameDef, Option, StageProps } from '../engine/types';
+import { songMeta } from './song.meta';
 import { findTrack } from '../content/itunes';
 import { streamDeck } from '../content/deck';
 import { normalize } from '../content/cache';
-import { isAudioUnlocked, playClip, preloadClip, unlockAudio, type Playback } from '../lib/audio';
+import {
+  isAudioUnlocked,
+  playClip,
+  preloadClip,
+  preloadFullClip,
+  unlockAudio,
+  type Playback,
+} from '../lib/audio';
 import { usePlayAction } from '../engine/player';
 
 /** The ladder the whole game is built around: a tenth of a second, then more. */
@@ -30,12 +38,18 @@ function SongStage({ round, level, revealed, accent }: StageProps) {
   const raf = useRef(0);
   const startedAt = useRef(0);
 
+  // While the round is live only the opening seconds have been downloaded; the
+  // rest arrives once the answer is out and there is time to spare for it.
+  const [fullBuffer, setFullBuffer] = useState<AudioBuffer | null>(null);
+  const active = (revealed && fullBuffer) || buffer;
+
   const unlockedSec = DURATIONS[Math.min(level, DURATIONS.length - 1)] ?? 5;
-  const clipSec = revealed ? Math.min(buffer?.duration ?? FULL_PREVIEW, FULL_PREVIEW) : unlockedSec;
+  const clipSec = revealed ? Math.min(active?.duration ?? FULL_PREVIEW, FULL_PREVIEW) : unlockedSec;
 
   useEffect(() => {
     let alive = true;
     setBuffer(null);
+    setFullBuffer(null);
     setFailed(false);
     preloadClip(p.previewUrl)
       .then((b) => alive && setBuffer(b))
@@ -44,6 +58,20 @@ function SongStage({ round, level, revealed, accent }: StageProps) {
       alive = false;
     };
   }, [p.previewUrl]);
+
+  // Reveal: go and get the whole thing so the answer plays out properly. If it
+  // hasn't landed, the prefix still plays — several seconds of the song, which
+  // is enough to recognise it.
+  useEffect(() => {
+    if (!revealed) return;
+    let alive = true;
+    preloadFullClip(p.previewUrl)
+      .then((b) => alive && setFullBuffer(b))
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [revealed, p.previewUrl]);
 
   const stop = useCallback(() => {
     playback.current?.stop();
@@ -57,7 +85,7 @@ function SongStage({ round, level, revealed, accent }: StageProps) {
   useEffect(() => stop, [stop, round.id]);
 
   const play = useCallback(async () => {
-    if (!buffer) return;
+    if (!active) return;
     await unlockAudio();
     playback.current?.stop();
     cancelAnimationFrame(raf.current);
@@ -66,7 +94,7 @@ function SongStage({ round, level, revealed, accent }: StageProps) {
     startedAt.current = performance.now();
     setPlaying(true);
 
-    playback.current = playClip(buffer, {
+    playback.current = playClip(active, {
       startSec: 0,
       durationSec: duration,
       onEnd: () => {
@@ -83,10 +111,10 @@ function SongStage({ round, level, revealed, accent }: StageProps) {
       if (t < duration) raf.current = requestAnimationFrame(tick);
     };
     raf.current = requestAnimationFrame(tick);
-  }, [buffer, clipSec]);
+  }, [active, clipSec]);
 
   // Space bar plays (or re-plays) the clip.
-  usePlayAction(buffer && !failed ? () => void play() : null, [buffer, failed, play]);
+  usePlayAction(active && !failed ? () => void play() : null, [active, failed, play]);
 
   // Once audio is unlocked, each new rung plays itself — pressing play again
   // after every skip gets old fast.
@@ -97,7 +125,8 @@ function SongStage({ round, level, revealed, accent }: StageProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [level, buffer, round.id]);
 
-  const scale = revealed ? FULL_PREVIEW : 5;
+  // The bar measures against whatever is actually playable right now.
+  const scale = revealed ? Math.min(active?.duration ?? FULL_PREVIEW, FULL_PREVIEW) : 5;
   const unlockedPct = (clipSec / scale) * 100;
   const playedPct = (elapsed / scale) * 100;
 
@@ -116,14 +145,14 @@ function SongStage({ round, level, revealed, accent }: StageProps) {
       <div className="track" role="img" aria-label={`${clipSec} seconds unlocked of ${scale}`}>
         <div className="track-unlocked" style={{ width: `${unlockedPct}%`, background: accent }} />
         <div className="track-played" style={{ width: `${playedPct}%` }} />
-        {DURATIONS.map((d) => (
+        {DURATIONS.filter((d) => d <= scale).map((d) => (
           <span key={d} className="track-mark" style={{ left: `${(d / scale) * 100}%` }} />
         ))}
       </div>
 
       <div className="track-scale">
         <span>0s</span>
-        <span>{revealed ? `${FULL_PREVIEW}s` : '5s'}</span>
+        <span>{revealed ? `${Math.round(scale)}s` : '5s'}</span>
       </div>
 
       <button
@@ -188,20 +217,7 @@ async function loadDeck(count: number, rng: () => number): Promise<Deck> {
 }
 
 export const songGame: GameDef = {
-  slug: 'song',
-  title: 'Guess the Song',
-  short: 'Song',
-  tagline: 'Name the song from as little of it as possible.',
-  blurb:
-    'You get 0.1 seconds of the track. Not enough? Trade points for more — half a second, a second and a half, three, five. Then name it.',
-  emoji: '🎧',
-  accent: '#9E2B3F',
-  guess: 'search',
-  levels: ['0.1s', '0.5s', '1.5s', '3s', '5s'],
-  skipLabel: 'Hear more',
-  needsNetwork: true,
-  rounds: 10,
-  keywords: ['music', 'audio', 'track', 'heardle', 'listen', 'tune'],
+  ...songMeta,
   loadDeck,
   // Decoding a preview takes a moment; do the next one during this round.
   prefetch: (round) => {

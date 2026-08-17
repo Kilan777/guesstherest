@@ -1,5 +1,5 @@
 import type { Deck, GameDef, Option, StageProps } from '../engine/types';
-import { INSECTS } from '../content/data/insects';
+import { insectMeta } from './insect.meta';
 import { pageInfo } from '../content/wikipedia';
 import { streamDeck } from '../content/deck';
 import { ZoomStage, focalOf } from './stages';
@@ -40,6 +40,7 @@ function InsectStage({ round, level, revealed }: StageProps) {
 }
 
 async function loadDeck(count: number, rng: () => number): Promise<Deck> {
+  const { INSECTS } = await import('../content/data/insects');
   const catalog: Option[] = INSECTS.map((i) => ({
     id: `insect:${i.wiki}`,
     label: i.label,
@@ -70,20 +71,7 @@ async function loadDeck(count: number, rng: () => number): Promise<Deck> {
 }
 
 export const insectGame: GameDef = {
-  slug: 'insect',
-  title: 'Guess the Insect',
-  short: 'Insect',
-  tagline: 'Name the insect from a close crop of it.',
-  blurb:
-    'Butterflies, beetles, bees and ants, plus a few spiders and scorpions, photographed close and then cropped closer. The ladder starts gentler than the other zoom games, because a macro shot is already abstract before you magnify it.',
-  emoji: '🦋',
-  accent: '#7B6212',
-  guess: 'search',
-  levels: ['4×', '2.9×', '2.1×', '1.6×', '1.15×'],
-  skipLabel: 'Zoom out',
-  needsNetwork: true,
-  rounds: 10,
-  keywords: ['insect', 'insects', 'bug', 'bugs', 'beetle', 'butterfly', 'spider', 'entomology', 'zoom'],
+  ...insectMeta,
   prefetch: (round) => {
     const p = round.payload as InsectPayload | undefined;
     if (p?.src) new Image().src = p.src;

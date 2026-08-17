@@ -1,4 +1,5 @@
 import type { Deck, GameDef, Option, StageProps } from '../engine/types';
+import { appMeta } from './app.meta';
 import { findApp } from '../content/itunes';
 import { streamDeck } from '../content/deck';
 import { normalize } from '../content/cache';
@@ -8,8 +9,14 @@ import { BlurStage } from './stages';
  * Gentler than the painting ladder: App Store icons are only 512px square, so
  * anything past about 7× is a wall of interpolated mush rather than a puzzle.
  */
-const BLURS = [46, 26, 13, 5, 1.5];
-const SCALES = [1.06, 1.05, 1.04, 1.03, 1.02];
+const BLURS = [80, 42, 20, 8, 1.5];
+/**
+ * The frame clips at its own edge, and a CSS blur samples transparency beyond
+ * the image, so the first rungs need a real overscan — otherwise an 80px blur
+ * fades the outer band of the icon into the frame background and the whole
+ * thing reads as a vignette rather than an icon.
+ */
+const SCALES = [1.34, 1.18, 1.09, 1.04, 1.02];
 
 type AppPayload = { artwork: string; name: string; detail: string };
 
@@ -67,20 +74,7 @@ async function loadDeck(count: number, rng: () => number): Promise<Deck> {
 }
 
 export const appGame: GameDef = {
-  slug: 'app',
-  title: 'Guess the App',
-  short: 'App',
-  tagline: 'Name the app as its icon comes into focus.',
-  blurb:
-    'An app icon from the home screen everyone has, magnified until it is four colours and a curve. Each skip pulls the camera back one step.',
-  emoji: '📱',
-  accent: '#5B3E8C',
-  guess: 'search',
-  levels: ['Smudge', 'Blurry', 'Soft', 'Nearly there', 'Almost sharp'],
-  skipLabel: 'Sharpen',
-  needsNetwork: true,
-  rounds: 10,
-  keywords: ['icon', 'phone', 'store', 'software', 'logo', 'zoom'],
+  ...appMeta,
   prefetch: (round) => { const p = round.payload as AppPayload | undefined; if (p?.artwork) new Image().src = p.artwork; },
   loadDeck,
   Stage: AppStage,

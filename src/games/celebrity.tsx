@@ -1,4 +1,5 @@
 import type { Deck, GameDef, Option, StageProps } from '../engine/types';
+import { celebrityMeta } from './celebrity.meta';
 import { pageInfo } from '../content/wikipedia';
 import { streamDeck } from '../content/deck';
 import { BlurStage } from './stages';
@@ -61,20 +62,7 @@ async function loadDeck(count: number, rng: () => number): Promise<Deck> {
 }
 
 export const celebrityGame: GameDef = {
-  slug: 'celebrity',
-  title: 'Guess the Celebrity',
-  short: 'Celebrity',
-  tagline: 'Name the famous face as it comes into focus.',
-  blurb:
-    'Portraits of screen actors from the silent era to last year, blurred to a smudge. Hair and jawline come back first; the eyes are what settle it.',
-  emoji: '🎭',
-  accent: '#92315F',
-  guess: 'search',
-  levels: ['Soft', 'Nearly there', 'Almost sharp'],
-  skipLabel: 'Sharpen',
-  needsNetwork: true,
-  rounds: 10,
-  keywords: ['celebrity', 'famous', 'face', 'star', 'actor', 'musician', 'blur'],
+  ...celebrityMeta,
   prefetch: (round) => {
     const p = round.payload as CelebrityPayload | undefined;
     if (p?.portrait) new Image().src = p.portrait;
