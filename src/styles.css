@@ -1307,8 +1307,9 @@ a {
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow);
-  max-height: 320px;
+  max-height: 44vh;
   overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .guess-item {

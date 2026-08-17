@@ -2,6 +2,9 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Option } from '../engine/types';
 import { normalize } from '../content/cache';
 
+/** The list scrolls, so this is about how much is worth scanning, not fit. */
+const MAX_SUGGESTIONS = 16;
+
 /**
  * Type-to-filter guess box. The catalog is small enough (a few hundred rows)
  * that filtering on every keystroke is free, so there's no debounce here.
@@ -21,21 +24,33 @@ export function GuessSearch(props: {
   const listRef = useRef<HTMLUListElement | null>(null);
 
   const index = useMemo(
-    () => catalog.map((o) => ({ o, hay: normalize(`${o.label} ${o.sublabel ?? ''}`) })),
+    () =>
+      catalog.map((o) => ({
+        o,
+        label: normalize(o.label),
+        hay: normalize(`${o.label} ${o.sublabel ?? ''}`),
+      })),
     [catalog],
   );
 
   const matches = useMemo(() => {
     const q = normalize(query);
     if (!q) return [];
-    const starts: Option[] = [];
-    const contains: Option[] = [];
-    for (const { o, hay } of index) {
-      if (hay.startsWith(q)) starts.push(o);
-      else if (hay.includes(q)) contains.push(o);
-      if (starts.length >= 8) break;
+
+    // Ranked rather than first-come. The old version stopped scanning as soon
+    // as it had eight prefix matches, so anything matching mid-title was
+    // unreachable — typing "godfather" could not find "The Godfather".
+    const scored: { o: Option; rank: number }[] = [];
+    for (const { o, label, hay } of index) {
+      let rank = -1;
+      if (label.startsWith(q)) rank = 0; // title starts with what you typed
+      else if (label.includes(` ${q}`)) rank = 1; // a later word starts with it
+      else if (label.includes(q)) rank = 2; // anywhere in the title
+      else if (hay.includes(q)) rank = 3; // only in the artist/year/subtitle
+      if (rank >= 0) scored.push({ o, rank });
     }
-    return [...starts, ...contains].slice(0, 8);
+    scored.sort((a, b) => a.rank - b.rank || a.o.label.length - b.o.label.length);
+    return scored.slice(0, MAX_SUGGESTIONS).map((m) => m.o);
   }, [query, index]);
 
   useEffect(() => setActive(0), [query]);
