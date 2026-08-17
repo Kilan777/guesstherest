@@ -9,7 +9,7 @@ import {
   playClip,
   preloadClip,
   preloadFullClip,
-  unlockAudio,
+  primeAudio,
   type Playback,
 } from '../lib/audio';
 import { usePlayAction } from '../engine/player';
@@ -84,14 +84,19 @@ function SongStage({ round, level, revealed, accent }: StageProps) {
   // Never let one round's audio bleed into the next.
   useEffect(() => stop, [stop, round.id]);
 
-  const play = useCallback(async () => {
+  // Deliberately not async. A phone only lets the audio hardware start from
+  // inside the gesture's own task, and the `await unlockAudio()` this used to
+  // open with handed the rest of the handler to a later one — by which point the
+  // tap no longer counted and the clip played into a context that was never
+  // running. Starting the context is now synchronous and everything that could
+  // yield has gone.
+  const play = useCallback(() => {
     if (!active) return;
-    await unlockAudio();
+    primeAudio();
     playback.current?.stop();
     cancelAnimationFrame(raf.current);
 
     const duration = clipSec;
-    startedAt.current = performance.now();
     setPlaying(true);
 
     playback.current = playClip(active, {
@@ -105,21 +110,25 @@ function SongStage({ round, level, revealed, accent }: StageProps) {
       },
     });
 
+    // The clip is scheduled a little way ahead of the clock; the bar waits for
+    // it rather than running out in front.
+    startedAt.current = performance.now() + playback.current.startsIn * 1000;
+
     const tick = () => {
       const t = (performance.now() - startedAt.current) / 1000;
-      setElapsed(Math.min(t, duration));
+      setElapsed(Math.min(Math.max(t, 0), duration));
       if (t < duration) raf.current = requestAnimationFrame(tick);
     };
     raf.current = requestAnimationFrame(tick);
   }, [active, clipSec]);
 
   // Space bar plays (or re-plays) the clip.
-  usePlayAction(active && !failed ? () => void play() : null, [active, failed, play]);
+  usePlayAction(active && !failed ? play : null, [active, failed, play]);
 
   // Once audio is unlocked, each new rung plays itself — pressing play again
   // after every skip gets old fast.
   useEffect(() => {
-    if (buffer && isAudioUnlocked() && !revealed) void play();
+    if (buffer && isAudioUnlocked() && !revealed) play();
     // Deliberately keyed on the rung, not on `play`, which changes identity
     // whenever the window does.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -158,7 +167,7 @@ function SongStage({ round, level, revealed, accent }: StageProps) {
       <button
         type="button"
         className="play-btn"
-        onClick={() => (playing ? stop() : void play())}
+        onClick={() => (playing ? stop() : play())}
         disabled={!buffer || failed}
         style={{ borderColor: accent }}
       >

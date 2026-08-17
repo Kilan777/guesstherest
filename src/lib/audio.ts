@@ -13,6 +13,18 @@ const buffers = new Map<string, Promise<AudioBuffer>>();
 
 function audioCtx(): AudioContext {
   if (!ctx) {
+    // iOS 16.4+ routes Web Audio through the "ambient" audio session, which the
+    // hardware ring/silent switch mutes outright — a phone on silent plays the
+    // whole game without a sound and reports every state as healthy. Asking for
+    // the 'playback' category before the context exists opts out of that.
+    const session = (navigator as unknown as { audioSession?: { type: string } }).audioSession;
+    if (session) {
+      try {
+        session.type = 'playback';
+      } catch {
+        /* not supported here */
+      }
+    }
     const Ctor = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
     ctx = new Ctor();
   }
@@ -20,18 +32,103 @@ function audioCtx(): AudioContext {
 }
 
 let unlocked = false;
+let primed = false;
 
-/** Browsers start the context suspended until a real user gesture. */
+/**
+ * Nudge the context back to 'running', never throwing.
+ *
+ * `resume()` can reject, and on some engines throw outright; letting either
+ * escape would take the whole play handler with it and leave the button dead.
+ */
+function resume(c: AudioContext): void {
+  if (c.state === 'running') return;
+  try {
+    void Promise.resolve(c.resume()).catch(() => {});
+  } catch {
+    /* nothing more to try */
+  }
+}
+
+/**
+ * Starts the audio hardware. Must be reached *synchronously* from inside a user
+ * gesture — before any `await`.
+ *
+ * Two things go wrong on a phone and neither shows up on desktop Chrome:
+ *
+ * The context is created during preload, long before anyone taps, so it is born
+ * suspended. Testing for exactly `'suspended'` misses iOS Safari's fourth state,
+ * `'interrupted'` — which is where a context created outside a gesture, or one
+ * that lived through a phone call, a Siri invocation or a backgrounded tab, ends
+ * up. A context left interrupted never resumes and every clip scheduled on it is
+ * silent, while `state` never equals the one string the old check looked for.
+ *
+ * And iOS only really considers a context started once a source has actually run
+ * on it. Resuming is not enough; a one-sample silent buffer, started inside the
+ * gesture, is what flips it. That costs nothing and is the standard fix.
+ */
+function warmAudio(): void {
+  let c: AudioContext;
+  try {
+    c = audioCtx();
+  } catch {
+    return;
+  }
+
+  resume(c);
+
+  if (!primed) {
+    try {
+      const src = c.createBufferSource();
+      src.buffer = c.createBuffer(1, 1, c.sampleRate);
+      src.connect(c.destination);
+      src.start(0);
+      primed = true;
+    } catch {
+      /* try again on the next gesture */
+    }
+  }
+}
+
+/**
+ * The first tap of a session usually lands somewhere else — a game tile, the
+ * start button — well before the play button exists. Spending it on the audio
+ * hardware means the context is already running by the time a clip is due, so
+ * the play button never has to win the race itself.
+ *
+ * Deliberately does *not* mark audio unlocked: tapping a tile is consent to open
+ * a game, not consent to have it start playing at you.
+ */
+if (typeof document !== 'undefined') {
+  const events = ['pointerdown', 'touchend', 'keydown', 'click'] as const;
+  const onGesture = () => {
+    warmAudio();
+    for (const e of events) document.removeEventListener(e, onGesture, true);
+  };
+  for (const e of events) document.addEventListener(e, onGesture, { capture: true, passive: true });
+}
+
+/**
+ * Call this synchronously from the play handler, ahead of any `await`.
+ *
+ * Awaiting `resume()` first — which is what this used to do — hands the rest of
+ * the handler to a later task, and on iOS the gesture no longer counts by then.
+ */
+export function primeAudio(): void {
+  warmAudio();
+  unlocked = true;
+}
+
+/** Async form, for callers that want to know the context settled. */
 export async function unlockAudio(): Promise<void> {
+  primeAudio();
   const c = audioCtx();
-  if (c.state === 'suspended') {
+  if (c.state !== 'running') {
     try {
       await c.resume();
     } catch {
-      return;
+      /* nothing more to try */
     }
   }
-  unlocked = c.state === 'running';
 }
 
 /**
@@ -77,8 +174,79 @@ const fullBuffers = new Map<string, Promise<AudioBuffer>>();
  */
 let chain: Promise<unknown> = Promise.resolve();
 
-async function decode(bytes: ArrayBuffer): Promise<AudioBuffer> {
-  return audioCtx().decodeAudioData(bytes);
+/** Longest rung the ladder can ask for; a prefix shorter than this is no use. */
+const LADDER_SEC = 5;
+
+/** Nothing may leave the player staring at a disabled "Loading…" button. */
+const NET_TIMEOUT = 15000;
+const DECODE_TIMEOUT = 20000;
+
+async function download(url: string, range?: string): Promise<{ bytes: ArrayBuffer; status: number }> {
+  const abort = new AbortController();
+  const timer = setTimeout(() => abort.abort(), NET_TIMEOUT);
+  try {
+    const res = await fetch(url, {
+      signal: abort.signal,
+      ...(range ? { headers: { Range: range } } : {}),
+    });
+    if (!res.ok) throw new Error(`preview ${res.status}`);
+    return { bytes: await res.arrayBuffer(), status: res.status };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function decode(bytes: ArrayBuffer): Promise<AudioBuffer> {
+  const c = audioCtx();
+  const decoded = new Promise<AudioBuffer>((resolve, reject) => {
+    // Safari below 14.1 only has the callback form and returns undefined, so
+    // both shapes have to be handled or the promise never settles.
+    const maybe = c.decodeAudioData(bytes, resolve, reject) as unknown as Promise<AudioBuffer> | undefined;
+    if (maybe && typeof maybe.then === 'function') maybe.then(resolve, reject);
+  });
+  return withTimeout(decoded, DECODE_TIMEOUT, 'decode timed out');
+}
+
+function withTimeout<T>(p: Promise<T>, ms: number, why: string): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(why)), ms);
+    p.then(
+      (v) => {
+        clearTimeout(timer);
+        resolve(v);
+      },
+      (e) => {
+        clearTimeout(timer);
+        reject(e);
+      },
+    );
+  });
+}
+
+/**
+ * Every channel flat for the whole stretch the ladder can play.
+ *
+ * A truncated MPEG-4 is not a decode error to every decoder. Safari's is
+ * stricter than Chrome's about the prefix and can *succeed* while handing back a
+ * buffer that is all zeros — which plays perfectly and makes no sound, exactly
+ * the symptom being chased. Real music is never silent for five seconds.
+ */
+function isSilent(buffer: AudioBuffer): boolean {
+  const upto = Math.min(buffer.length, Math.ceil(buffer.sampleRate * LADDER_SEC));
+  if (upto <= 0) return true;
+  const step = Math.max(1, Math.floor(upto / 4096));
+  for (let ch = 0; ch < buffer.numberOfChannels; ch++) {
+    const data = buffer.getChannelData(ch);
+    for (let i = 0; i < upto; i += step) {
+      if (Math.abs(data[i] as number) > 1e-4) return false;
+    }
+  }
+  return true;
+}
+
+/** Long enough for the whole ladder, and audible. */
+function usable(buffer: AudioBuffer): boolean {
+  return buffer.duration >= LADDER_SEC && !isSilent(buffer);
 }
 
 /** The opening seconds of a preview — everything the reveal ladder can play. */
@@ -87,22 +255,28 @@ export function preloadClip(url: string): Promise<AudioBuffer> {
   if (cached) return cached;
 
   const p = chain.then(async () => {
-    const res = await fetch(url, { headers: { Range: `bytes=0-${PREFIX_BYTES - 1}` } });
-    if (!res.ok) throw new Error(`preview ${res.status}`);
-    const bytes = await res.arrayBuffer();
+    const { bytes, status } = await download(url, `bytes=0-${PREFIX_BYTES - 1}`);
     // A 200 means the range was ignored and the whole file arrived anyway;
     // those bytes are already paid for, so keep them for the reveal.
-    if (res.status === 200) {
+    if (status === 200) {
       const full = decode(bytes.slice(0));
       full.catch(() => fullBuffers.delete(url));
       fullBuffers.set(url, full);
     }
+
+    // Two ways the prefix lets us down, and only one of them throws. Chrome
+    // rejects a truncated MPEG-4 it cannot use; Safari has been known to return
+    // a short or entirely silent buffer instead, which is worse — it plays, and
+    // nothing comes out. Both end up on the whole file.
+    const prefix = await decode(bytes).catch(() => null);
+    if (prefix && usable(prefix)) return prefix;
     try {
-      return await decode(bytes);
-    } catch {
-      // Only reachable if a file ever ships with more padding than the prefix
-      // covers. Falling back to the whole file is still better than failing.
-      return loadFull(url);
+      return await loadFull(url);
+    } catch (err) {
+      // Short but audible still beats an unplayable round; the ladder clamps
+      // every rung to whatever the buffer actually holds.
+      if (prefix && !isSilent(prefix)) return prefix;
+      throw err;
     }
   });
   // The queue must survive a failed download, so it waits on the settled state
@@ -118,9 +292,8 @@ function loadFull(url: string): Promise<AudioBuffer> {
   const cached = fullBuffers.get(url);
   if (cached) return cached;
   const p = (async () => {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`preview ${res.status}`);
-    return decode(await res.arrayBuffer());
+    const { bytes } = await download(url);
+    return decode(bytes);
   })();
   p.catch(() => fullBuffers.delete(url));
   fullBuffers.set(url, p);
@@ -137,31 +310,95 @@ export function preloadFullClip(url: string): Promise<AudioBuffer> {
   return loadFull(url);
 }
 
-export type Playback = { stop: () => void };
+export type Playback = { stop: () => void; startsIn: number };
 
 const FADE = 0.012;
+
+/**
+ * How far ahead of the clock to schedule.
+ *
+ * It used to be a flat 20 ms, which is comfortable on a desktop rendering in
+ * 2.9 ms quanta and nowhere near enough on a phone. `currentTime` only advances
+ * when the audio thread finishes a callback, and a phone's callback is tens of
+ * milliseconds long, so between reading the clock and the schedule landing the
+ * clock can jump straight past the moment we picked. Everything then sits in the
+ * past: `start` fires immediately, `stop` has already been and gone, and the
+ * gain envelope collapses to its final value before a sample is heard. A 0.1
+ * second rung disappears completely — no error, no sound, which is the bug.
+ *
+ * Scaling with the device's own reported latency keeps desktop snappy and gives
+ * a slow phone the headroom it needs.
+ */
+function leadTime(c: AudioContext): number {
+  const latency = (c.baseLatency || 0) + (c.outputLatency || 0);
+  return Math.min(0.25, Math.max(0.08, latency * 2));
+}
 
 export function playClip(
   buffer: AudioBuffer,
   opts: { startSec: number; durationSec: number; onEnd?: () => void },
 ): Playback {
   const c = audioCtx();
-  const src = c.createBufferSource();
-  src.buffer = buffer;
+  // A context can drop back out of 'running' between rounds — iOS interrupts it
+  // for a phone call and never puts it back on its own.
+  resume(c);
 
-  const gain = c.createGain();
-  src.connect(gain).connect(c.destination);
+  if (!(buffer.duration > 0)) {
+    // A zero-length decode would otherwise schedule a source that ends instantly
+    // and leaves the UI stuck mid-play.
+    opts.onEnd?.();
+    return { stop: () => {}, startsIn: 0 };
+  }
 
   const start = Math.max(0, Math.min(opts.startSec, Math.max(0, buffer.duration - 0.05)));
   const duration = Math.max(0.05, Math.min(opts.durationSec, buffer.duration - start));
-  const t0 = c.currentTime + 0.02;
-
-  // Fade in, hold, fade out — all scheduled on the audio clock, not setTimeout.
   const fade = Math.min(FADE, duration / 4);
-  gain.gain.setValueAtTime(0.0001, t0);
-  gain.gain.exponentialRampToValueAtTime(1, t0 + fade);
-  gain.gain.setValueAtTime(1, t0 + duration - fade);
-  gain.gain.exponentialRampToValueAtTime(0.0001, t0 + duration);
+
+  let src!: AudioBufferSourceNode;
+  let gain!: GainNode;
+  let t0 = 0;
+
+  const schedule = (lead: number) => {
+    src = c.createBufferSource();
+    src.buffer = buffer;
+    gain = c.createGain();
+    src.connect(gain).connect(c.destination);
+
+    // Read the clock as late as possible — after the nodes exist — so the window
+    // between reading it and scheduling against it is as small as it can be.
+    // While the context is still suspended `currentTime` is frozen, which is
+    // fine: it resumes from exactly there and the clip plays from its first
+    // sample.
+    t0 = c.currentTime + lead;
+
+    // Fade in, hold, fade out — all on the audio clock, not setTimeout.
+    gain.gain.setValueAtTime(0.0001, t0);
+    gain.gain.exponentialRampToValueAtTime(1, t0 + fade);
+    gain.gain.setValueAtTime(1, t0 + duration - fade);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + duration);
+
+    src.start(t0, start, duration);
+    src.stop(t0 + duration);
+  };
+
+  schedule(leadTime(c));
+
+  // If the main thread stalled while we were scheduling — a phone under load
+  // does this constantly — the clock can already have passed the window we
+  // picked, and a rung that short would simply never be heard. Anchor it again
+  // from where the clock actually is. Costs nothing when nothing went wrong,
+  // which is every desktop play.
+  const late = c.currentTime - t0;
+  if (late > 0) {
+    try {
+      src.stop();
+      src.disconnect();
+      gain.disconnect();
+    } catch {
+      /* nothing to unwind */
+    }
+    schedule(late + leadTime(c) * 2);
+  }
 
   let stopped = false;
   src.onended = () => {
@@ -171,10 +408,10 @@ export function playClip(
     }
   };
 
-  src.start(t0, start, duration);
-  src.stop(t0 + duration);
-
   return {
+    // How long until the first sample sounds, so the progress bar can start
+    // with the audio instead of ahead of it.
+    startsIn: Math.max(0, t0 - c.currentTime),
     stop: () => {
       if (stopped) return;
       stopped = true;
@@ -193,7 +430,8 @@ export function playClip(
 export function blip(kind: 'correct' | 'wrong' | 'reveal' | 'finish'): void {
   try {
     const c = audioCtx();
-    if (c.state === 'suspended') return;
+    // Not just 'suspended' — an interrupted context is equally deaf.
+    if (c.state !== 'running') return;
     const notes: Record<typeof kind, number[]> = {
       correct: [523.25, 659.25, 783.99],
       wrong: [196, 155.56],
