@@ -8,7 +8,7 @@ import { BlurStage } from './stages';
  * Gentler than the painting ladder: App Store icons are only 512px square, so
  * anything past about 7× is a wall of interpolated mush rather than a puzzle.
  */
-const BLURS = [26, 16, 9, 4, 1.5];
+const BLURS = [46, 26, 13, 5, 1.5];
 const SCALES = [1.06, 1.05, 1.04, 1.03, 1.02];
 
 type AppPayload = { artwork: string; name: string; detail: string };

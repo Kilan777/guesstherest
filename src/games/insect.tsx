@@ -9,7 +9,7 @@ import { ZoomStage, focalOf } from './stages';
  * fourteen-times crop of one is abstract before the ladder does anything — ten
  * still lands on a single eye or one segment of leg, which is enough.
  */
-const SCALES = [6, 4, 2.8, 1.8, 1.2];
+const SCALES = [4, 2.9, 2.1, 1.6, 1.15];
 
 type InsectPayload = {
   src: string | null;
@@ -79,7 +79,7 @@ export const insectGame: GameDef = {
   emoji: '🦋',
   accent: '#7B6212',
   guess: 'search',
-  levels: ['6×', '4×', '2.8×', '1.8×', '1.2×'],
+  levels: ['4×', '2.9×', '2.1×', '1.6×', '1.15×'],
   skipLabel: 'Zoom out',
   needsNetwork: true,
   rounds: 10,

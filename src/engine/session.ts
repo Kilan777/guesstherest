@@ -34,6 +34,8 @@ export type Session = {
   bestStreak: number;
   roundsWon: number;
   submitted: 'pending' | 'global' | 'local' | null;
+  /** Milliseconds left on the round clock, or null if this game is untimed. */
+  remainingMs: number | null;
   guess: (option: Option) => void;
   guessYear: (year: number) => void;
   revealMore: () => void;
@@ -64,10 +66,14 @@ export function useGameSession(game: GameDef, option?: string): Session {
   const [submitted, setSubmitted] = useState<'pending' | 'global' | 'local' | null>(null);
 
   const roundStart = useRef<number>(0);
+  const [remainingMs, setRemainingMs] = useState<number | null>(
+    game.timeLimitMs ? game.timeLimitMs : null,
+  );
 
   // Load (or reload) the deck.
   useEffect(() => {
     let cancelled = false;
+    let unsubscribe: (() => void) | undefined;
     // Nothing to build until the player has answered the game's setup question.
     if (game.options && !option) {
       setPhase('choosing');
@@ -95,21 +101,32 @@ export function useGameSession(game: GameDef, option?: string): Session {
         roundStart.current = performance.now();
         setPhase('playing');
 
-        // The rest of the deck streams in behind the first rounds. A player
-        // spends far longer on round one than this takes, so it has always
-        // landed by the time it's needed.
+        // The rest of the deck streams in behind the first rounds, one at a
+        // time. Round two used to wait on round ten, which on a phone is a long
+        // stare at a spinner between the first song and the second; now each
+        // round joins the deck — and gets its media prefetched — as it lands.
+        const stop = loaded.subscribe?.((round) => {
+          if (cancelled) return;
+          setDeck((d) => (d && !d.rounds.some((r) => r.id === round.id)
+            ? { ...d, rounds: [...d.rounds, round] }
+            : d));
+        });
+        unsubscribe = stop;
+
         loaded.rest
           ?.then((more) => {
             if (cancelled) return;
             // Pin `expected` to what actually arrived. If the tail came up
             // short — a few seeds with no usable media — the run has to end at
             // the real count, or the last round would buffer forever waiting
-            // for rounds that were never coming.
-            setDeck((d) =>
-              d
-                ? { ...d, rounds: [...d.rounds, ...more], expected: d.rounds.length + more.length }
-                : d,
-            );
+            // for rounds that were never coming. Anything `subscribe` already
+            // delivered is skipped; a deck without `subscribe` lands here.
+            setDeck((d) => {
+              if (!d) return d;
+              const fresh = more.filter((m) => !d.rounds.some((r) => r.id === m.id));
+              const rounds = [...d.rounds, ...fresh];
+              return { ...d, rounds, expected: rounds.length };
+            });
           })
           .catch(() => {
             // Whatever loaded stays playable; the run just ends earlier.
@@ -123,6 +140,7 @@ export function useGameSession(game: GameDef, option?: string): Session {
       });
     return () => {
       cancelled = true;
+      unsubscribe?.();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [game, nonce, option]);
@@ -264,6 +282,36 @@ export function useGameSession(game: GameDef, option?: string): Session {
     if (phase === 'playing') roundStart.current = performance.now();
   }, [roundIndex, phase]);
 
+  // Round clock. Keyed on the round rather than the rung, so buying a clue
+  // costs points without also buying time. `finishRound` changes identity on
+  // every streak change, so it is read through a ref to avoid restarting the
+  // countdown mid-round.
+  const finishRef = useRef(finishRound);
+  finishRef.current = finishRound;
+
+  useEffect(() => {
+    if (!game.timeLimitMs) return;
+    if (phase !== 'playing') return;
+
+    const deadline = performance.now() + game.timeLimitMs;
+    setRemainingMs(game.timeLimitMs);
+
+    const tick = window.setInterval(() => {
+      const left = deadline - performance.now();
+      if (left <= 0) {
+        window.clearInterval(tick);
+        setRemainingMs(0);
+        finishRef.current(false, 0, 0);
+      } else {
+        setRemainingMs(left);
+      }
+    }, 200);
+
+    return () => window.clearInterval(tick);
+    // Deliberately not keyed on `level`: a skip must not reset the clock.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [game.timeLimitMs, phase === 'playing', roundIndex, nonce]);
+
   // Pull the next round's media down while this one is being played.
   useEffect(() => {
     if (!deck || !game.prefetch) return;
@@ -305,6 +353,7 @@ export function useGameSession(game: GameDef, option?: string): Session {
     bestStreak,
     roundsWon,
     submitted,
+    remainingMs,
     guess,
     guessYear,
     revealMore,

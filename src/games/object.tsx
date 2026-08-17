@@ -3,7 +3,7 @@ import { pageInfo } from '../content/wikipedia';
 import { streamDeck } from '../content/deck';
 import { ZoomStage, focalOf } from './stages';
 
-const SCALES = [11, 6.5, 3.8, 2.2, 1.4];
+const SCALES = [6.5, 4.3, 2.9, 2, 1.35];
 
 type ObjectPayload = {
   src: string | null;
@@ -74,7 +74,7 @@ export const objectGame: GameDef = {
   emoji: '🔍',
   accent: '#14615F',
   guess: 'search',
-  levels: ['11×', '6.5×', '3.8×', '2.2×', '1.4×'],
+  levels: ['6.5×', '4.3×', '2.9×', '2×', '1.35×'],
   skipLabel: 'Zoom out',
   needsNetwork: false,
   rounds: 10,

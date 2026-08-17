@@ -42,7 +42,12 @@ async function drain<S, R>(
   out: Resolved<S, R>[],
   take: number,
   cap: number,
-  opts: { resolve: (seed: S) => Promise<R | null>; concurrency?: number },
+  opts: {
+    resolve: (seed: S) => Promise<R | null>;
+    concurrency?: number;
+    /** Fired the instant a seed resolves, ahead of the batch finishing. */
+    onResolved?: (r: Resolved<S, R>) => void;
+  },
 ): Promise<void> {
   const batch = shuffled.slice(cursor.at, cursor.at + take);
   cursor.at += batch.length;
@@ -57,7 +62,11 @@ async function drain<S, R>(
         if (seed === undefined || fatal) return;
         try {
           const value = await opts.resolve(seed);
-          if (value !== null && out.length < cap) out.push({ seed, value });
+          if (value !== null && out.length < cap) {
+            const resolved = { seed, value };
+            out.push(resolved);
+            opts.onResolved?.(resolved);
+          }
         } catch (err) {
           fatal = err;
           return;
@@ -77,6 +86,12 @@ async function drain<S, R>(
  * Wikipedia lookups before anything appeared on screen. Since a player spends
  * ten seconds or more on the first round, the remainder always lands long
  * before it is needed.
+ *
+ * The tail is delivered round by round through `subscribe`, not in one lump when
+ * `rest` settles. Handing over the whole tail at once meant round two waited on
+ * round ten: on a phone, with a throttled source, that is a minute of staring at
+ * a spinner between the first song and the second. Each round now shows up — and
+ * gets its media prefetched — the moment it is ready.
  */
 export async function streamDeck<S, R>(opts: {
   pool: readonly S[];
@@ -102,14 +117,29 @@ export async function streamDeck<S, R>(opts: {
   }
   if (firstBatch.length === 0) throw new Error(opts.emptyError);
 
+  // A deck is often warmed long before anything subscribes to it, so landed
+  // rounds are kept and replayed to each new listener.
+  const landed: Round[] = [];
+  const listeners = new Set<(round: Round) => void>();
+  const emit = (round: Round) => {
+    landed.push(round);
+    for (const fn of listeners) fn(round);
+  };
+  const subscribe = (fn: (round: Round) => void) => {
+    for (const round of landed) fn(round);
+    listeners.add(fn);
+    return () => listeners.delete(fn);
+  };
+  const streaming = { ...opts, onResolved: (r: Resolved<S, R>) => emit(opts.toRound(r.seed, r.value)) };
+
   const remaining = opts.count - firstBatch.length;
   const rest =
     remaining > 0
       ? (async () => {
           const more: Resolved<S, R>[] = [];
-          await drain(shuffled, cursor, more, remaining, remaining, opts);
+          await drain(shuffled, cursor, more, remaining, remaining, streaming);
           if (more.length < remaining && cursor.at < shuffled.length) {
-            await drain(shuffled, cursor, more, remaining - more.length + 3, remaining, opts);
+            await drain(shuffled, cursor, more, remaining - more.length + 3, remaining, streaming);
           }
           return more.map((r) => opts.toRound(r.seed, r.value));
         })()
@@ -120,5 +150,6 @@ export async function streamDeck<S, R>(opts: {
     catalog: opts.catalog,
     expected: opts.count,
     rest,
+    subscribe,
   };
 }

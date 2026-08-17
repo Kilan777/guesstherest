@@ -29,6 +29,13 @@ export type Deck = {
   expected?: number;
   /** Rounds still being fetched; appended to `rounds` when they land. */
   rest?: Promise<Round[]>;
+  /**
+   * Delivers each streamed round the moment it resolves, rather than making the
+   * player wait for the whole tail. Rounds that landed before you subscribed are
+   * replayed immediately, so warming a deck early never loses any. Returns an
+   * unsubscribe function.
+   */
+  subscribe?: (fn: (round: Round) => void) => () => void;
 };
 
 export type Outcome = 'won' | 'lost' | null;
@@ -71,6 +78,12 @@ export type GameDef = {
   /** False for games whose content is fully bundled. */
   needsNetwork: boolean;
   rounds: number;
+  /**
+   * Optional per-round countdown, in milliseconds. Time runs from the moment a
+   * round starts and does not reset when you buy a rung — otherwise skipping
+   * would be a way to buy more time as well as more information.
+   */
+  timeLimitMs?: number;
   yearRange?: [number, number];
   /** Extra words the home-page search should match on. */
   keywords?: string[];

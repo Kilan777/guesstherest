@@ -225,10 +225,19 @@ export function GameScreen(props: { game: GameDef; onExit: () => void; onOpenSet
           <span className="hud-label">Score</span>
           <strong>{formatScore(session.score)}</strong>
         </div>
-        <div className="hud-item">
-          <span className="hud-label">Streak</span>
-          <strong>{session.streak > 0 ? `${session.streak}🔥` : '—'}</strong>
-        </div>
+        {session.remainingMs === null ? (
+          <div className="hud-item">
+            <span className="hud-label">Streak</span>
+            <strong>{session.streak > 0 ? `${session.streak}🔥` : '—'}</strong>
+          </div>
+        ) : (
+          <div className={`hud-item ${session.remainingMs <= 10000 ? 'hud-urgent' : ''}`}>
+            <span className="hud-label">Time</span>
+            <strong>
+              {revealed ? '—' : `${Math.ceil(session.remainingMs / 1000)}s`}
+            </strong>
+          </div>
+        )}
         <div className="hud-item">
           <span className="hud-label">At stake</span>
           <strong style={{ color: game.accent }}>{revealed ? '—' : formatScore(atStake)}</strong>
@@ -338,7 +347,7 @@ export function GameScreen(props: { game: GameDef; onExit: () => void; onOpenSet
             {/* Two different things: buy another rung, or abandon the round.
                 On the last rung there is nothing left to buy. */}
             {!lastRung && (
-              <button type="button" className="btn btn-skip" onClick={session.revealMore}>
+              <button type="button" className="btn btn-skip btn-reveal" onClick={session.revealMore}>
                 {game.skipLabel}
                 <em>−{formatScore(atStake - levelValue(session.level + 1, session.totalLevels))} pts</em>
                 <kbd>R</kbd>

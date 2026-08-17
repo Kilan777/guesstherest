@@ -415,7 +415,6 @@ export function StreetViewStage(props: {
         {/* Covers the place-name label and the "View on Google Maps" link.
             Deliberately small: everything else, including Google's attribution
             along the bottom, stays visible and interactive. */}
-        {!revealed && <div className="sv-label-mask" aria-hidden />}
       </div>
       <p className="stage-note">Drag to look around. Road signs, plates and which side they drive on all help.</p>
       {visibleHints.length > 0 && (

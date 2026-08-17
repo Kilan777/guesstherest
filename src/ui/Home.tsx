@@ -7,7 +7,8 @@ import { getHandle, needsHandle } from '../lib/identity';
 import { useAuth } from '../lib/auth';
 import { recentGames, trendingGames, type Trending } from '../lib/history';
 import { warmDeck } from '../engine/warm';
-import { CardArt } from './CardArt';
+import { CardArt, hasCardPhoto } from './CardArt';
+import { ART_CREDITS } from '../content/art-credits';
 import { NamePrompt } from './NamePrompt';
 import { AdSlot, AD_SLOTS } from './AdSlot';
 
@@ -38,6 +39,7 @@ function warmFeatured(slugs: string[]): void {
 export function Home(props: { onPlay: (slug: string) => void; onOpenSettings: () => void }) {
   const auth = useAuth();
   const [query, setQuery] = useState('');
+  const [credits, setCredits] = useState(false);
   const [recent, setRecent] = useState<string[]>([]);
   const [trending, setTrending] = useState<Trending | null>(null);
   const [localName] = useState(getHandle);
@@ -181,7 +183,14 @@ export function Home(props: { onPlay: (slug: string) => void; onOpenSettings: ()
           Wikipedia · trailers from YouTube. No API keys, no account required. The only thing stored
           about you is the name you pick.
         </p>
+        <p>
+          <button type="button" className="link-btn" onClick={() => setCredits(true)}>
+            Photo credits
+          </button>
+        </p>
       </footer>
+
+      {credits && <CreditsPanel onClose={() => setCredits(false)} />}
     </div>
   );
 }
@@ -229,9 +238,13 @@ function Card(props: {
 
       <div className="card-art">
         <CardArt slug={g.slug} />
-        <span className="card-emoji" aria-hidden>
-          {g.emoji}
-        </span>
+        {/* The badge belongs on the drawn cards, where it is part of the
+            picture. On a photograph it just sits in front of the subject. */}
+        {!hasCardPhoto(g.slug) && (
+          <span className="card-emoji" aria-hidden>
+            {g.emoji}
+          </span>
+        )}
         {props.rank && <span className="card-rank">#{props.rank}</span>}
         {!g.needsNetwork && <span className="card-flag">offline ready</span>}
       </div>
@@ -325,5 +338,44 @@ function GoogleMark() {
       <path fill="#FBBC05" d="M11.5 28.4c-.5-1.4-.7-2.9-.7-4.4s.3-3 .7-4.4l-7.1-5.5C2.9 17 2 20.4 2 24s.9 7 2.4 9.9l7.1-5.5z" />
       <path fill="#EA4335" d="M24 10.6c3.3 0 6.2 1.1 8.5 3.3l6.3-6.3C34.9 4 29.9 2 24 2 15.4 2 8.1 7 4.4 14.1l7.1 5.5c1.8-5.2 6.7-9 12.5-9z" />
     </svg>
+  );
+}
+
+/**
+ * Attribution for the card photographs. Most come from Wikimedia Commons under
+ * CC-BY or CC-BY-SA, and both licences require the credit to be shown somewhere
+ * a reader can actually get to — so it lives one click from the footer rather
+ * than buried in the repository.
+ */
+function CreditsPanel(props: { onClose: () => void }) {
+  const entries = Object.entries(ART_CREDITS);
+  return (
+    <div className="modal-backdrop" role="dialog" aria-modal="true" aria-label="Photo credits" onClick={props.onClose}>
+      <div className="modal credits-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-head">
+          <h2>Photo credits</h2>
+          <button type="button" className="icon-btn" onClick={props.onClose} aria-label="Close">
+            ×
+          </button>
+        </div>
+        <p className="credits-intro">
+          The photograph on each game card, and where it came from. Images from Wikimedia Commons
+          are used under the licence shown; app icons are App Store artwork belonging to their
+          publishers.
+        </p>
+        <ul className="credits-list">
+          {entries.map(([slug, items]) => (
+            <li key={slug}>
+              <strong>{slug}</strong>
+              <span>
+                {items
+                  .map((i) => `${i.subject} — ${i.author}${i.licence ? ` (${i.licence})` : ''}`)
+                  .join(' · ')}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
   );
 }

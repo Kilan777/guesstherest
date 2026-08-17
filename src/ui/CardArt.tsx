@@ -603,7 +603,40 @@ const ART: Record<string, () => React.ReactElement> = {
   recipe: Recipe,
 };
 
+/**
+ * Games whose card is a real photograph rather than a drawing. The files are
+ * built by scripts/build-card-art.mjs and served from our own origin; the six
+ * games missing from this list keep their illustration, which suits a game
+ * about words, sounds or lines of dialogue better than any photo would.
+ */
+const PHOTO = new Set([
+  'animal', 'bird', 'insect', 'plant', 'dish', 'recipe', 'landmark', 'capital',
+  'skyline', 'country', 'car', 'sport', 'boardgame', 'object', 'word', 'outline',
+  'videogame', 'scene', 'year', 'rebus', 'logo', 'celebrity', 'quote', 'app',
+]);
+
+/** True when this card is a photograph, which needs no emoji badge on top. */
+export const hasCardPhoto = (slug: string) => PHOTO.has(slug);
+
 export function CardArt({ slug }: { slug: string }) {
+  if (PHOTO.has(slug)) {
+    return (
+      <div className="art-wrap">
+        <img
+          className="art art-photo"
+          src={`${import.meta.env.BASE_URL}art/${slug}.webp`}
+          alt=""
+          width={480}
+          height={270}
+          /* Thirty cards on the home page: only the ones actually on screen
+             should cost anything. */
+          loading="lazy"
+          decoding="async"
+          draggable={false}
+        />
+      </div>
+    );
+  }
   const Art = ART[slug];
   return <div className="art-wrap">{Art ? <Art /> : null}</div>;
 }

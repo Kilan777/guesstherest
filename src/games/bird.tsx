@@ -5,7 +5,7 @@ import { streamDeck } from '../content/deck';
 import { ZoomStage, focalOf } from './stages';
 
 /** Twelve times in is one patch of plumage — barb, bar and not much else. */
-const SCALES = [8, 5, 3.2, 2, 1.3];
+const SCALES = [5, 3.4, 2.4, 1.7, 1.2];
 
 type BirdPayload = {
   src: string | null;
@@ -75,7 +75,7 @@ export const birdGame: GameDef = {
   emoji: '🦜',
   accent: '#1F5F73',
   guess: 'search',
-  levels: ['8×', '5×', '3.2×', '2×', '1.3×'],
+  levels: ['5×', '3.4×', '2.4×', '1.7×', '1.2×'],
   skipLabel: 'Zoom out',
   needsNetwork: true,
   rounds: 10,
