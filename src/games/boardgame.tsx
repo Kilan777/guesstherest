@@ -28,6 +28,9 @@ function BoardGameStage({ round, level, revealed }: StageProps) {
       cols={COLS}
       rows={ROWS}
       seed={round.id}
+      // Box art is not one shape either — a fixed frame letterboxes it, and
+      // tiles near the edge then open onto blank bars instead of the picture.
+      aspect="auto"
       fit="contain"
       caption={
         <>

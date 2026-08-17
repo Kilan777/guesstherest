@@ -22,6 +22,15 @@ function VideoGameStage({ round, level, revealed }: StageProps) {
       cols={COLS}
       rows={ROWS}
       seed={round.id}
+      // The lead image on a game's article is usually box art, but by no means
+      // always: of 62 titles here, 51 are portrait, 4 square and 7 landscape,
+      // running from 0.60:1 up to League of Legends' 2.6:1 and Pokemon Red and
+      // Blue's 3:1 wordmark. A 2:3 cover frame threw away three quarters of
+      // those two and half of the 1.4:1 ones, magnifying what was left until a
+      // round was two letters of a word. The frame is shaped to whatever the
+      // round actually loaded instead, and `contain` guarantees the rest.
+      aspect="auto"
+      fit="contain"
       caption={
         <>
           <strong>{p.label}</strong>

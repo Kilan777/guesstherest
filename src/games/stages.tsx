@@ -13,38 +13,42 @@ export function focalOf(seedText: string): [number, number] {
 }
 
 type ImageState =
-  | { status: 'idle' | 'loading' | 'failed'; url: null }
-  | { status: 'ready'; url: string };
+  | { status: 'idle' | 'loading' | 'failed'; url: null; w: 0; h: 0 }
+  | { status: 'ready'; url: string; w: number; h: number };
 
 /**
  * Tries each candidate URL in order and reports the first that decodes. The
  * smaller Wikimedia render is preferred but isn't cached for every file, so the
  * full-size original follows it as a fallback.
+ *
+ * The decoded size comes back with it: a stage that has to shape itself around
+ * the picture can't know the picture's proportions any earlier than this.
  */
 function useImageState(candidates: (string | null)[]): ImageState {
   const urls = candidates.filter((u): u is string => !!u);
   const key = urls.join('|');
   const [state, setState] = useState<ImageState>(
-    urls.length ? { status: 'loading', url: null } : { status: 'idle', url: null },
+    urls.length ? { status: 'loading', url: null, w: 0, h: 0 } : { status: 'idle', url: null, w: 0, h: 0 },
   );
 
   useEffect(() => {
     if (!urls.length) {
-      setState({ status: 'idle', url: null });
+      setState({ status: 'idle', url: null, w: 0, h: 0 });
       return;
     }
     let alive = true;
-    setState({ status: 'loading', url: null });
+    setState({ status: 'loading', url: null, w: 0, h: 0 });
 
     const attempt = (i: number) => {
       if (!alive) return;
       const url = urls[i];
       if (!url) {
-        setState({ status: 'failed', url: null });
+        setState({ status: 'failed', url: null, w: 0, h: 0 });
         return;
       }
       const img = new Image();
-      img.onload = () => alive && setState({ status: 'ready', url });
+      img.onload = () =>
+        alive && setState({ status: 'ready', url, w: img.naturalWidth, h: img.naturalHeight });
       img.onerror = () => attempt(i + 1);
       img.src = url;
     };
@@ -141,8 +145,17 @@ export function TileStage(props: {
    * Frame shape. Posters and box art are portrait; flags are landscape, and a
    * landscape image in a 2:3 frame with object-fit:cover crops away the sides,
    * which is where half a flag's identity lives.
+   *
+   * 'auto' shapes the frame to the picture once it has decoded. Use it for a
+   * deck that has no single shape: video game lead images run from 0.60:1 box
+   * art to a 3:1 wordmark, so any fixed frame is wrong for part of the deck —
+   * with 'cover' it crops the answer away, and with 'contain' it letterboxes,
+   * which is worse here than it looks. The tile grid is laid over the frame, so
+   * bars inside the frame mean the early rungs open windows onto blank
+   * background and reveal nothing. Matching the frame to the image removes the
+   * bars, which is what keeps every opened cell landing on artwork.
    */
-  aspect?: 'portrait' | 'landscape';
+  aspect?: 'portrait' | 'landscape' | 'auto';
   /**
    * Colour of the solid backing when `conceal` is 'hide'. Flags and maps are
    * colourful and sit well on dark; a lot of logos are black on transparent,
@@ -156,10 +169,30 @@ export function TileStage(props: {
   fit?: 'cover' | 'contain';
   caption?: React.ReactNode;
 }) {
-  const { src, opened, level, revealed, cols, rows } = props;
+  const { src, opened, level, revealed } = props;
   const conceal = props.conceal ?? 'blur';
   const fit = props.fit ?? 'cover';
   const state = useImageState([src]);
+
+  // Only a guard against a freak panorama making the frame a few pixels tall.
+  // Everything in the decks that asks for 'auto' sits well inside it, so the
+  // frame ends up exactly the picture's shape and nothing is letterboxed.
+  const ratio =
+    props.aspect === 'auto' && state.status === 'ready' && state.h > 0
+      ? Math.min(3.6, Math.max(0.4, state.w / state.h))
+      : null;
+
+  // A 6x8 grid over a 3:1 wordmark makes cells four times wider than they are
+  // tall, and the round-window masks over them read as letterbox slits. The
+  // caller's cols x rows is taken as the budget of cells and re-proportioned to
+  // the picture, so a window stays a window whatever shape the frame is.
+  const { cols, rows } = useMemo(() => {
+    if (ratio === null) return { cols: props.cols, rows: props.rows };
+    const budget = props.cols * props.rows;
+    const c = Math.max(2, Math.round(Math.sqrt(budget * ratio)));
+    return { cols: c, rows: Math.max(2, Math.round(budget / c)) };
+  }, [ratio, props.cols, props.rows]);
+
   const total = cols * rows;
 
   // Deterministic shuffle so the same round always opens the same cells.
@@ -226,7 +259,18 @@ export function TileStage(props: {
 
   return (
     <div className="stage">
-      <div className={`frame ${props.aspect === 'landscape' ? 'frame-flag' : 'frame-poster'}`}>
+      <div
+        className={`frame ${
+          props.aspect === 'auto'
+            ? 'frame-auto'
+            : props.aspect === 'landscape'
+              ? 'frame-flag'
+              : 'frame-poster'
+        }`}
+        // Until the picture decodes there is nothing to shape the frame to, so
+        // the CSS fallback holds a poster-shaped box rather than collapsing.
+        style={ratio !== null ? ({ '--ar': ratio } as React.CSSProperties) : undefined}
+      >
         {state.status === 'ready' ? (
           revealed ? (
             /* One clean copy once the round is over. Rendering the backing

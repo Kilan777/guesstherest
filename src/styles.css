@@ -875,6 +875,26 @@ a {
   background: var(--bg-sink);
 }
 
+/* A frame cut to the picture, for decks that have no one shape — video game
+   lead images run from 0.6:1 box art to a 3:1 wordmark. `--ar` is set per round
+   from the image's own pixels, so `object-fit: contain` fills the box corner to
+   corner with no bars, and the tile grid over the frame is therefore also the
+   grid over the artwork.
+
+   Sizing is driven from the height budget rather than the width: a frame that
+   hit a `max-height` cap would be squashed off its aspect ratio, and the bars
+   the ratio exists to prevent would come straight back. Deriving the width from
+   --frame-h keeps the box on-ratio and inside the budget at every size, so the
+   `max-height` further down never has anything to trim. */
+.frame-auto {
+  --frame-h: 560px;
+  aspect-ratio: var(--ar, 0.667);
+  width: min(100%, 560px, calc(var(--frame-h) * var(--ar, 0.667)));
+  max-width: 100%;
+  margin: 0 auto;
+  background: var(--bg-sink);
+}
+
 /* Most national flags are 3:2. */
 .frame-flag {
   aspect-ratio: 3 / 2;
@@ -2155,6 +2175,12 @@ kbd {
     max-height: 40dvh;
   }
 
+  /* The self-shaping frame takes the same budget as a height to size itself
+     from, so it shrinks by width and stays on its picture's ratio. */
+  .frame-auto {
+    --frame-h: 40dvh;
+  }
+
   .vinyl {
     width: min(150px, 36vw);
     height: min(150px, 36vw);
@@ -2243,6 +2269,10 @@ kbd {
     width: auto;
     height: 32dvh;
     max-width: 100%;
+  }
+
+  .frame-auto {
+    --frame-h: 32dvh;
   }
 
   .vinyl {
@@ -2407,4 +2437,132 @@ kbd {
 
 .mod-note-bad {
   color: var(--bad);
+}
+
+/* ── tv intro stage ───────────────────────────────────────────────────────── */
+
+.stage-show {
+  gap: 18px;
+  padding: 8px 0;
+  /* The off-screen player is absolutely positioned against this. */
+  position: relative;
+}
+
+/* The YouTube player, playing, at a real size, where nobody can see it.
+   It must stay laid out — `display:none`, `visibility:hidden` and a 0×0 box
+   all stop Chrome playing the audio — so it is pushed out of the viewport
+   instead. `overflow:hidden` on the stage would clip it into existence again,
+   which is why it is fixed rather than absolute. */
+.tv-audio-host {
+  position: fixed;
+  left: -10000px;
+  top: 0;
+  width: 320px;
+  height: 180px;
+  pointer-events: none;
+  opacity: 0;
+  z-index: -1;
+}
+
+.tv-audio-host iframe {
+  width: 320px;
+  height: 180px;
+  border: 0;
+}
+
+.tv {
+  width: min(300px, 62vw);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.tv-screen {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: 18px / 14px;
+  border: 3px solid var(--line);
+  background: radial-gradient(120% 120% at 50% 30%, #24382c 0%, #101a14 100%);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.tv.on .tv-screen {
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06), var(--shadow);
+}
+
+/* Faint CRT scanlines, so an idle screen still reads as a television. */
+.tv-scan {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.045) 0 1px,
+    transparent 1px 4px
+  );
+}
+
+.tv-idle {
+  font-size: 2.4rem;
+  opacity: 0.55;
+  filter: grayscale(1);
+}
+
+.tv-eq {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 56%;
+}
+
+.tv-eq span {
+  width: 7px;
+  border-radius: 3px;
+  height: 100%;
+  transform-origin: 50% 100%;
+  animation: tv-bounce 0.62s ease-in-out infinite alternate;
+}
+
+@keyframes tv-bounce {
+  from {
+    transform: scaleY(0.14);
+  }
+  to {
+    transform: scaleY(var(--h, 1));
+  }
+}
+
+.tv-legs {
+  display: flex;
+  gap: 46%;
+  width: 68%;
+}
+
+.tv-legs span {
+  flex: 1;
+  height: 10px;
+  border-radius: 0 0 5px 5px;
+  background: var(--line);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tv-eq span {
+    animation: none;
+    transform: scaleY(0.6);
+  }
+}
+
+@media (max-width: 640px) {
+  .stage-show {
+    gap: 14px;
+  }
+
+  .tv {
+    width: min(220px, 52vw);
+  }
 }
