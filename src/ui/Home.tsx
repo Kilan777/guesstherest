@@ -9,6 +9,7 @@ import { recentGames, trendingGames, type Trending } from '../lib/history';
 import { warmDeck } from '../engine/warm';
 import { CardArt } from './CardArt';
 import { NamePrompt } from './NamePrompt';
+import { AdSlot, AD_SLOTS } from './AdSlot';
 
 export function Home(props: { onPlay: (slug: string) => void; onOpenSettings: () => void }) {
   const auth = useAuth();
@@ -131,6 +132,8 @@ export function Home(props: { onPlay: (slug: string) => void; onOpenSettings: ()
           </div>
         )}
       </section>
+
+      <AdSlot slot={AD_SLOTS.home} format="horizontal" className="ad-home" />
 
       <footer className="site-foot">
         <p>

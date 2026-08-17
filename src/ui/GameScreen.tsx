@@ -8,6 +8,7 @@ import { Leaderboard } from './Leaderboard';
 import { formatScore, levelValue } from '../lib/scoring';
 import { localBest } from '../lib/leaderboard';
 import { triggerPlay } from '../engine/player';
+import { AdSlot, AD_SLOTS } from './AdSlot';
 
 export function GameScreen(props: { game: GameDef; onExit: () => void; onOpenSettings: () => void }) {
   const { game } = props;
@@ -194,6 +195,7 @@ export function GameScreen(props: { game: GameDef; onExit: () => void; onOpenSet
             </button>
           </div>
         </div>
+        <AdSlot slot={AD_SLOTS.results} format="horizontal" />
         <Leaderboard slug={game.slug} accent={game.accent} refreshKey={boardKey} />
       </div>
     );

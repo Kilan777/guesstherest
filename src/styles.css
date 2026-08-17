@@ -1903,6 +1903,29 @@ kbd {
   margin-top: 6px;
 }
 
+/* ── ads ──────────────────────────────────────────────────────────────────── */
+
+.ad-slot {
+  margin: 8px 0 4px;
+  min-height: 90px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ad-home {
+  padding: 0 var(--pad);
+}
+
+/* Labelled because an unlabelled ad that looks like site content is exactly
+   what AdSense's policies prohibit. */
+.ad-label {
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--text-faint);
+}
+
 /* ── misc ─────────────────────────────────────────────────────────────────── */
 
 .shimmer {

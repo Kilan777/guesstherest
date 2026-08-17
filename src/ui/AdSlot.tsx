@@ -25,6 +25,16 @@ declare global {
 
 export const adsEnabled = () => CLIENT.trim().length > 0;
 
+/**
+ * Ad unit ids, set once you create units in the AdSense dashboard. Until then
+ * the placements render nothing — auto ads still run from the loader script,
+ * and an empty `<ins>` would just log errors.
+ */
+export const AD_SLOTS = {
+  home: (import.meta.env.VITE_ADSENSE_SLOT_HOME as string) || '',
+  results: (import.meta.env.VITE_ADSENSE_SLOT_RESULTS as string) || '',
+};
+
 let scriptRequested = false;
 
 /** Loads AdSense once. Called from main.tsx; safe to call repeatedly. */

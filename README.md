@@ -240,6 +240,22 @@ CNAME www  kilan777.github.io
 Then in the repo: **Settings → Pages → Source: GitHub Actions**, and tick
 *Enforce HTTPS* once the certificate is issued (it can take up to an hour).
 
+### Seeded leaderboard scores
+
+`supabase/seed/leaderboard_seed.sql` fills every board with plausible scores so
+a new visitor doesn't meet an empty table. It needs migration
+`0002_seeded_scores.sql` first, which drops the `auth.users` foreign key (a fake
+player has no auth account) and adds a `bot` column.
+
+It cannot be run from the browser: the RLS insert policy ties every client
+insert to the caller's own `auth.uid()` and forbids `bot = true`, which is
+precisely what stops a player fabricating their own scores. Seeding is an admin
+action and happens in the SQL editor.
+
+Regenerate with `node scripts/seed-leaderboards.mjs`. Remove them all with
+`delete from public.scores where bot;`. Because they're flagged rather than
+indistinguishable, you can also filter or label them later.
+
 ### Ads
 
 AdSense runs in auto-ads mode: `src/ui/AdSlot.tsx` injects the loader with the
