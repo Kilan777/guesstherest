@@ -20,6 +20,19 @@ export type Resolved<S, R> = { seed: S; value: R };
  */
 export type Hidden = ReadonlySet<string>;
 
+/**
+ * The hide-list, possibly still in flight.
+ *
+ * Waiting for it before asking iTunes for round one put a whole network round
+ * trip in front of a network round trip: nothing had even been *requested* of
+ * the content source until the moderation list came back. Since the check only
+ * matters once a seed has resolved — and resolving is the slow half — the list
+ * is started first and awaited at the point of use, where by then it has almost
+ * always already landed. The filtering guarantee is unchanged; only the waiting
+ * moved.
+ */
+export type MaybeHidden = Hidden | Promise<Hidden>;
+
 /** How many extra passes over the pool a short deck is allowed. */
 const TOP_UP_PASSES = 4;
 
@@ -45,7 +58,7 @@ export async function buildDeck<S, R>(opts: {
   /** Extra seeds to try when the first pass comes up short. */
   topUpSlack?: number;
   /** Moderator-hidden round ids to skip. Needs `idOf` to be of any use. */
-  hidden?: Hidden;
+  hidden?: MaybeHidden;
   /** The round id a resolved seed would produce — see {@link Hidden}. */
   idOf?: (seed: S, value: R) => string;
 }): Promise<Resolved<S, R>[]> {
@@ -112,7 +125,7 @@ async function drain<S, R>(
     concurrency?: number;
     /** Fired the instant a seed resolves, ahead of the batch finishing. */
     onResolved?: (r: Resolved<S, R>) => void;
-    hidden?: Hidden;
+    hidden?: MaybeHidden;
     idOf?: (seed: S, value: R) => string;
   },
 ): Promise<void> {
@@ -129,7 +142,8 @@ async function drain<S, R>(
         if (seed === undefined || fatal) return;
         try {
           const value = await opts.resolve(seed);
-          if (value === null || isHidden(opts, seed, value)) continue;
+          if (value === null) continue;
+          if (isHidden(await opts.hidden, opts.idOf, seed, value)) continue;
           if (out.length < cap) {
             const resolved = { seed, value };
             out.push(resolved);
@@ -154,13 +168,14 @@ async function drain<S, R>(
  * round shown once more, against a game that will not deal at all.
  */
 function isHidden<S, R>(
-  opts: { hidden?: Hidden; idOf?: (seed: S, value: R) => string },
+  hidden: Hidden | undefined,
+  idOf: ((seed: S, value: R) => string) | undefined,
   seed: S,
   value: R,
 ): boolean {
-  if (!opts.hidden?.size || !opts.idOf) return false;
+  if (!hidden?.size || !idOf) return false;
   try {
-    return opts.hidden.has(opts.idOf(seed, value));
+    return hidden.has(idOf(seed, value));
   } catch {
     return false;
   }
@@ -198,7 +213,7 @@ export async function streamDeck<S, R>(opts: {
    * and used — which is what covers all thirty games without each one having to
    * remember to opt in. Pass an explicit set (or an empty one) to override.
    */
-  hidden?: Hidden;
+  hidden?: MaybeHidden;
 }): Promise<Deck> {
   const eager = Math.min(opts.eager ?? 2, opts.count);
   const shuffled = sample(opts.pool, opts.pool.length, opts.rng);
@@ -211,7 +226,7 @@ export async function streamDeck<S, R>(opts: {
   // stop a deck being dealt.
   const filtered = {
     ...opts,
-    hidden: opts.hidden ?? (await hiddenIds()),
+    hidden: opts.hidden ?? hiddenIds(),
     idOf: (seed: S, value: R) => opts.toRound(seed, value).id,
   };
 
