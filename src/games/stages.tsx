@@ -228,31 +228,44 @@ export function TileStage(props: {
     <div className="stage">
       <div className={`frame ${props.aspect === 'landscape' ? 'frame-flag' : 'frame-poster'}`}>
         {state.status === 'ready' ? (
-          <>
-            {conceal === 'hide' && !revealed ? (
-              <div
-                className={`tile-img tile-solid ${props.backing === 'light' ? 'tile-solid-light' : ''}`}
-                aria-hidden
-              />
-            ) : (
-              <img
-                className="tile-img tile-base"
-                src={state.url}
-                alt=""
-                draggable={false}
-                style={{ filter: `blur(${baseBlur}px)`, transform: 'scale(1.08)' }}
-              />
-            )}
-            {(openCount > 0 || revealed) && (
-              <img
-                className="tile-img tile-sharp"
-                src={state.url}
-                alt=""
-                draggable={false}
-                style={revealed ? { objectFit: fit } : { ...mask, objectFit: fit }}
-              />
-            )}
-          </>
+          revealed ? (
+            /* One clean copy once the round is over. Rendering the backing
+               layer as well left a second image 8% larger sitting behind the
+               first, which read as the picture doubled up on itself. */
+            <img
+              className="tile-img tile-sharp"
+              src={state.url}
+              alt=""
+              draggable={false}
+              style={{ objectFit: fit }}
+            />
+          ) : (
+            <>
+              {conceal === 'hide' ? (
+                <div
+                  className={`tile-img tile-solid ${props.backing === 'light' ? 'tile-solid-light' : ''}`}
+                  aria-hidden
+                />
+              ) : (
+                <img
+                  className="tile-img tile-base"
+                  src={state.url}
+                  alt=""
+                  draggable={false}
+                  style={{ filter: `blur(${baseBlur}px)`, transform: 'scale(1.08)', objectFit: fit }}
+                />
+              )}
+              {openCount > 0 && (
+                <img
+                  className="tile-img tile-sharp"
+                  src={state.url}
+                  alt=""
+                  draggable={false}
+                  style={{ ...mask, objectFit: fit }}
+                />
+              )}
+            </>
+          )
         ) : state.status === 'failed' || state.status === 'idle' ? (
           <div className="frame-msg">Poster unavailable.</div>
         ) : (
