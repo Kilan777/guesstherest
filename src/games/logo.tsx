@@ -1,5 +1,4 @@
 import type { Deck, GameDef, Option, StageProps } from '../engine/types';
-import { LOGOS } from '../content/data/logos';
 import { pageInfo } from '../content/wikipedia';
 import { streamDeck } from '../content/deck';
 import { TileStage } from './stages';
@@ -46,6 +45,7 @@ function LogoStage({ round, level, revealed }: StageProps) {
 }
 
 async function loadDeck(count: number, rng: () => number): Promise<Deck> {
+  const { LOGOS } = await import('../content/data/logos');
   const catalog: Option[] = LOGOS.map((l) => ({
     id: `logo:${l.label}`,
     label: l.label,

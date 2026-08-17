@@ -1,12 +1,12 @@
 import type { Deck, GameDef, Option, StageProps } from '../engine/types';
-import { STREET_VIEW, type StreetViewSeed } from '../content/data/streetview';
+import type { StreetViewSeed } from '../content/data/streetview';
 import { CAPITALS } from '../content/data/capitals';
 import { streamDeck } from '../content/deck';
 import { StreetViewStage } from './stages';
 
 type CountryPayload = { lat: number; lng: number; country: string; region: string };
 
-function CountryStage({ round, revealed }: StageProps) {
+function CountryStage({ round, level, revealed }: StageProps) {
   const p = round.payload as CountryPayload;
   return (
     <StreetViewStage
@@ -14,6 +14,8 @@ function CountryStage({ round, revealed }: StageProps) {
       lng={p.lng}
       seed={round.id}
       revealed={revealed}
+      hints={round.hints ?? []}
+      level={level}
       caption={
         <>
           <strong>{p.country}</strong>
@@ -25,6 +27,7 @@ function CountryStage({ round, revealed }: StageProps) {
 }
 
 async function loadDeck(count: number, rng: () => number): Promise<Deck> {
+  const { STREET_VIEW } = await import('../content/data/streetview');
   // The guess list is every country the site knows about, not just the ones
   // with a location in the deck — otherwise the catalog itself narrows the
   // answer down to fifty-odd countries.

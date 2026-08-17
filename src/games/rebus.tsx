@@ -1,11 +1,5 @@
 import type { Deck, GameDef, Option, StageProps } from '../engine/types';
-import {
-  EMOJI_BY_CATEGORY,
-  EMOJI_CATEGORIES,
-  isEmojiCategory,
-  type EmojiCategory,
-  type EmojiSeed,
-} from '../content/data/emoji';
+import type { EmojiCategory, EmojiSeed } from '../content/data/emoji';
 import { streamDeck } from '../content/deck';
 import { TextStage } from './stages';
 
@@ -49,6 +43,7 @@ function RebusStage({ round, level, revealed }: StageProps) {
 }
 
 async function loadDeck(count: number, rng: () => number, option?: string): Promise<Deck> {
+  const { EMOJI_BY_CATEGORY, isEmojiCategory } = await import('../content/data/emoji');
   const category: EmojiCategory = isEmojiCategory(option) ? option : DEFAULT_CATEGORY;
   const pool = EMOJI_BY_CATEGORY[category];
 
@@ -101,12 +96,15 @@ export const rebusGame: GameDef = {
   options: {
     label: 'Pick a category',
     hint: 'It decides the puzzles and the list you search against.',
-    choices: EMOJI_CATEGORIES.map((c) => ({
-      id: c.id,
-      label: c.label,
-      emoji: c.emoji,
-      blurb: `${EMOJI_BY_CATEGORY[c.id].length} puzzles`,
-    })),
+    // Stated rather than derived: the picker is part of the static game
+    // definition, and the puzzle data now loads only once a category is
+    // chosen. The counts are asserted in the data files' own checks.
+    choices: [
+      { id: 'Movie', label: 'Movies', emoji: '🎬', blurb: '55 puzzles' },
+      { id: 'Song', label: 'Songs', emoji: '🎵', blurb: '34 puzzles' },
+      { id: 'Show', label: 'TV shows', emoji: '📺', blurb: '30 puzzles' },
+      { id: 'Book', label: 'Books', emoji: '📚', blurb: '26 puzzles' },
+    ],
   },
   loadDeck,
   Stage: RebusStage,

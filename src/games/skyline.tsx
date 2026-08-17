@@ -1,5 +1,4 @@
 import type { Deck, GameDef, Option, StageProps } from '../engine/types';
-import { SKYLINES } from '../content/data/skylines';
 import { pageInfo } from '../content/wikipedia';
 import { streamDeck } from '../content/deck';
 import { ZoomStage, focalOf } from './stages';
@@ -8,7 +7,7 @@ import { ZoomStage, focalOf } from './stages';
  * Shallower than the painting ladder. City photographs are usually montages, so
  * a 16× crop lands inside a single pane of glass and tells you nothing at all.
  */
-const SCALES = [10, 6, 3.6, 2.2, 1.3];
+const SCALES = [6, 4, 2.8, 1.8, 1.2];
 
 type SkylinePayload = {
   src: string | null;
@@ -38,6 +37,7 @@ function SkylineStage({ round, level, revealed }: StageProps) {
 }
 
 async function loadDeck(count: number, rng: () => number): Promise<Deck> {
+  const { SKYLINES } = await import('../content/data/skylines');
   const catalog: Option[] = SKYLINES.map((c) => ({
     id: `city:${c.wiki}`,
     label: c.label,
@@ -78,7 +78,7 @@ export const skylineGame: GameDef = {
   emoji: '🌆',
   accent: '#14615F',
   guess: 'search',
-  levels: ['10×', '6×', '3.6×', '2.2×', '1.3×'],
+  levels: ['6×', '4×', '2.8×', '1.8×', '1.2×'],
   skipLabel: 'Zoom out',
   needsNetwork: true,
   rounds: 10,

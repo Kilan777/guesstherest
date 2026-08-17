@@ -1,5 +1,5 @@
 import type { Deck, GameDef, Option, StageProps } from '../engine/types';
-import { FILM_LINES, type FilmLineSeed } from '../content/data/filmlines';
+import type { FilmLineSeed } from '../content/data/filmlines';
 import { streamDeck } from '../content/deck';
 import { TextStage } from './stages';
 
@@ -27,6 +27,7 @@ function FilmLineStage({ round, level, revealed }: StageProps) {
 }
 
 async function loadDeck(count: number, rng: () => number): Promise<Deck> {
+  const { FILM_LINES } = await import('../content/data/filmlines');
   // Several films contribute more than one line, so the catalog is deduplicated
   // by title — otherwise the same film would appear twice in the guess list.
   const seen = new Set<string>();

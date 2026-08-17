@@ -1,5 +1,4 @@
 import type { Deck, GameDef, Option, StageProps } from '../engine/types';
-import { OUTLINES } from '../content/data/outlines';
 import { pageInfo } from '../content/wikipedia';
 import { streamDeck } from '../content/deck';
 import { TileStage } from './stages';
@@ -42,6 +41,7 @@ function OutlineStage({ round, level, revealed }: StageProps) {
 }
 
 async function loadDeck(count: number, rng: () => number): Promise<Deck> {
+  const { OUTLINES } = await import('../content/data/outlines');
   const catalog: Option[] = OUTLINES.map((c) => ({
     id: `outline:${c.wiki}`,
     label: c.label,

@@ -186,6 +186,20 @@ a {
 
 /* "Rest" sits back from "GuessThe" so the wordmark reads as one name with a
    quiet tail, rather than two words of equal weight. */
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.brand-strap {
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: rgba(255, 255, 255, 0.5);
+  white-space: nowrap;
+}
+
 .brand-name em {
   font-style: normal;
   font-weight: 500;
@@ -1940,6 +1954,46 @@ kbd {
   50% {
     opacity: 0.45;
   }
+}
+
+@media (max-width: 760px) {
+  /* The bar becomes two rows: brand and account on top, search beneath, so
+     none of the three has to shrink to nothing. */
+  .topnav {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas: 'brand . right' 'search search search';
+    gap: 10px 8px;
+    padding: 10px var(--pad) 12px;
+  }
+  .brand { grid-area: brand; }
+  .nav-right { grid-area: right; }
+  .nav-search { grid-area: search; }
+  .brand-strap { display: none; }
+  .signin-label { max-width: 8ch; }
+
+  /* Two columns of cards rather than one huge one. */
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+  }
+  .row-scroll { grid-auto-columns: minmax(160px, 200px); gap: 10px; }
+  .card-title { font-size: 0.94rem; }
+  .card-tagline { font-size: 0.76rem; }
+  .card-body { padding: 11px 12px 12px; }
+  .card-emoji { font-size: 1.4rem; left: 10px; bottom: 8px; }
+
+  /* Controls stack and go full width so they're thumb-sized. */
+  .control-row { flex-direction: column; align-items: stretch; }
+  .btn-skip { justify-content: center; padding: 13px 16px; }
+  .verdict { flex-direction: column; align-items: stretch; gap: 12px; }
+  .verdict .btn-primary { width: 100%; }
+  .gate-actions .btn { flex: 1 1 auto; }
+  .screen { padding: 12px var(--pad) 40px; }
+  .stage-song { gap: 14px; }
+  .year-card { flex-direction: column; align-items: center; text-align: center; }
+  .year-poster { width: 130px; }
+  .picker-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 640px) {

@@ -1,12 +1,11 @@
 import type { Deck, GameDef, Option, StageProps } from '../engine/types';
-import { SPORTS } from '../content/data/sports';
 import { pageInfo } from '../content/wikipedia';
 import { streamDeck } from '../content/deck';
 import { ZoomStage, focalOf } from './stages';
 
 /** Deep to start. Sport photographs are busy, so a twelve-times crop still
  *  lands on something — a boot, a line on the floor, a bit of kit. */
-const SCALES = [12, 7, 4, 2.4, 1.4];
+const SCALES = [7, 4, 2.4, 1.4];
 
 type SportPayload = {
   src: string | null;
@@ -36,6 +35,7 @@ function SportStage({ round, level, revealed }: StageProps) {
 }
 
 async function loadDeck(count: number, rng: () => number): Promise<Deck> {
+  const { SPORTS } = await import('../content/data/sports');
   const catalog: Option[] = SPORTS.map((s) => ({
     id: `sport:${s.wiki}`,
     label: s.label,
@@ -75,7 +75,7 @@ export const sportGame: GameDef = {
   emoji: '🏅',
   accent: '#2F6B3D',
   guess: 'search',
-  levels: ['12×', '7×', '4×', '2.4×', '1.4×'],
+  levels: ['7×', '4×', '2.4×', '1.4×'],
   skipLabel: 'Zoom out',
   needsNetwork: true,
   rounds: 10,

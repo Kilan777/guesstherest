@@ -1,5 +1,4 @@
 import type { Deck, GameDef, StageProps } from '../engine/types';
-import { MOVIES } from '../content/data/movies';
 import { pageInfo } from '../content/wikipedia';
 import { streamDeck } from '../content/deck';
 
@@ -62,6 +61,7 @@ function YearStage({ round, level, revealed }: StageProps) {
 }
 
 async function loadDeck(count: number, rng: () => number): Promise<Deck> {
+  const { MOVIES } = await import('../content/data/movies');
   const usable = MOVIES.filter((m) => m.year >= YEAR_MIN && m.year <= YEAR_MAX);
 
   return streamDeck({

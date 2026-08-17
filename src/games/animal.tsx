@@ -1,11 +1,10 @@
 import type { Deck, GameDef, Option, StageProps } from '../engine/types';
-import { ANIMALS } from '../content/data/animals';
 import { pageInfo } from '../content/wikipedia';
 import { streamDeck } from '../content/deck';
 import { ZoomStage, focalOf } from './stages';
 
 /** Fourteen times in is usually one patch of coat, feather or scale. */
-const SCALES = [14, 8, 4.5, 2.6, 1.5];
+const SCALES = [8, 5, 3.2, 2, 1.3];
 
 type AnimalPayload = {
   src: string | null;
@@ -35,6 +34,7 @@ function AnimalStage({ round, level, revealed }: StageProps) {
 }
 
 async function loadDeck(count: number, rng: () => number): Promise<Deck> {
+  const { ANIMALS } = await import('../content/data/animals');
   const catalog: Option[] = ANIMALS.map((a) => ({
     id: `animal:${a.wiki}`,
     label: a.label,
@@ -75,7 +75,7 @@ export const animalGame: GameDef = {
   emoji: '🦋',
   accent: '#2F6B3D',
   guess: 'search',
-  levels: ['14×', '8×', '4.5×', '2.6×', '1.5×'],
+  levels: ['8×', '5×', '3.2×', '2×', '1.3×'],
   skipLabel: 'Zoom out',
   needsNetwork: true,
   rounds: 10,

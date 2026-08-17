@@ -1,5 +1,4 @@
 import type { Deck, GameDef, Option, StageProps } from '../engine/types';
-import { CELEBRITIES } from '../content/data/celebrities';
 import { pageInfo } from '../content/wikipedia';
 import { streamDeck } from '../content/deck';
 import { BlurStage } from './stages';
@@ -31,6 +30,7 @@ function CelebrityStage({ round, level, revealed }: StageProps) {
 }
 
 async function loadDeck(count: number, rng: () => number): Promise<Deck> {
+  const { CELEBRITIES } = await import('../content/data/celebrities');
   const catalog: Option[] = CELEBRITIES.map((a) => ({
     id: `celeb:${a.wiki}`,
     label: a.label,

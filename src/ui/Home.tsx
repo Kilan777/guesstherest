@@ -98,8 +98,11 @@ export function Home(props: { onPlay: (slug: string) => void; onOpenSettings: ()
       <nav className="topnav">
         <a className="brand" href="#/" onClick={() => setQuery('')}>
           <span className="brand-mark">🎯</span>
-          <span className="brand-name">
-            GuessThe<em>Rest</em>
+          <span className="brand-text">
+            <span className="brand-name">
+              GuessThe<em>Rest</em>
+            </span>
+            <span className="brand-strap">Every round gives you a little more to go on</span>
           </span>
         </a>
 

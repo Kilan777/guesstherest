@@ -1,11 +1,10 @@
 import type { Deck, GameDef, Option, StageProps } from '../engine/types';
-import { LANDMARKS } from '../content/data/landmarks';
 import { pageInfo } from '../content/wikipedia';
 import { streamDeck } from '../content/deck';
 import { ZoomStage, focalOf } from './stages';
 
 /** Buildings survive a shallower crop than paintings — brick reads as brick. */
-const SCALES = [12, 7, 4, 2.4, 1.4];
+const SCALES = [7, 4.5, 3, 2, 1.3];
 
 type LandmarkPayload = {
   src: string | null;
@@ -35,6 +34,7 @@ function LandmarkStage({ round, level, revealed }: StageProps) {
 }
 
 async function loadDeck(count: number, rng: () => number): Promise<Deck> {
+  const { LANDMARKS } = await import('../content/data/landmarks');
   const catalog: Option[] = LANDMARKS.map((l) => ({
     id: `landmark:${l.wiki}`,
     label: l.label,
@@ -75,7 +75,7 @@ export const landmarkGame: GameDef = {
   emoji: '🗿',
   accent: '#7A4A24',
   guess: 'search',
-  levels: ['12×', '7×', '4×', '2.4×', '1.4×'],
+  levels: ['7×', '4.5×', '3×', '2×', '1.3×'],
   skipLabel: 'Zoom out',
   needsNetwork: true,
   rounds: 10,

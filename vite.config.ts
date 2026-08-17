@@ -29,4 +29,16 @@ function adsenseTag(): Plugin {
 export default defineConfig({
   plugins: [react(), adsenseTag()],
   server: { port: 5173, host: true },
+  build: {
+    rollupOptions: {
+      output: {
+        // Split the vendor libraries out so they cache across deploys, and so
+        // their real cost is visible rather than hidden in one lump.
+        manualChunks: {
+          react: ['react', 'react-dom'],
+          supabase: ['@supabase/supabase-js'],
+        },
+      },
+    },
+  },
 });

@@ -36,7 +36,7 @@ export function localCounts(): Map<string, number> {
  * anonymous player gets.
  */
 export async function recentGames(userId: string | null, limit = 4): Promise<string[]> {
-  const sb = getSupabase();
+  const sb = await getSupabase();
   if (sb && userId) {
     try {
       const { data, error } = await sb

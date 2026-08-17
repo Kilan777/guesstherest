@@ -1,15 +1,15 @@
 import type { Deck, GameDef, Option, StageProps } from '../engine/types';
-import { APPS } from '../content/data/apps';
 import { findApp } from '../content/itunes';
 import { streamDeck } from '../content/deck';
 import { normalize } from '../content/cache';
-import { ZoomStage, focalOf } from './stages';
+import { BlurStage } from './stages';
 
 /**
  * Gentler than the painting ladder: App Store icons are only 512px square, so
  * anything past about 7× is a wall of interpolated mush rather than a puzzle.
  */
-const SCALES = [7, 4.5, 3, 2, 1.3];
+const BLURS = [26, 16, 9, 4, 1.5];
+const SCALES = [1.06, 1.05, 1.04, 1.03, 1.02];
 
 type AppPayload = { artwork: string; name: string; detail: string };
 
@@ -18,12 +18,12 @@ const seedId = (name: string) => `app:${normalize(name)}`;
 function AppStage({ round, level, revealed }: StageProps) {
   const p = round.payload as AppPayload;
   return (
-    <ZoomStage
+    <BlurStage
       src={p.artwork}
+      blurs={BLURS}
       scales={SCALES}
       level={level}
       revealed={revealed}
-      focal={focalOf(round.id)}
       caption={
         <>
           <strong>{p.name}</strong>
@@ -35,6 +35,7 @@ function AppStage({ round, level, revealed }: StageProps) {
 }
 
 async function loadDeck(count: number, rng: () => number): Promise<Deck> {
+  const { APPS } = await import('../content/data/apps');
   const catalog: Option[] = APPS.map((a) => ({
     id: seedId(a.name),
     label: a.name,
@@ -69,14 +70,14 @@ export const appGame: GameDef = {
   slug: 'app',
   title: 'Guess the App',
   short: 'App',
-  tagline: 'Name the app from a zoomed-in corner of its icon.',
+  tagline: 'Name the app as its icon comes into focus.',
   blurb:
     'An app icon from the home screen everyone has, magnified until it is four colours and a curve. Each skip pulls the camera back one step.',
   emoji: '📱',
   accent: '#5B3E8C',
   guess: 'search',
-  levels: ['7×', '4.5×', '3×', '2×', '1.3×'],
-  skipLabel: 'Zoom out',
+  levels: ['Smudge', 'Blurry', 'Soft', 'Nearly there', 'Almost sharp'],
+  skipLabel: 'Sharpen',
   needsNetwork: true,
   rounds: 10,
   keywords: ['icon', 'phone', 'store', 'software', 'logo', 'zoom'],

@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Deck, GameDef, Option, StageProps } from '../engine/types';
-import { SONGS } from '../content/data/songs';
 import { findTrack } from '../content/itunes';
 import { streamDeck } from '../content/deck';
 import { normalize } from '../content/cache';
@@ -149,6 +148,7 @@ function SongStage({ round, level, revealed, accent }: StageProps) {
 }
 
 async function loadDeck(count: number, rng: () => number): Promise<Deck> {
+  const { SONGS } = await import('../content/data/songs');
   const catalog: Option[] = SONGS.map((s) => ({
     id: seedId(s.t, s.a),
     label: s.t,

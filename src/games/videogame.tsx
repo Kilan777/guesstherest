@@ -1,5 +1,4 @@
 import type { Deck, GameDef, Option, StageProps } from '../engine/types';
-import { VIDEO_GAMES } from '../content/data/videogames';
 import { pageInfo } from '../content/wikipedia';
 import { streamDeck } from '../content/deck';
 import { TileStage } from './stages';
@@ -33,6 +32,7 @@ function VideoGameStage({ round, level, revealed }: StageProps) {
 }
 
 async function loadDeck(count: number, rng: () => number): Promise<Deck> {
+  const { VIDEO_GAMES } = await import('../content/data/videogames');
   const catalog: Option[] = VIDEO_GAMES.map((g) => ({
     id: `game:${g.wiki}`,
     label: g.label,

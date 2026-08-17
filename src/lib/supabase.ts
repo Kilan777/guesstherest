@@ -1,16 +1,24 @@
-import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { getSettings, hasSupabase, onSettingsChange } from './settings';
 
 let client: SupabaseClient | null = null;
 let clientKey = '';
 
-/** Rebuilt automatically if the player pastes different credentials at runtime. */
-export function getSupabase(): SupabaseClient | null {
+/**
+ * The Supabase library is 128 KB — a quarter of what the page used to download
+ * before a single game could start — and none of it is needed to play. It is
+ * imported on first use instead: leaderboards, sign-in, play history. A player
+ * who never looks at a board never pays for it.
+ *
+ * Rebuilt automatically if the credentials change at runtime.
+ */
+export async function getSupabase(): Promise<SupabaseClient | null> {
   if (!hasSupabase()) return null;
   const { supabaseUrl, supabaseKey } = getSettings();
   const key = `${supabaseUrl}|${supabaseKey}`;
   if (client && clientKey === key) return client;
   try {
+    const { createClient } = await import('@supabase/supabase-js');
     client = createClient(supabaseUrl.trim(), supabaseKey.trim(), {
       auth: {
         persistSession: true,
@@ -39,7 +47,7 @@ let sessionPromise: Promise<string | null> | null = null;
 
 /** The signed-in user id, if there already is a session. Never creates one. */
 export async function existingUserId(): Promise<string | null> {
-  const sb = getSupabase();
+  const sb = await getSupabase();
   if (!sb) return null;
   try {
     const { data } = await sb.auth.getSession();
@@ -62,7 +70,7 @@ export async function existingUserId(): Promise<string | null> {
 export function ensureSession(): Promise<string | null> {
   if (sessionPromise) return sessionPromise;
   sessionPromise = (async () => {
-    const sb = getSupabase();
+    const sb = await getSupabase();
     if (!sb) return null;
     try {
       const { data } = await sb.auth.getSession();

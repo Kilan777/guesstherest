@@ -1,5 +1,5 @@
 import type { Deck, GameDef, Option, StageProps } from '../engine/types';
-import { PLOTS, type PlotSeed } from '../content/data/plots';
+import type { PlotSeed } from '../content/data/plots';
 import { streamDeck } from '../content/deck';
 import { TextStage } from './stages';
 
@@ -31,6 +31,7 @@ function PlotStage({ round, level, revealed }: StageProps) {
 }
 
 async function loadDeck(count: number, rng: () => number): Promise<Deck> {
+  const { PLOTS } = await import('../content/data/plots');
   // The catalog is every film in the file — the game is recognising the story,
   // not narrowing down a shortlist.
   const catalog: Option[] = PLOTS.map((s) => ({

@@ -1,5 +1,5 @@
 import type { Deck, GameDef, Option, StageProps } from '../engine/types';
-import { LANGUAGES, type LanguageSeed } from '../content/data/languages';
+import type { LanguageSeed } from '../content/data/languages';
 import { streamDeck } from '../content/deck';
 import { sample, shuffle } from '../lib/rng';
 import { TextStage } from './stages';
@@ -39,15 +39,15 @@ function toOption(seed: LanguageSeed): Option {
  * up from anywhere, which is the best that can be done for a language with no
  * cousins.
  */
-function choicesFor(seed: LanguageSeed, rng: () => number): Option[] {
-  const sameFamily = LANGUAGES.filter(
+function choicesFor(seed: LanguageSeed, pool: LanguageSeed[], rng: () => number): Option[] {
+  const sameFamily = pool.filter(
     (l) => l.family === seed.family && l.language !== seed.language,
   );
   const decoys = sample(sameFamily, 3, rng);
 
   while (decoys.length < 3) {
     const filler = sample(
-      LANGUAGES.filter(
+      pool.filter(
         (l) => l.language !== seed.language && !decoys.some((d) => d.language === l.language),
       ),
       1,
@@ -61,6 +61,7 @@ function choicesFor(seed: LanguageSeed, rng: () => number): Option[] {
 }
 
 async function loadDeck(count: number, rng: () => number): Promise<Deck> {
+  const { LANGUAGES } = await import('../content/data/languages');
   return streamDeck<LanguageSeed, Option[]>({
     pool: LANGUAGES,
     count,
@@ -68,7 +69,7 @@ async function loadDeck(count: number, rng: () => number): Promise<Deck> {
     catalog: [],
     // Nothing to fetch, so build the whole deck up front.
     eager: count,
-    resolve: async (seed) => choicesFor(seed, rng),
+    resolve: async (seed) => choicesFor(seed, LANGUAGES, rng),
     toRound: (seed, choices) => ({
       id: `lang:${seed.language}`,
       answer: toOption(seed),

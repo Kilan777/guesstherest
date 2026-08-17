@@ -2,7 +2,6 @@ import type { GameDef } from '../engine/types';
 import { songGame } from './song';
 import { sceneGame } from './scene';
 import { objectGame } from './object';
-import { albumGame } from './album';
 import { quoteGame } from './quote';
 import { rebusGame } from './rebus';
 import { yearGame } from './year';
@@ -18,12 +17,16 @@ import { countryGame } from './country';
 import { languageGame } from './language';
 import { sloganGame } from './slogan';
 import { plotGame } from './plot';
-import { planetGame } from './planet';
 import { carGame } from './car';
 import { sportGame } from './sport';
 import { skylineGame } from './skyline';
 import { outlineGame } from './outline';
 import { boardgameGame } from './boardgame';
+import { birdGame } from './bird';
+import { plantGame } from './plant';
+import { insectGame } from './insect';
+import { wordGame } from './word';
+import { recipeGame } from './recipe';
 import { appGame } from './app';
 import { logoGame } from './logo';
 
@@ -38,25 +41,28 @@ export const GAMES: GameDef[] = [
   rebusGame,
   objectGame,
   animalGame,
+  birdGame,
+  insectGame,
+  plantGame,
   landmarkGame,
   skylineGame,
   outlineGame,
-  albumGame,
   celebrityGame,
   videoGameGame,
   boardgameGame,
   logoGame,
   appGame,
   carGame,
-  planetGame,
   dishGame,
   sportGame,
+  recipeGame,
   quoteGame,
   filmLineGame,
   openingLineGame,
   plotGame,
   sloganGame,
   languageGame,
+  wordGame,
   yearGame,
   capitalGame,
 ];

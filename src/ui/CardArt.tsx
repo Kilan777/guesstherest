@@ -126,26 +126,6 @@ function Quote() {
   );
 }
 
-function Album() {
-  return (
-    <svg viewBox={VB} className="art" aria-hidden>
-      <defs>
-        <filter id="a-blur">
-          <feGaussianBlur stdDeviation="9" />
-        </filter>
-      </defs>
-      <g filter="url(#a-blur)" opacity="0.55">
-        <rect x="60" y="18" width="90" height="80" rx="10" fill="currentColor" />
-        <circle cx="200" cy="120" r="46" fill="currentColor" opacity="0.7" />
-        <rect x="150" y="26" width="70" height="52" rx="8" fill="currentColor" opacity="0.5" />
-      </g>
-      <circle cx="160" cy="90" r="58" fill="none" stroke="currentColor" strokeWidth="2" opacity="0.5" />
-      <circle cx="160" cy="90" r="40" fill="none" stroke="currentColor" strokeWidth="2" opacity="0.35" />
-      <circle cx="160" cy="90" r="22" fill="none" stroke="currentColor" strokeWidth="2" opacity="0.25" />
-      <circle cx="160" cy="90" r="7" fill="currentColor" />
-    </svg>
-  );
-}
 
 
 function Rebus() {
@@ -380,21 +360,6 @@ function Plot() {
   );
 }
 
-function Planet() {
-  return (
-    <svg viewBox={VB} className="art" aria-hidden>
-      <circle cx="150" cy="90" r="56" fill="currentColor" opacity="0.75" />
-      <circle cx="128" cy="72" r="13" fill="#ffffff" opacity="0.3" />
-      <circle cx="168" cy="106" r="20" fill="#ffffff" opacity="0.18" />
-      <circle cx="176" cy="62" r="8" fill="#ffffff" opacity="0.25" />
-      <ellipse cx="150" cy="90" rx="94" ry="24" fill="none" stroke="currentColor" strokeWidth="6" opacity="0.5"
-        transform="rotate(-18 150 90)" />
-      {([[36, 30], [274, 44], [258, 142], [58, 150]] as [number, number][]).map(([x, y], i) => (
-        <circle key={i} cx={x} cy={y} r={2.5} fill="currentColor" opacity="0.5" />
-      ))}
-    </svg>
-  );
-}
 
 function Car() {
   return (
@@ -517,12 +482,99 @@ function Logo() {
   );
 }
 
+
+/* ── fourth wave ──────────────────────────────────────────────────────────── */
+
+function Bird() {
+  return (
+    <svg viewBox={VB} className="art" aria-hidden>
+      {/* Overlapping feather shapes, the texture the game actually shows. */}
+      {Array.from({ length: 18 }, (_, i) => {
+        const c = i % 6;
+        const r = Math.floor(i / 6);
+        return (
+          <ellipse key={i} cx={54 + c * 42} cy={44 + r * 44 + (c % 2) * 12} rx="24" ry="15"
+            fill="currentColor" opacity={0.1 + ((i * 5) % 4) * 0.07}
+            transform={`rotate(-24 ${54 + c * 42} ${44 + r * 44 + (c % 2) * 12})`} />
+        );
+      })}
+      <circle cx="206" cy="66" r="26" fill="currentColor" opacity="0.85" />
+      <circle cx="206" cy="66" r="9" fill="#ffffff" opacity="0.9" />
+      <circle cx="209" cy="63" r="3.5" fill="currentColor" />
+      <path d="M232 68 l34 8 -34 10 z" fill="currentColor" opacity="0.9" />
+    </svg>
+  );
+}
+
+function Plant() {
+  return (
+    <svg viewBox={VB} className="art" aria-hidden>
+      <path d="M160 168 L160 62" stroke="currentColor" strokeWidth="7" opacity="0.55" strokeLinecap="round" />
+      {[[0, 96, 1], [1, 122, -1], [2, 74, 1], [3, 100, -1]].map(([i, y, dir]) => (
+        <path key={i as number}
+          d={`M160 ${y} q${(dir as number) * 46} -22 ${(dir as number) * 74} 6 q${-(dir as number) * 40} 26 ${-(dir as number) * 74} -6 z`}
+          fill="currentColor" opacity={0.24 + (i as number) * 0.12} />
+      ))}
+      <circle cx="160" cy="52" r="19" fill="currentColor" opacity="0.9" />
+      {[0, 1, 2, 3, 4, 5].map((i) => (
+        <ellipse key={i} cx={160 + Math.cos((i / 6) * 6.28) * 30} cy={52 + Math.sin((i / 6) * 6.28) * 30}
+          rx="13" ry="9" fill="currentColor" opacity="0.4"
+          transform={`rotate(${(i / 6) * 360} ${160 + Math.cos((i / 6) * 6.28) * 30} ${52 + Math.sin((i / 6) * 6.28) * 30})`} />
+      ))}
+    </svg>
+  );
+}
+
+function Insect() {
+  return (
+    <svg viewBox={VB} className="art" aria-hidden>
+      <ellipse cx="160" cy="92" rx="13" ry="52" fill="currentColor" opacity="0.85" />
+      {[[-1, 0.9], [1, 0.9], [-1, 0.45], [1, 0.45]].map(([dir, op], i) => (
+        <path key={i}
+          d={i < 2
+            ? `M160 66 q${(dir as number) * 74} -34 ${(dir as number) * 84} 22 q${-(dir as number) * 30} 26 ${-(dir as number) * 84} -22 z`
+            : `M160 104 q${(dir as number) * 58} 10 ${(dir as number) * 60} 44 q${-(dir as number) * 34} 8 ${-(dir as number) * 60} -44 z`}
+          fill="currentColor" opacity={(op as number) * 0.5} />
+      ))}
+      <circle cx="160" cy="42" r="12" fill="currentColor" />
+      <path d="M156 32 q-12 -18 -22 -22 M164 32 q12 -18 22 -22" stroke="currentColor" strokeWidth="3.5" fill="none" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function Word() {
+  return (
+    <svg viewBox={VB} className="art" aria-hidden>
+      <rect x="40" y="22" width="240" height="136" rx="6" fill="currentColor" opacity="0.08" />
+      <rect x="62" y="42" width="96" height="13" rx="6.5" fill="currentColor" opacity="0.9" />
+      <rect x="62" y="66" width="176" height="7" rx="3.5" fill="currentColor" opacity="0.28" />
+      <rect x="62" y="82" width="150" height="7" rx="3.5" fill="currentColor" opacity="0.28" />
+      <rect x="62" y="106" width="70" height="13" rx="6.5" fill="currentColor" opacity="0.55" />
+      <rect x="62" y="130" width="164" height="7" rx="3.5" fill="currentColor" opacity="0.2" />
+      <line x1="40" y1="94" x2="280" y2="94" stroke="currentColor" strokeWidth="1.5" opacity="0.18" />
+    </svg>
+  );
+}
+
+function Recipe() {
+  return (
+    <svg viewBox={VB} className="art" aria-hidden>
+      {[0, 1, 2, 3, 4].map((i) => (
+        <g key={i} opacity={i < 2 ? 0.9 : 0.22}>
+          <circle cx="72" cy={34 + i * 28} r="7" fill="currentColor" />
+          <rect x="90" y={29 + i * 28} width={150 - (i % 3) * 34} height="9" rx="4.5" fill="currentColor" />
+        </g>
+      ))}
+      <path d="M250 40 q22 22 0 44 q-22 -22 0 -44" fill="currentColor" opacity="0.3" />
+    </svg>
+  );
+}
+
 const ART: Record<string, () => React.ReactElement> = {
   song: Song,
   scene: Scene,
   object: ObjectArt,
   quote: Quote,
-  album: Album,
   rebus: Rebus,
   year: Year,
   landmark: Landmark,
@@ -537,7 +589,6 @@ const ART: Record<string, () => React.ReactElement> = {
   language: Language,
   slogan: Slogan,
   plot: Plot,
-  planet: Planet,
   car: Car,
   sport: Sport,
   skyline: Skyline,
@@ -545,6 +596,11 @@ const ART: Record<string, () => React.ReactElement> = {
   boardgame: BoardGame,
   app: AppIcon,
   logo: Logo,
+  bird: Bird,
+  plant: Plant,
+  insect: Insect,
+  word: Word,
+  recipe: Recipe,
 };
 
 export function CardArt({ slug }: { slug: string }) {

@@ -1,5 +1,5 @@
 import type { Deck, GameDef, Option, StageProps } from '../engine/types';
-import { OPENING_LINES, type OpeningLineSeed } from '../content/data/openinglines';
+import type { OpeningLineSeed } from '../content/data/openinglines';
 import { streamDeck } from '../content/deck';
 import { TextStage } from './stages';
 
@@ -31,6 +31,7 @@ function OpeningLineStage({ round, level, revealed }: StageProps) {
 }
 
 async function loadDeck(count: number, rng: () => number): Promise<Deck> {
+  const { OPENING_LINES } = await import('../content/data/openinglines');
   // The catalog is every book in the file — the game is recognising the
   // sentence, not narrowing down a shortlist.
   const catalog: Option[] = OPENING_LINES.map((s) => ({

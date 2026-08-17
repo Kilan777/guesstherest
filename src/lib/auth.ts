@@ -53,13 +53,16 @@ export function useAuth(): AuthState & {
   }));
 
   useEffect(() => {
-    const sb = getSupabase();
-    if (!sb) {
-      setState({ player: null, status: 'unavailable', error: null });
-      return;
-    }
-
     let alive = true;
+    let unsubscribe: (() => void) | undefined;
+
+    void (async () => {
+      const sb = await getSupabase();
+      if (!alive) return;
+      if (!sb) {
+        setState({ player: null, status: 'unavailable', error: null });
+        return;
+      }
 
     sb.auth
       .getSession()
@@ -83,14 +86,17 @@ export function useAuth(): AuthState & {
       if (player?.signedIn) adoptHandle(player.name);
     });
 
+      unsubscribe = () => sub.subscription.unsubscribe();
+    })();
+
     return () => {
       alive = false;
-      sub.subscription.unsubscribe();
+      unsubscribe?.();
     };
   }, []);
 
   const signInWithGoogle = useCallback(async () => {
-    const sb = getSupabase();
+    const sb = await getSupabase();
     if (!sb) {
       setState((s) => ({ ...s, error: 'Add Supabase credentials in Settings first.' }));
       return;
@@ -104,7 +110,7 @@ export function useAuth(): AuthState & {
   }, []);
 
   const signOut = useCallback(async () => {
-    const sb = getSupabase();
+    const sb = await getSupabase();
     if (!sb) return;
     await sb.auth.signOut();
     setState({ player: null, status: 'anonymous', error: null });

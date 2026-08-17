@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Deck, GameDef, Option, StageProps } from '../engine/types';
-import { MOVIES } from '../content/data/movies';
 import { pageInfo } from '../content/wikipedia';
 import { streamDeck } from '../content/deck';
 import { loadYouTubeApi, type YTPlayer } from '../lib/youtube';
@@ -13,16 +12,18 @@ type ScenePayload = {
   poster: string | null;
   title: string;
   year: number;
+  start: number;
 };
 
 /**
- * Where in the trailer to start.
+ * Fallback for where in the trailer to start.
  *
- * Trailers are built out of real footage, but not evenly: the first fifth is
- * studio logos and setup, and the last eighth is title cards, cast lists and a
- * release date — all of which either give the answer away or show nothing of
- * the film. The middle is where actual scenes live, so rounds sample 38%–72%
- * in, and the clip is pulled back if it would run into the end card.
+ * Every film in MOVIES carries a measured `start`, so this is only reached if a
+ * row is added without one. Trailers are built out of real footage, but not
+ * evenly: the first fifth is studio logos and setup, and the last eighth is
+ * title cards, cast lists and a release date — all of which either give the
+ * answer away or show nothing of the film. The middle is where actual scenes
+ * live, so it guesses 38%–72% in.
  */
 function startFraction(id: string): number {
   let h = 0;
@@ -137,10 +138,13 @@ function SceneStage({ round, level, revealed, accent }: StageProps) {
       duration = 0;
     }
     const usable = duration * TAIL_GUARD;
-    const start =
-      duration > 5
-        ? Math.max(0, Math.min(duration * startFraction(round.id), usable - clipSec))
-        : 0;
+    // `start` was measured, not guessed: every trailer was sampled at five
+    // points and each pair of frames scored for motion, colour and darkness, so
+    // the offset stored here is one where the screen holds real footage rather
+    // than a studio logo, a "FROM THE CREATORS OF" card or a held black frame.
+    const wanted =
+      Number.isFinite(p.start) && p.start > 0 ? p.start : duration * startFraction(round.id);
+    const start = duration > 5 ? Math.max(0, Math.min(wanted, usable - clipSec)) : 0;
 
     player.seekTo(Math.max(0, start), true);
     player.playVideo();
@@ -154,7 +158,7 @@ function SceneStage({ round, level, revealed, accent }: StageProps) {
       setPlaying(false);
       setError('YouTube would not start this clip. Try again, or skip the round.');
     }, 12000);
-  }, [clipSec, round.id]);
+  }, [clipSec, round.id, p.start]);
 
   // Space bar plays the clip.
   usePlayAction(ready && !error ? play : null, [ready, error, play]);
@@ -218,6 +222,7 @@ function SceneStage({ round, level, revealed, accent }: StageProps) {
 }
 
 async function loadDeck(count: number, rng: () => number): Promise<Deck> {
+  const { MOVIES } = await import('../content/data/movies');
   const catalog: Option[] = MOVIES.map((m) => ({
     id: `scene:${m.wiki}`,
     label: m.title,
@@ -243,6 +248,7 @@ async function loadDeck(count: number, rng: () => number): Promise<Deck> {
         poster: value.poster,
         title: seed.title,
         year: seed.year,
+        start: seed.start,
       } satisfies ScenePayload,
     }),
     eager: 2,

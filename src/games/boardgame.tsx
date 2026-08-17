@@ -1,5 +1,4 @@
 import type { Deck, GameDef, Option, StageProps } from '../engine/types';
-import { BOARDGAMES } from '../content/data/boardgames';
 import { pageInfo } from '../content/wikipedia';
 import { streamDeck } from '../content/deck';
 import { TileStage } from './stages';
@@ -28,6 +27,7 @@ function BoardGameStage({ round, level, revealed }: StageProps) {
       cols={COLS}
       rows={ROWS}
       seed={round.id}
+      fit="contain"
       caption={
         <>
           <strong>{p.label}</strong>
@@ -39,6 +39,7 @@ function BoardGameStage({ round, level, revealed }: StageProps) {
 }
 
 async function loadDeck(count: number, rng: () => number): Promise<Deck> {
+  const { BOARDGAMES } = await import('../content/data/boardgames');
   const catalog: Option[] = BOARDGAMES.map((g) => ({
     id: `bg:${g.wiki}`,
     label: g.label,

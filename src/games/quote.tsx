@@ -1,5 +1,5 @@
 import type { Deck, GameDef, Option, StageProps } from '../engine/types';
-import { QUOTES, type QuoteSeed } from '../content/data/quotes';
+import type { QuoteSeed } from '../content/data/quotes';
 import { pageInfo } from '../content/wikipedia';
 import { mapLimit } from '../content/cache';
 import { streamDeck } from '../content/deck';
@@ -45,6 +45,7 @@ function QuoteStage({ round, level, revealed }: StageProps) {
 }
 
 async function loadDeck(count: number, rng: () => number): Promise<Deck> {
+  const { QUOTES } = await import('../content/data/quotes');
   return streamDeck({
     pool: QUOTES,
     count,

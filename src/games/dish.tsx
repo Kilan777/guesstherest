@@ -1,5 +1,4 @@
 import type { Deck, GameDef, Option, StageProps } from '../engine/types';
-import { DISHES } from '../content/data/dishes';
 import { pageInfo } from '../content/wikipedia';
 import { streamDeck } from '../content/deck';
 import { ZoomStage, focalOf } from './stages';
@@ -36,6 +35,7 @@ function DishStage({ round, level, revealed }: StageProps) {
 }
 
 async function loadDeck(count: number, rng: () => number): Promise<Deck> {
+  const { DISHES } = await import('../content/data/dishes');
   const catalog: Option[] = DISHES.map((d) => ({
     id: `dish:${d.wiki}`,
     label: d.label,

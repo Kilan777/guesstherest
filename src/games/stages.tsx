@@ -383,9 +383,14 @@ export function StreetViewStage(props: {
   /** Stable per-round heading so the same round always faces the same way. */
   seed: string;
   revealed: boolean;
+  /** Clues bought with skips. These had nowhere to render before. */
+  hints?: string[];
+  level?: number;
   caption?: React.ReactNode;
 }) {
   const { lat, lng, seed, revealed } = props;
+  const hints = props.hints ?? [];
+  const visibleHints = revealed ? hints : hints.slice(0, props.level ?? 0);
 
   const heading = useMemo(() => {
     let h = 0;
@@ -413,6 +418,16 @@ export function StreetViewStage(props: {
         {!revealed && <div className="sv-label-mask" aria-hidden />}
       </div>
       <p className="stage-note">Drag to look around. Road signs, plates and which side they drive on all help.</p>
+      {visibleHints.length > 0 && (
+        <ul className="hint-list">
+          {visibleHints.map((h, i) => (
+            <li key={i} className="hint">
+              <span className="hint-tag">Clue {i + 1}</span>
+              {h}
+            </li>
+          ))}
+        </ul>
+      )}
       {revealed && props.caption ? <div className="stage-caption">{props.caption}</div> : null}
     </div>
   );

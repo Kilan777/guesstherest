@@ -1,5 +1,5 @@
 import type { Deck, GameDef, Option, StageProps } from '../engine/types';
-import { SLOGANS, type SloganSeed } from '../content/data/slogans';
+import type { SloganSeed } from '../content/data/slogans';
 import { streamDeck } from '../content/deck';
 import { TextStage } from './stages';
 
@@ -27,6 +27,7 @@ function SloganStage({ round, level, revealed }: StageProps) {
 }
 
 async function loadDeck(count: number, rng: () => number): Promise<Deck> {
+  const { SLOGANS } = await import('../content/data/slogans');
   // The catalog is every brand in the file — the game is recognising the line,
   // not narrowing down a shortlist.
   const catalog: Option[] = SLOGANS.map((s) => ({

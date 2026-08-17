@@ -1,0 +1,91 @@
+/**
+ * Trees, flowers, crops and oddities, keyed to their English Wikipedia articles.
+ *
+ * Two things decide whether a title belongs here. It has to lead with a
+ * photograph — a lot of the older plant articles lead with a Köhler's
+ * Medizinal-Pflanzen plate, and an eleven-times crop of a botanical engraving is
+ * a guessing game about ink, not about plants. And the photograph has to be of
+ * the living plant rather than the produce, which rules out the fruit articles
+ * whose lead image is a bowl on a kitchen counter.
+ *
+ * Titles are stored decoded. `pageInfo` percent-encodes them itself, and a
+ * pre-encoded title double-encodes into a 403 that silently drops the round.
+ */
+export type PlantSeed = { wiki: string; label: string; kind: string };
+
+export const PLANTS: PlantSeed[] = [
+  { wiki: 'Venus_flytrap', label: 'Venus flytrap', kind: 'Carnivorous plant' },
+  { wiki: 'Nepenthes', label: 'Tropical pitcher plant', kind: 'Carnivorous plant' },
+  { wiki: 'Sarracenia', label: 'Trumpet pitcher', kind: 'Carnivorous plant' },
+  { wiki: 'Drosera', label: 'Sundew', kind: 'Carnivorous plant' },
+  { wiki: 'Adansonia_digitata', label: 'Baobab', kind: 'Tree' },
+  { wiki: 'Salix_babylonica', label: 'Weeping willow', kind: 'Tree' },
+  { wiki: 'Acer_palmatum', label: 'Japanese maple', kind: 'Tree' },
+  { wiki: 'Sequoiadendron_giganteum', label: 'Giant sequoia', kind: 'Tree' },
+  { wiki: 'Ginkgo_biloba', label: 'Ginkgo', kind: 'Tree' },
+  { wiki: 'Quercus_robur', label: 'English oak', kind: 'Tree' },
+  { wiki: 'Betula_pendula', label: 'Silver birch', kind: 'Tree' },
+  { wiki: 'Aesculus', label: 'Horse chestnut', kind: 'Tree' },
+  { wiki: 'Pinus_longaeva', label: 'Bristlecone pine', kind: 'Tree' },
+  { wiki: 'Araucaria_araucana', label: 'Monkey puzzle', kind: 'Tree' },
+  { wiki: 'Dracaena_cinnabari', label: 'Dragon blood tree', kind: 'Tree' },
+  { wiki: 'Magnolia_grandiflora', label: 'Southern magnolia', kind: 'Tree' },
+  { wiki: 'Prunus_serrulata', label: 'Japanese cherry', kind: 'Tree' },
+  { wiki: 'Jacaranda_mimosifolia', label: 'Jacaranda', kind: 'Tree' },
+  { wiki: 'Eucalyptus_deglupta', label: 'Rainbow eucalyptus', kind: 'Tree' },
+  { wiki: 'Plumeria', label: 'Frangipani', kind: 'Tree' },
+  { wiki: 'Banyan', label: 'Banyan', kind: 'Tree' },
+  { wiki: 'Ficus_elastica', label: 'Rubber plant', kind: 'Tree' },
+  { wiki: 'Theobroma_cacao', label: 'Cacao', kind: 'Tree' },
+  { wiki: 'Olive', label: 'Olive tree', kind: 'Tree' },
+  { wiki: 'Roystonea_regia', label: 'Royal palm', kind: 'Palm' },
+  { wiki: 'Common_sunflower', label: 'Sunflower', kind: 'Flowering plant' },
+  { wiki: 'Strelitzia_reginae', label: 'Bird of paradise', kind: 'Flowering plant' },
+  { wiki: 'Digitalis_purpurea', label: 'Foxglove', kind: 'Flowering plant' },
+  { wiki: 'Papaver_orientale', label: 'Oriental poppy', kind: 'Flowering plant' },
+  { wiki: 'Mimosa_pudica', label: 'Sensitive plant', kind: 'Flowering plant' },
+  { wiki: 'Amorphophallus_titanum', label: 'Titan arum', kind: 'Flowering plant' },
+  { wiki: 'Convallaria_majalis', label: 'Lily of the valley', kind: 'Flowering plant' },
+  { wiki: 'Iris_germanica', label: 'Bearded iris', kind: 'Flowering plant' },
+  { wiki: 'Rafflesia_arnoldii', label: 'Rafflesia', kind: 'Parasitic plant' },
+  { wiki: 'Phalaenopsis', label: 'Moth orchid', kind: 'Orchid' },
+  { wiki: 'Vanilla_(genus)', label: 'Vanilla orchid', kind: 'Orchid' },
+  { wiki: 'Tulip', label: 'Tulip', kind: 'Bulb flower' },
+  { wiki: 'Narcissus_(plant)', label: 'Daffodil', kind: 'Bulb flower' },
+  { wiki: 'Crocus', label: 'Crocus', kind: 'Bulb flower' },
+  { wiki: 'Rose', label: 'Rose', kind: 'Shrub' },
+  { wiki: 'Lavandula', label: 'Lavender', kind: 'Shrub' },
+  { wiki: 'Hibiscus_rosa-sinensis', label: 'Chinese hibiscus', kind: 'Shrub' },
+  { wiki: 'Protea_cynaroides', label: 'King protea', kind: 'Shrub' },
+  { wiki: 'Coffea_arabica', label: 'Arabica coffee', kind: 'Shrub' },
+  { wiki: 'Camellia_sinensis', label: 'Tea plant', kind: 'Shrub' },
+  { wiki: 'Rosmarinus_officinalis', label: 'Rosemary', kind: 'Shrub' },
+  { wiki: 'Taraxacum', label: 'Dandelion', kind: 'Wildflower' },
+  { wiki: 'Bellis_perennis', label: 'Daisy', kind: 'Wildflower' },
+  { wiki: 'Urtica_dioica', label: 'Stinging nettle', kind: 'Wildflower' },
+  { wiki: 'Wisteria', label: 'Wisteria', kind: 'Climbing vine' },
+  { wiki: 'Hedera_helix', label: 'Common ivy', kind: 'Climbing vine' },
+  { wiki: 'Toxicodendron_radicans', label: 'Poison ivy', kind: 'Climbing vine' },
+  { wiki: 'Vitis_vinifera', label: 'Grapevine', kind: 'Climbing vine' },
+  { wiki: 'Passiflora', label: 'Passion flower', kind: 'Climbing vine' },
+  { wiki: 'Bougainvillea', label: 'Bougainvillea', kind: 'Climbing shrub' },
+  { wiki: 'Monstera_deliciosa', label: 'Monstera', kind: 'Climbing houseplant' },
+  { wiki: 'Saguaro', label: 'Saguaro', kind: 'Cactus' },
+  { wiki: 'Opuntia', label: 'Prickly pear', kind: 'Cactus' },
+  { wiki: 'Echinocactus_grusonii', label: 'Golden barrel cactus', kind: 'Cactus' },
+  { wiki: 'Aloe_vera', label: 'Aloe vera', kind: 'Succulent' },
+  { wiki: 'Agave_americana', label: 'Century plant', kind: 'Succulent' },
+  { wiki: 'Lithops', label: 'Living stones', kind: 'Succulent' },
+  { wiki: 'Welwitschia', label: 'Welwitschia', kind: 'Desert plant' },
+  { wiki: 'Nelumbo_nucifera', label: 'Sacred lotus', kind: 'Aquatic plant' },
+  { wiki: 'Victoria_amazonica', label: 'Giant water lily', kind: 'Aquatic plant' },
+  { wiki: 'Cyperus_papyrus', label: 'Papyrus', kind: 'Sedge' },
+  { wiki: 'Bamboo', label: 'Bamboo', kind: 'Giant grass' },
+  { wiki: 'Musa_acuminata', label: 'Banana plant', kind: 'Giant herb' },
+  { wiki: 'Oryza_sativa', label: 'Rice', kind: 'Crop' },
+  { wiki: 'Common_wheat', label: 'Wheat', kind: 'Crop' },
+  { wiki: 'Tomato', label: 'Tomato plant', kind: 'Crop' },
+  { wiki: 'Pineapple', label: 'Pineapple', kind: 'Bromeliad' },
+  { wiki: 'Dicksonia_antarctica', label: 'Soft tree fern', kind: 'Fern' },
+  { wiki: 'Cycas_revoluta', label: 'Sago palm', kind: 'Cycad' },
+];

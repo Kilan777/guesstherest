@@ -55,7 +55,7 @@ export async function submitScore(game: string, run: RunResult): Promise<{ onlin
   writeLocal(game, run);
   if (run.score <= 0) return { online: false };
 
-  const sb = getSupabase();
+  const sb = await getSupabase();
   if (!sb) return { online: false };
   const uid = await ensureSession();
   if (!uid) return { online: false };
@@ -76,7 +76,7 @@ export async function submitScore(game: string, run: RunResult): Promise<{ onlin
 }
 
 export async function fetchBoard(game: string, limit = 25): Promise<Board> {
-  const sb = getSupabase();
+  const sb = await getSupabase();
   if (!sb) {
     return { entries: readLocal(game).slice(0, limit), source: 'local' };
   }

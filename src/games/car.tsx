@@ -1,5 +1,4 @@
 import type { Deck, GameDef, Option, StageProps } from '../engine/types';
-import { CARS } from '../content/data/cars';
 import { pageInfo } from '../content/wikipedia';
 import { streamDeck } from '../content/deck';
 import { BlurStage } from './stages';
@@ -7,8 +6,8 @@ import { BlurStage } from './stages';
 /** Blur rather than zoom: a car is identified by its silhouette, and blurring
  *  is the one treatment that takes the badge and the panel gaps away while
  *  leaving the shape. */
-const BLURS = [30, 19, 11, 5, 2];
-const SCALES = [1, 1, 1, 1, 1];
+const BLURS = [19, 11, 5, 2];
+const SCALES = [1, 1, 1, 1];
 
 type CarPayload = { src: string | null; label: string; era: string };
 
@@ -34,6 +33,7 @@ function CarStage({ round, level, revealed }: StageProps) {
 }
 
 async function loadDeck(count: number, rng: () => number): Promise<Deck> {
+  const { CARS } = await import('../content/data/cars');
   const catalog: Option[] = CARS.map((c) => ({
     id: `car:${c.wiki}`,
     label: c.label,
@@ -73,7 +73,7 @@ export const carGame: GameDef = {
   emoji: '🚗',
   accent: '#26517E',
   guess: 'search',
-  levels: ['Smudge', 'Blurry', 'Soft', 'Nearly there', 'Almost sharp'],
+  levels: ['Blurry', 'Soft', 'Nearly there', 'Almost sharp'],
   skipLabel: 'Sharpen',
   needsNetwork: true,
   rounds: 10,

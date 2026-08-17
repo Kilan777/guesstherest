@@ -1,5 +1,5 @@
 import type { Deck, GameDef, Option, StageProps } from '../engine/types';
-import { CAPITALS, type CapitalSeed } from '../content/data/capitals';
+import type { CapitalSeed } from '../content/data/capitals';
 import { streamDeck } from '../content/deck';
 import { sample, shuffle } from '../lib/rng';
 import { TextStage } from './stages';
@@ -34,13 +34,13 @@ function toOption(seed: CapitalSeed): Option {
  * away: one South American city among three Asian ones is a process of
  * elimination, not a guess. Small regions get topped up from anywhere.
  */
-function choicesFor(seed: CapitalSeed, rng: () => number): Option[] {
-  const sameRegion = CAPITALS.filter((c) => c.region === seed.region && c.country !== seed.country);
+function choicesFor(seed: CapitalSeed, pool: CapitalSeed[], rng: () => number): Option[] {
+  const sameRegion = pool.filter((c) => c.region === seed.region && c.country !== seed.country);
   const decoys = sample(sameRegion, 3, rng);
 
   while (decoys.length < 3) {
     const filler = sample(
-      CAPITALS.filter(
+      pool.filter(
         (c) => c.country !== seed.country && !decoys.some((d) => d.country === c.country),
       ),
       1,
@@ -54,6 +54,7 @@ function choicesFor(seed: CapitalSeed, rng: () => number): Option[] {
 }
 
 async function loadDeck(count: number, rng: () => number): Promise<Deck> {
+  const { CAPITALS } = await import('../content/data/capitals');
   return streamDeck<CapitalSeed, Option[]>({
     pool: CAPITALS,
     count,
@@ -61,7 +62,7 @@ async function loadDeck(count: number, rng: () => number): Promise<Deck> {
     catalog: [],
     // Nothing to fetch, so build the whole deck up front.
     eager: count,
-    resolve: async (seed) => choicesFor(seed, rng),
+    resolve: async (seed) => choicesFor(seed, CAPITALS, rng),
     toRound: (seed, choices) => ({
       id: `capital:${seed.country}`,
       answer: toOption(seed),
