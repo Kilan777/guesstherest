@@ -2243,6 +2243,7 @@ kbd {
   .screen {
     gap: 8px;
     padding-top: 8px;
+    padding-bottom: 8px;
   }
 
   .stage {
@@ -2299,7 +2300,14 @@ kbd {
   }
 
   .year-poster {
-    width: 72px;
+    width: 60px;
+  }
+
+  /* Last 20px of a 568px screen: the poster and the card padding give it up so
+     the guess controls stay above the fold. */
+  .year-card {
+    padding: 9px;
+    gap: 11px;
   }
 
   /* The slider ends already show the range; the printed scale is the first
