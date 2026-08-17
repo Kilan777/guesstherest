@@ -184,9 +184,12 @@ a {
   font-size: 1.35rem;
 }
 
+/* "Rest" sits back from "GuessThe" so the wordmark reads as one name with a
+   quiet tail, rather than two words of equal weight. */
 .brand-name em {
   font-style: normal;
-  color: rgba(255, 255, 255, 0.55);
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.45);
 }
 
 .nav-search {

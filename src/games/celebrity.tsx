@@ -64,7 +64,7 @@ export const celebrityGame: GameDef = {
   slug: 'celebrity',
   title: 'Guess the Celebrity',
   short: 'Celebrity',
-  tagline: 'A face, out of focus.',
+  tagline: 'Name the famous face as it comes into focus.',
   blurb:
     'Portraits of screen actors from the silent era to last year, blurred to a smudge. Hair and jawline come back first; the eyes are what settle it.',
   emoji: '🎭',

@@ -64,7 +64,7 @@ export const videoGameGame: GameDef = {
   slug: 'videogame',
   title: 'Guess the Video Game',
   short: 'Video Game',
-  tagline: 'Box art, two tiles at a time.',
+  tagline: 'Name the game from a few windows of its box art.',
   blurb:
     'Cover art from four decades of games, hidden behind forty-eight panels. The logo is usually the last thing to appear, so the art has to do the work.',
   emoji: '🕹️',

@@ -68,7 +68,7 @@ export const objectGame: GameDef = {
   slug: 'object',
   title: 'Guess the Object',
   short: 'Object',
-  tagline: 'Eleven times too close.',
+  tagline: 'Name an everyday object photographed far too close.',
   blurb:
     'An everyday thing, photographed and then magnified until it is abstract. Pull back one step at a time until you recognise it — or admit defeat and pull back again.',
   emoji: '🔍',

@@ -71,7 +71,7 @@ export const boardgameGame: GameDef = {
   slug: 'boardgame',
   title: 'Guess the Board Game',
   short: 'Board game',
-  tagline: 'Two windows on the box.',
+  tagline: 'Name the board game from a few windows of the box.',
   blurb:
     'Box art and boards from five thousand years of the genre, behind a blur with a few sharp windows cut into it. Modern games give up their logo early; the old ones are a wooden grid and a handful of pieces, and could be any of six.',
   emoji: '🎲',

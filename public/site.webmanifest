@@ -1,0 +1,14 @@
+{
+  "name": "Guess The Rest",
+  "short_name": "GuessTheRest",
+  "description": "Twenty-seven guessing games. A tenth of a second of a song, one second of a film, a street corner somewhere on Earth.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f4f3ec",
+  "theme_color": "#1f5136",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

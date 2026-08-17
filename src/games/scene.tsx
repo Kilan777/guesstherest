@@ -238,7 +238,7 @@ export const sceneGame: GameDef = {
   slug: 'scene',
   title: 'Guess the Movie',
   short: 'Scene',
-  tagline: 'One second of footage.',
+  tagline: 'Name the film from a single second of footage.',
   blurb:
     'A single second from somewhere in the middle of the trailer. Skip for two, four, eight, fifteen. The trick is that one second is almost always enough — you just have to trust it.',
   emoji: '🎬',

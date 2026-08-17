@@ -69,7 +69,7 @@ export const sportGame: GameDef = {
   slug: 'sport',
   title: 'Guess the Sport',
   short: 'Sport',
-  tagline: 'Twelve times into the action.',
+  tagline: 'Name the sport from a close crop of the action.',
   blurb:
     'One frame of play, cropped down to a patch of kit or a line on the ground. Olympic events and the games that are huge in one country and unheard of in the next. The surface tends to give it away before the ball does.',
   emoji: '🏅',

@@ -78,7 +78,7 @@ export const logoGame: GameDef = {
   slug: 'logo',
   title: 'Guess the Logo',
   short: 'Logo',
-  tagline: 'Colour first, letters later.',
+  tagline: 'Name the brand from a few windows of its logo.',
   blurb:
     'A company logo behind a panel of twenty-four windows. Two are open to start, which is usually a patch of flat colour and part of one letter. Wordmarks give themselves up early; the marks that are only a shape can take all five rungs.',
   emoji: '✳️',

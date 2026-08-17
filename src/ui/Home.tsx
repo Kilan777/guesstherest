@@ -64,7 +64,7 @@ export function Home(props: { onPlay: (slug: string) => void; onOpenSettings: ()
         <a className="brand" href="#/" onClick={() => setQuery('')}>
           <span className="brand-mark">🎯</span>
           <span className="brand-name">
-            Guess<em>The…</em>
+            GuessThe<em>Rest</em>
           </span>
         </a>
 
@@ -74,7 +74,7 @@ export function Home(props: { onPlay: (slug: string) => void; onOpenSettings: ()
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search games — song, movie, emoji…"
+            placeholder="Search games"
             aria-label="Search games"
           />
           {searching && (

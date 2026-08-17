@@ -104,7 +104,7 @@ export const yearGame: GameDef = {
   slug: 'year',
   title: 'Guess the Year',
   short: 'Year',
-  tagline: 'Close counts. Barely.',
+  tagline: 'Guess the year a film came out.',
   blurb:
     'Name the year a film came out. Exact is full marks; one year off still pays 60%, two years 35%, three years 15%. Four and you have burned a rung.',
   emoji: '📅',

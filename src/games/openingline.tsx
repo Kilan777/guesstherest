@@ -69,7 +69,7 @@ export const openingLineGame: GameDef = {
   slug: 'openingline',
   title: 'Guess the Opening Line',
   short: 'Opening',
-  tagline: 'The first sentence only.',
+  tagline: 'Name the novel from its first sentence.',
   blurb:
     'The first line of a famous novel, quoted exactly. Some give the whole book away in six words; some tell you nothing at all until you have spent a clue on the decade.',
   emoji: '📖',

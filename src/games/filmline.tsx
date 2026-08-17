@@ -69,7 +69,7 @@ export const filmLineGame: GameDef = {
   slug: 'filmline',
   title: 'Guess the Film Line',
   short: 'Film line',
-  tagline: 'Six words, one film.',
+  tagline: 'Name the film a line of dialogue comes from.',
   blurb:
     'A line of film dialogue, quoted the way it is actually spoken rather than the way everyone repeats it. Name the film it comes from.',
   emoji: '🎞️',

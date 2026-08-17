@@ -184,7 +184,7 @@ export const songGame: GameDef = {
   slug: 'song',
   title: 'Guess the Song',
   short: 'Song',
-  tagline: 'One tenth of one second.',
+  tagline: 'Name the song from as little of it as possible.',
   blurb:
     'You get 0.1 seconds of the track. Not enough? Trade points for more — half a second, a second and a half, three, five. Then name it.',
   emoji: '🎧',

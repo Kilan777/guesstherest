@@ -61,7 +61,7 @@ export const sloganGame: GameDef = {
   slug: 'slogan',
   title: 'Guess the Slogan',
   short: 'Slogan',
-  tagline: 'Whose line is it.',
+  tagline: 'Name the brand behind an advertising line.',
   blurb:
     'An advertising line, quoted the way it actually ran, with the brand name taken out of it where there was one. Name the company that paid for it. Skips buy you the sector, roughly when it launched, then something about the campaign.',
   emoji: '📣',

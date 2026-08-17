@@ -72,7 +72,7 @@ export const skylineGame: GameDef = {
   slug: 'skyline',
   title: 'Guess the City',
   short: 'City',
-  tagline: 'Ten times into the skyline.',
+  tagline: 'Name the city from a piece of its skyline.',
   blurb:
     'A city photographed from a distance, then cropped down to a few windows. Pull back until the towers, the hills behind them or the water in front give the place away. Sixty cities, most of them outside Europe and North America.',
   emoji: '🌆',

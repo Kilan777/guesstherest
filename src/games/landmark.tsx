@@ -69,7 +69,7 @@ export const landmarkGame: GameDef = {
   slug: 'landmark',
   title: 'Guess the Landmark',
   short: 'Landmark',
-  tagline: 'Twelve times too close.',
+  tagline: 'Name the landmark from one fragment of stone.',
   blurb:
     'A place millions of people have photographed, cropped down to a patch of stone or steel. Pull back a step at a time until the shape gives it away.',
   emoji: '🗿',

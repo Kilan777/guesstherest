@@ -66,7 +66,7 @@ export const countryGame: GameDef = {
   slug: 'country',
   title: 'Guess the Country',
   short: 'Country',
-  tagline: 'Dropped on a road somewhere.',
+  tagline: "Look around a street and work out which country you're in.",
   blurb:
     'A street somewhere on Earth, and you can look around as much as you like. The road markings, the signage, the plants and which side the cars are on will tell you more than the buildings do.',
   emoji: '🌐',

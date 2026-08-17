@@ -65,7 +65,7 @@ export const plotGame: GameDef = {
   slug: 'plot',
   title: 'Guess the Plot',
   short: 'Plot',
-  tagline: 'Summarised badly, on purpose.',
+  tagline: 'Name the film from a deliberately flat plot summary.',
   blurb:
     'A famous film described in one flat sentence, with no names and nothing that makes it sound worth watching. Most films survive the treatment for about four words. Skips buy you the decade, the genre, then a fact about how it was made.',
   emoji: '🎬',

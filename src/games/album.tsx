@@ -71,7 +71,7 @@ export const albumGame: GameDef = {
   slug: 'album',
   title: 'Guess the Album',
   short: 'Album',
-  tagline: 'Cover art, out of focus.',
+  tagline: 'Name the album from its blurred cover.',
   blurb:
     'A famous sleeve, blurred past recognition. Every skip sharpens it a little. The shapes usually give it away before the text does.',
   emoji: '💿',

@@ -78,7 +78,7 @@ export const outlineGame: GameDef = {
   slug: 'outline',
   title: 'Guess the Country by Outline',
   short: 'Outline',
-  tagline: 'Three windows onto a coastline.',
+  tagline: 'Name the country from the shape of it on a map.',
   blurb:
     'A map of one country behind a panel of twenty-four windows. Three open to start, which is usually one stretch of border and two of nothing. Coastline gives it away faster than anything inland does.',
   emoji: '🗺️',

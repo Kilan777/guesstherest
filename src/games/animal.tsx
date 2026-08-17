@@ -69,7 +69,7 @@ export const animalGame: GameDef = {
   slug: 'animal',
   title: 'Guess the Animal',
   short: 'Animal',
-  tagline: 'Fourteen times too close.',
+  tagline: 'Name the animal from a patch of fur, feather or scale.',
   blurb:
     'One patch of coat, feather or scale, magnified until it is just texture. Pull back a step at a time. Pattern narrows it down long before an eye or a beak appears.',
   emoji: '🦋',

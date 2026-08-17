@@ -87,7 +87,7 @@ export const rebusGame: GameDef = {
   slug: 'rebus',
   title: 'Guess by Emoji',
   short: 'Emoji',
-  tagline: 'Two emoji, one title.',
+  tagline: 'Read a title spelled out in emoji.',
   blurb:
     'Pick a category, then read the rebus. Two emoji to start; each skip adds another. Obvious once you see it, impossible until you do — and it works with the wifi off.',
   emoji: '🧩',

@@ -105,7 +105,7 @@ export const quoteGame: GameDef = {
   slug: 'quote',
   title: 'Guess Who Said It',
   short: 'Quote',
-  tagline: 'Four faces, one voice.',
+  tagline: 'Work out which famous person said it.',
   blurb:
     'A line somebody famous actually said — no internet misattributions here. Pick the face it belongs to. Stuck? Trade points for their field, their job, their initials.',
   emoji: '💬',

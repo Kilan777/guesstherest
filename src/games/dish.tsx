@@ -70,7 +70,7 @@ export const dishGame: GameDef = {
   slug: 'dish',
   title: 'Guess the Dish',
   short: 'Dish',
-  tagline: 'Four times into the plate.',
+  tagline: 'Name the dish from a close crop of the plate.',
   blurb:
     'Plates from every cuisine that travels, zoomed until they are just texture. A grain of rice, a bit of sauce, and the country it came from.',
   emoji: '🍜',

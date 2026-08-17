@@ -67,7 +67,7 @@ export const carGame: GameDef = {
   slug: 'car',
   title: 'Guess the Car',
   short: 'Car',
-  tagline: 'A shape behind frosted glass.',
+  tagline: 'Name the car from its blurred silhouette.',
   blurb:
     'Ninety years of cars, blurred until only the proportions are left. Each skip sharpens it. Roofline and glasshouse usually settle it two rungs before the badge is readable.',
   emoji: '🚗',

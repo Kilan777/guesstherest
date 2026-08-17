@@ -75,7 +75,7 @@ export const planetGame: GameDef = {
   slug: 'planet',
   title: 'Guess the Moon or Planet',
   short: 'Planet',
-  tagline: 'A patch of somewhere else.',
+  tagline: 'Name the planet or moon from a patch of its surface.',
   blurb:
     'Craters, cloud bands and ice, cropped so the outline of the disc is off screen. Planets, the larger moons, the dwarf planets, and the few asteroids and comets a spacecraft has been close enough to photograph.',
   emoji: '🪐',

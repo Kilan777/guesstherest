@@ -69,7 +69,7 @@ export const appGame: GameDef = {
   slug: 'app',
   title: 'Guess the App',
   short: 'App',
-  tagline: 'Seven times into the icon.',
+  tagline: 'Name the app from a zoomed-in corner of its icon.',
   blurb:
     'An app icon from the home screen everyone has, magnified until it is four colours and a curve. Each skip pulls the camera back one step.',
   emoji: '📱',
