@@ -155,6 +155,18 @@ function SceneStage({ round, level, revealed, accent }: StageProps) {
   // Space bar plays the clip.
   usePlayAction(ready && !error ? play : null, [ready, error, play]);
 
+  // Buying another rung should just play the longer clip. Pressing the button
+  // is itself the user gesture, so autoplay policy is satisfied.
+  const firstLevel = useRef(level);
+  useEffect(() => {
+    if (level === firstLevel.current) return;
+    firstLevel.current = level;
+    if (ready && !error && !revealed) play();
+    // Keyed on the rung only — `play` changes identity whenever the clip
+    // length does, which is on every rung.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [level]);
+
   return (
     <div className="stage">
       <div className="frame frame-wide">

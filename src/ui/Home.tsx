@@ -11,6 +11,30 @@ import { CardArt } from './CardArt';
 import { NamePrompt } from './NamePrompt';
 import { AdSlot, AD_SLOTS } from './AdSlot';
 
+/**
+ * Builds the featured decks while the page is idle.
+ *
+ * Hovering a card warms it, but a phone has no hover — the first signal there
+ * is the tap itself, which is far too late for a game that needs a couple of
+ * network round trips before round one exists. Skipped on metered or slow
+ * connections, where spending a visitor's data on a game they may not open is
+ * the wrong trade.
+ */
+function warmFeatured(slugs: string[]): void {
+  const conn = (navigator as { connection?: { saveData?: boolean; effectiveType?: string } }).connection;
+  if (conn?.saveData || /2g/.test(conn?.effectiveType ?? '')) return;
+
+  const start = () => {
+    const first = slugs.map(gameBySlug).find((g): g is GameDef => !!g && g.needsNetwork);
+    if (first) warmDeck(first);
+  };
+
+  const idle = (window as { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => void })
+    .requestIdleCallback;
+  if (idle) idle(start, { timeout: 2500 });
+  else window.setTimeout(start, 1200);
+}
+
 export function Home(props: { onPlay: (slug: string) => void; onOpenSettings: () => void }) {
   const auth = useAuth();
   const [query, setQuery] = useState('');
@@ -34,7 +58,11 @@ export function Home(props: { onPlay: (slug: string) => void; onOpenSettings: ()
       setAsked(true);
       setAskName(true);
     }
-    trendingGames(3).then((t) => alive && setTrending(t));
+    trendingGames(3).then((t) => {
+      if (!alive) return;
+      setTrending(t);
+      warmFeatured(t.slugs);
+    });
     return () => {
       alive = false;
     };

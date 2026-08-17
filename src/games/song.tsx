@@ -160,7 +160,8 @@ async function loadDeck(count: number, rng: () => number): Promise<Deck> {
     count,
     rng,
     catalog,
-    eager: 2,
+    // Round one needs one lookup, not two. The rest streams in behind it.
+    eager: 1,
     concurrency: 2,
     resolve: async (s) => {
       const track = await findTrack(s.t, s.a);
@@ -177,6 +178,12 @@ async function loadDeck(count: number, rng: () => number): Promise<Deck> {
       } satisfies SongPayload,
     }),
     emptyError: 'Could not reach the iTunes preview catalog. Check your connection.',
+  }).then((deck) => {
+    // Don't wait for the stage to mount before fetching audio — the download
+    // and decode can overlap with the rest of the deck streaming in.
+    const first = deck.rounds[0]?.payload as SongPayload | undefined;
+    if (first?.previewUrl) void preloadClip(first.previewUrl).catch(() => {});
+    return deck;
   });
 }
 

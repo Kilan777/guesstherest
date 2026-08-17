@@ -47,7 +47,8 @@ async function loadDeck(count: number, rng: () => number): Promise<Deck> {
     count,
     rng,
     catalog,
-    eager: 2,
+    // Round one needs one lookup, not two. The rest streams in behind it.
+    eager: 1,
     concurrency: 2,
     resolve: async (seed) => {
       const album = await findAlbum(seed.t, seed.a);
