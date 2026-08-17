@@ -35,20 +35,13 @@ export const AD_SLOTS = {
   results: (import.meta.env.VITE_ADSENSE_SLOT_RESULTS as string) || '',
 };
 
-let scriptRequested = false;
-
-/** Loads AdSense once. Called from main.tsx; safe to call repeatedly. */
-export function initAds(): void {
-  if (scriptRequested || !adsEnabled()) return;
-  // Never load a tracker into an automated browser or a local dev run.
-  if (import.meta.env.DEV || navigator.webdriver) return;
-  scriptRequested = true;
-  const s = document.createElement('script');
-  s.async = true;
-  s.crossOrigin = 'anonymous';
-  s.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${encodeURIComponent(CLIENT)}`;
-  document.head.appendChild(s);
-}
+/**
+ * No-op: the loader is now a static tag in the built HTML (see the adsenseTag
+ * plugin in vite.config.ts), because verification reads the page source rather
+ * than running the app. Kept so callers don't need to care, and so a second
+ * copy of the script is never appended — loading adsbygoogle.js twice throws.
+ */
+export function initAds(): void {}
 
 export function AdSlot(props: {
   /** Ad unit id from the AdSense dashboard. Without one, nothing renders. */
