@@ -75,6 +75,10 @@ function SceneStage({ round, level, revealed, accent }: StageProps) {
             fs: 0,
             iv_load_policy: 3,
             playsinline: 1,
+            // Captions were auto-showing, which prints the dialogue on screen
+            // and hands over far more than a second of footage should.
+            cc_load_policy: 0,
+            hl: 'en',
           },
           events: {
             onReady: () => !disposed && setReady(true),
