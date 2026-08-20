@@ -2154,6 +2154,15 @@ kbd {
   gap: 4px;
 }
 
+/* Google marks a unit it declined to fill with data-ad-status="unfilled", and
+   leaves the reserved box behind. An empty box under the word "Advertisement"
+   reads as a broken page, which is worse than no advert at all — so a slot that
+   came back unfilled takes up no room. Reserving the space is only worth it
+   when something arrives to sit in it. */
+.ad-slot:has(> ins[data-ad-status='unfilled']) {
+  display: none;
+}
+
 .ad-home {
   padding: 0 var(--pad);
 }
